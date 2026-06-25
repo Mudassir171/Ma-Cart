@@ -9,7 +9,7 @@ const app = express();
 
 // Config setting
 if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config({ path: 'backend/config/config.env' });
+    require('dotenv').config({ path: 'api/config/config.env' }); // 'backend' ki jagah 'api'
 }
 
 // Middlewares
