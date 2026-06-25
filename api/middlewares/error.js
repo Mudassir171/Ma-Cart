@@ -1,5 +1,5 @@
-const ErrorHandler = require("./utils/errorHandler"); 
-
+// Path sahi karein aur Capital H ka dhyan rakhein
+const ErrorHandler = require("../utils/errorHandler");
 module.exports = (err, req, res, next) => {
     // Default values agar error mein kuch na ho
     let statusCode = err.statusCode || 500;
