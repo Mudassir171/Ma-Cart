@@ -1,5 +1,10 @@
 # dependencies
 /node_modules
+/api/node_modules
+/frontend/node_modules
+
+# build artifacts
+/frontend/build
 
 # local env files
 /api/config/config.env
