@@ -1,6 +1,6 @@
 const cloudinary = require("cloudinary");
-const connectDatabase = require("./config/database");
-const app = require("./app");
+const connectDatabase = require("../backend/config/database");
+const app = require("../backend/app");
 
 connectDatabase();
 
