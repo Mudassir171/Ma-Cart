@@ -9,9 +9,9 @@
     "frontend": "npm start --prefix frontend",
     "dev": "concurrently \"npm run server\" \"npm run frontend\"",
     "postinstall": "npm install --prefix frontend",
-    "render-postbuild": "NPM_CONFIG_PRODUCTION=false && npm install --prefix frontend && npm --prefix frontend run build",
-    "build": "npm install --prefix frontend && npm --prefix frontend run build",
-    "vercel-build": "npm install --prefix frontend && npm --prefix frontend run build"
+    "render-postbuild": "NPM_CONFIG_PRODUCTION=false && npm install --prefix frontend && CI=false npm --prefix frontend run build",
+    "build": "npm install --prefix frontend && CI=false npm --prefix frontend run build",
+    "vercel-build": "npm install --prefix frontend && CI=false npm --prefix frontend run build"
   },
   "author": "Jigar Sable",
   "license": "ISC",

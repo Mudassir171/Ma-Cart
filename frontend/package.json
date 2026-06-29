@@ -37,12 +37,11 @@
     "slick-carousel": "^1.8.1",
     "source-map-explorer": "^2.5.2",
     "web-vitals": "^2.1.3",
-    "webfontloader": "^1.6.28",
-    "cross-env": "^10.1.0"
+    "webfontloader": "^1.6.28"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "cross-env CI=false GENERATE_SOURCEMAP=false react-scripts build",
+    "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
