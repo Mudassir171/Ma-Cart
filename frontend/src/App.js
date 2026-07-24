@@ -374,8 +374,8 @@ function App() {
                 <Route path="/password/forgot" element={<ForgotPassword />} />
                 <Route path="/password/reset/:token" element={<ResetPassword />} />
                 <Route path="/seller/store/:id" element={ <SellerStore /> } />
-                // App.js mein:
-<Route path="/sellerstore/:id" element={<SellerStore />} />
+                {/* App.js mein: */}
+                <Route path="/sellerstore/:id" element={<SellerStore />} />
                 {/* --- Protected User Routes --- */}
                 <Route path="/account" element={<ProtectedRoute><Account activeTab="profile" /></ProtectedRoute>} />
                 <Route path="/account/update" element={<ProtectedRoute><UpdateProfile /></ProtectedRoute>} />
