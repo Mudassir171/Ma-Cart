@@ -8,10 +8,15 @@
         "distDir": "build",
         "buildCommand": "npm --prefix frontend run build"
       }
+    },
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "/api" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
