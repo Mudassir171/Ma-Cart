@@ -34,6 +34,7 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
 
     sendToken(user, 201, res);
   } catch (error) {
+    console.log("CLOUDINARY ERROR:", error);
     return next(new ErrorHandler(error.message, 500));
   }
 });

@@ -1,17 +1,16 @@
 const path = require("path");
 const mongoose = require("mongoose");
 
-// Load local env files for development. Vercel uses its own environment variables.
 require("dotenv").config({ path: path.resolve(process.cwd(), ".env") });
 require("dotenv").config({
-  path: path.resolve(process.cwd(), "api", "config", "config.env"),
+  path: path.resolve(process.cwd(), "backend", "config", "config.env"),
 });
 
-// 2. Warning khatam karne ke liye
 mongoose.set("strictQuery", false);
 
 const MONGO_URI =
   process.env.MONGODB_URI || process.env.MONGO_URI || process.env.DATABASE_URL;
+
 const ENV_VAR_USED = process.env.MONGODB_URI
   ? "MONGODB_URI"
   : process.env.MONGO_URI
@@ -20,29 +19,45 @@ const ENV_VAR_USED = process.env.MONGODB_URI
       ? "DATABASE_URL"
       : "none";
 
-const connectDatabase = () => {
+// Cache connection for Serverless (Vercel)
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+const connectDatabase = async () => {
   if (!MONGO_URI) {
-    console.log(
-      "ERROR: MongoDB URI is undefined. Set MONGODB_URI in Vercel or local env.",
-    );
-    console.log("Detected env var:", ENV_VAR_USED);
+    console.log("ERROR: MongoDB URI is undefined.");
     return;
   }
 
-  console.log("Connecting to MongoDB using env var:", ENV_VAR_USED);
+  if (cached.conn) {
+    return cached.conn;
+  }
 
-  mongoose
-    .connect(MONGO_URI, {
+  if (!cached.promise) {
+    const opts = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 15000,
-    })
-    .then(() => {
+    };
+
+    console.log("Connecting to MongoDB using env var:", ENV_VAR_USED);
+    cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
       console.log("Mongoose Connected");
-    })
-    .catch((err) => {
-      console.log("Database Connection Error: ", err);
+      return mongoose;
     });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
 };
 
 module.exports = connectDatabase;

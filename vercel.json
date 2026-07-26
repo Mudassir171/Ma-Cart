@@ -6,7 +6,7 @@
       "use": "@vercel/static-build",
       "config": {
         "distDir": "frontend/build",
-        "buildCommand": "npm run vercel-build"
+        "buildCommand": "npm run build"
       }
     },
     {
@@ -17,6 +17,6 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "^/(.*)$", "dest": "/index.html" }
   ]
 }
