@@ -120,7 +120,7 @@ const Header = () => {
 
                   {/* Primary DropDown Menu (Desktop - Directly under Account) */}
                   {togglePrimaryDropDown && (
-                    <div className="absolute right-[60px] top-3 mt-1 z-50">
+                    <div className="absolute right-[60px] top-2 mt-1 z-50">
                       <PrimaryDropDownMenu
                         setTogglePrimaryDropDown={setTogglePrimaryDropDown}
                         user={user}
@@ -209,9 +209,9 @@ const Header = () => {
                   </span>
                 </div>
 
-                {/* Mobile Primary DropDown Menu - Positioned Absolute to the Right */}
+                {/* Mobile Primary DropDown Menu - Right Aligned */}
                 {togglePrimaryDropDown && (
-                  <div className="absolute right-[56px] top-full mt-2 w-56 bg-white text-black rounded-md shadow-xl overflow-hidden z-50">
+                  <div className="absolute right-0 mt-3 w-48 bg-white text-black rounded shadow-lg overflow-hidden z-50">
                     <PrimaryDropDownMenu
                       setTogglePrimaryDropDown={setTogglePrimaryDropDown}
                       user={user}
