@@ -101,7 +101,7 @@ const Header = () => {
 
                                     {/* Primary DropDown Menu (Desktop - Directly under Account) */}
                                     {togglePrimaryDropDown && (
-                                        <div className="absolute right-0 top-full mt-2 z-50">
+                                        <div className="absolute right-1 top-5 mt-1 z-50">
                                             <PrimaryDropDownMenu setTogglePrimaryDropDown={setTogglePrimaryDropDown} user={user} />
                                         </div>
                                     )}
