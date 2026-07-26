@@ -48,12 +48,12 @@ const Header = () => {
                 </div>
 
                 {/* Main Header Container */}
-                <div className="w-full sm:w-9/12 px-3 sm:px-4 m-auto flex flex-col sm:flex-row justify-between items-center py-2.5 sm:py-3 gap-2 sm:gap-4 relative">
+                <div className="w-full sm:w-9/12 px-3 sm:px-4 m-auto flex flex-col sm:flex-row justify-between items-center py-2.5 sm:py-3 gap-2 sm:gap-4">
 
-                    {/* Top Row for Mobile (Menu, Logo, Wishlist, Cart) & Standard Desktop Row */}
-                    <div className="w-full flex justify-between items-center relative">
+                    {/* Top Row for Mobile & Standard Desktop Row */}
+                    <div className="w-full flex justify-between items-center">
                         
-                        {/* Left Side: Mobile Menu Icon / Desktop Logo */}
+                        {/* Left Side: Mobile Menu Icon & Logo */}
                         <div className="flex items-center gap-3">
                             {/* Mobile Menu Button */}
                             <div className="flex sm:hidden items-center text-white">
@@ -75,7 +75,7 @@ const Header = () => {
                             </Link>
                         </div>
 
-                        {/* Searchbar for Desktop Only (In main row) */}
+                        {/* Searchbar for Desktop Only */}
                         <div className="hidden sm:flex flex-1 max-w-2xl mx-4">
                             <Searchbar />
                         </div>
@@ -89,13 +89,23 @@ const Header = () => {
                                     <Link to="/register" className="hover:underline">SIGN UP</Link>
                                 </div>
                             ) : (
-                                <span 
-                                    className="hidden sm:flex items-center font-medium gap-1 cursor-pointer hover:opacity-80 relative" 
-                                    onClick={() => setTogglePrimaryDropDown(!togglePrimaryDropDown)}
-                                >
-                                    {user.name && user.name.split(" ", 1)}
-                                    {togglePrimaryDropDown ? <ExpandLessIcon sx={{ fontSize: "16px" }} /> : <ExpandMoreIcon sx={{ fontSize: "16px" }} />}
-                                </span>
+                                /* Account Wrapper with relative positioning for dropdown */
+                                <div className="relative hidden sm:block">
+                                    <span 
+                                        className="flex items-center font-medium gap-1 cursor-pointer hover:opacity-80" 
+                                        onClick={() => setTogglePrimaryDropDown(!togglePrimaryDropDown)}
+                                    >
+                                        {user.name && user.name.split(" ", 1)}
+                                        {togglePrimaryDropDown ? <ExpandLessIcon sx={{ fontSize: "16px" }} /> : <ExpandMoreIcon sx={{ fontSize: "16px" }} />}
+                                    </span>
+
+                                    {/* Primary DropDown Menu (Desktop - Directly under Account) */}
+                                    {togglePrimaryDropDown && (
+                                        <div className="absolute right-0 top-full mt-2 z-50">
+                                            <PrimaryDropDownMenu setTogglePrimaryDropDown={setTogglePrimaryDropDown} user={user} />
+                                        </div>
+                                    )}
+                                </div>
                             )}
 
                             {/* Wishlist */}
@@ -118,13 +128,6 @@ const Header = () => {
                                 )}
                             </Link>
                         </div>
-
-                        {/* Primary DropDown Menu (Desktop - Positioned under Account) */}
-                        {togglePrimaryDropDown && (
-                            <div className="hidden sm:block absolute right-0 top-12 z-50">
-                                <PrimaryDropDownMenu setTogglePrimaryDropDown={setTogglePrimaryDropDown} user={user} />
-                            </div>
-                        )}
                     </div>
 
                     {/* Searchbar for Mobile Only (Alag neechay wali row mein) */}
@@ -133,7 +136,7 @@ const Header = () => {
                     </div>
                 </div>
 
-                {/* Mobile Dropdown Menu (Right Side / Drawer when Menu button is clicked) */}
+                {/* Mobile Dropdown Menu (Drawer) */}
                 {mobileMenuToggle && (
                     <div className="sm:hidden absolute top-full left-0 w-full bg-green-900 text-white px-4 py-4 space-y-3 border-t border-green-700 shadow-xl z-50">
                         {isAuthenticated === false ? (
@@ -185,7 +188,7 @@ const Header = () => {
                 </div>
             </header>
 
-            {/* Spacer to prevent content overlap */}
+            {/* Spacer */}
             <div className="h-20 sm:h-20"></div>
         </div>
     );
