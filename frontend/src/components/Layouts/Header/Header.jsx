@@ -211,7 +211,7 @@ const Header = () => {
 
                 {/* Mobile Primary DropDown Menu - Right Aligned */}
                 {togglePrimaryDropDown && (
-                  <div className="absolute right-0 mt-3 w-48 bg-white text-black rounded shadow-lg overflow-hidden z-50">
+                  <div className="absolute right-0 mt-3 w-48 bg-white text-black rounded shadow-lg z-50">
                     <PrimaryDropDownMenu
                       setTogglePrimaryDropDown={setTogglePrimaryDropDown}
                       user={user}
