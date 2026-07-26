@@ -3,9 +3,17 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 const cors = require("cors");
+const cloudinary = require("cloudinary"); // <- Yeh add karein
 const errorMiddleware = require("./middlewares/error");
 
 const app = express();
+
+// Cloudinary Configuration for Serverless (Vercel)
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Middlewares
 app.use(express.json({ limit: "50mb" }));
