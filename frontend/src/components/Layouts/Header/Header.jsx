@@ -48,81 +48,94 @@ const Header = () => {
                 </div>
 
                 {/* Main Header Container */}
-                <div className="w-full sm:w-9/12 px-2 sm:px-4 m-auto flex justify-between items-center py-2.5 sm:py-3 gap-2 sm:gap-4 relative">
+                <div className="w-full sm:w-9/12 px-3 sm:px-4 m-auto flex flex-col sm:flex-row justify-between items-center py-2.5 sm:py-3 gap-2 sm:gap-4 relative">
 
-                    {/* Mobile Menu Icon */}
-                    <div className="flex sm:hidden items-center text-white">
-                        <button 
-                            onClick={() => {
-                                setMobileMenuToggle(!mobileMenuToggle);
-                                setTogglePrimaryDropDown(false);
-                            }} 
-                            className="focus:outline-none p-1"
-                        >
-                            {mobileMenuToggle ? <CloseIcon /> : <MenuIcon />}
-                        </button>
+                    {/* Top Row for Mobile (Menu, Logo, Wishlist, Cart) & Standard Desktop Row */}
+                    <div className="w-full flex justify-between items-center relative">
+                        
+                        {/* Left Side: Mobile Menu Icon / Desktop Logo */}
+                        <div className="flex items-center gap-3">
+                            {/* Mobile Menu Button */}
+                            <div className="flex sm:hidden items-center text-white">
+                                <button 
+                                    onClick={() => {
+                                        setMobileMenuToggle(!mobileMenuToggle);
+                                        setTogglePrimaryDropDown(false);
+                                    }} 
+                                    className="focus:outline-none p-1 flex items-center"
+                                >
+                                    {mobileMenuToggle ? <CloseIcon /> : <MenuIcon />}
+                                    <span className="text-xs ml-1 font-medium">Menu</span>
+                                </button>
+                            </div>
+
+                            {/* Logo */}
+                            <Link className="h-7 sm:h-9 flex items-center shrink-0" to="/">
+                                <img draggable="false" className="h-7 sm:h-10 w-auto object-contain" src={logo} alt="MA-CART" />
+                            </Link>
+                        </div>
+
+                        {/* Searchbar for Desktop Only (In main row) */}
+                        <div className="hidden sm:flex flex-1 max-w-2xl mx-4">
+                            <Searchbar />
+                        </div>
+
+                        {/* Right Navigation (Wishlist, Cart, Account/Login) */}
+                        <div className="flex items-center gap-3 sm:gap-6 text-white shrink-0">
+                            {isAuthenticated === false ? (
+                                <div className="hidden sm:flex gap-3 font-medium text-sm text-white">
+                                    <Link to="/login" className="hover:underline">LOGIN</Link>
+                                    <span>|</span>
+                                    <Link to="/register" className="hover:underline">SIGN UP</Link>
+                                </div>
+                            ) : (
+                                <span 
+                                    className="hidden sm:flex items-center font-medium gap-1 cursor-pointer hover:opacity-80 relative" 
+                                    onClick={() => setTogglePrimaryDropDown(!togglePrimaryDropDown)}
+                                >
+                                    {user.name && user.name.split(" ", 1)}
+                                    {togglePrimaryDropDown ? <ExpandLessIcon sx={{ fontSize: "16px" }} /> : <ExpandMoreIcon sx={{ fontSize: "16px" }} />}
+                                </span>
+                            )}
+
+                            {/* Wishlist */}
+                            <Link to="/wishlist" className="relative hover:opacity-85 flex items-center p-1">
+                                <FavoriteIcon sx={{ fontSize: { xs: '24px', sm: '26px' } }} />
+                                {wishlistItems.length > 0 && (
+                                    <div className="w-4 h-4 bg-orange-500 text-white text-[9px] rounded-full absolute -top-0.5 -right-1 sm:-top-1 sm:-right-2 flex justify-center items-center font-bold">
+                                        {wishlistItems.length}
+                                    </div>
+                                )}
+                            </Link>
+
+                            {/* Cart */}
+                            <Link to="/cart" className="relative hover:opacity-85 flex items-center p-1">
+                                <ShoppingCartIcon sx={{ fontSize: { xs: '24px', sm: '26px' } }} />
+                                {cartItems.length > 0 && (
+                                    <div className="w-4 h-4 bg-orange-500 text-white text-[9px] rounded-full absolute -top-0.5 -right-1 sm:-top-1 sm:-right-2 flex justify-center items-center font-bold">
+                                        {cartItems.length}
+                                    </div>
+                                )}
+                            </Link>
+                        </div>
+
+                        {/* Primary DropDown Menu (Desktop - Positioned under Account) */}
+                        {togglePrimaryDropDown && (
+                            <div className="hidden sm:block absolute right-0 top-12 z-50">
+                                <PrimaryDropDownMenu setTogglePrimaryDropDown={setTogglePrimaryDropDown} user={user} />
+                            </div>
+                        )}
                     </div>
 
-                    {/* Logo */}
-                    <Link className="h-7 sm:h-9 flex items-center shrink-0" to="/">
-                        <img draggable="false" className="h-6 sm:h-10 w-auto object-contain" src={logo} alt="MA-CART" />
-                    </Link>
-
-                    {/* Searchbar */}
-                    <div className="flex-1 max-w-2xl mx-1 sm:mx-0">
+                    {/* Searchbar for Mobile Only (Alag neechay wali row mein) */}
+                    <div className="flex sm:hidden w-full pb-1">
                         <Searchbar />
                     </div>
-
-                    {/* Right Navigation (Always visible on both Mobile & Desktop) */}
-                    <div className="flex items-center gap-3 sm:gap-6 text-white shrink-0">
-                        {isAuthenticated === false ? (
-                            <div className="hidden sm:flex gap-3 font-medium text-sm text-white">
-                                <Link to="/login" className="hover:underline">LOGIN</Link>
-                                <span>|</span>
-                                <Link to="/register" className="hover:underline">SIGN UP</Link>
-                            </div>
-                        ) : (
-                            <span 
-                                className="hidden sm:flex items-center font-medium gap-1 cursor-pointer hover:opacity-80" 
-                                onClick={() => setTogglePrimaryDropDown(!togglePrimaryDropDown)}
-                            >
-                                {user.name && user.name.split(" ", 1)}
-                                {togglePrimaryDropDown ? <ExpandLessIcon sx={{ fontSize: "16px" }} /> : <ExpandMoreIcon sx={{ fontSize: "16px" }} />}
-                            </span>
-                        )}
-
-                        {/* Wishlist */}
-                        <Link to="/wishlist" className="relative hover:opacity-85 flex items-center p-1">
-                            <FavoriteIcon sx={{ fontSize: { xs: '22px', sm: '26px' } }} />
-                            {wishlistItems.length > 0 && (
-                                <div className="w-4 h-4 bg-orange-500 text-white text-[9px] rounded-full absolute -top-0.5 -right-1 sm:-top-1 sm:-right-2 flex justify-center items-center font-bold">
-                                    {wishlistItems.length}
-                                </div>
-                            )}
-                        </Link>
-
-                        {/* Cart */}
-                        <Link to="/cart" className="relative hover:opacity-85 flex items-center p-1">
-                            <ShoppingCartIcon sx={{ fontSize: { xs: '22px', sm: '26px' } }} />
-                            {cartItems.length > 0 && (
-                                <div className="w-4 h-4 bg-orange-500 text-white text-[9px] rounded-full absolute -top-0.5 -right-1 sm:-top-1 sm:-right-2 flex justify-center items-center font-bold">
-                                    {cartItems.length}
-                                </div>
-                            )}
-                        </Link>
-                    </div>
-
-                    {/* Primary DropDown Menu (Desktop) */}
-                    {togglePrimaryDropDown && (
-                        <div className="hidden sm:block">
-                            <PrimaryDropDownMenu setTogglePrimaryDropDown={setTogglePrimaryDropDown} user={user} />
-                        </div>
-                    )}
                 </div>
 
-                {/* Mobile Dropdown / Drawer Menu */}
+                {/* Mobile Dropdown Menu (Right Side / Drawer when Menu button is clicked) */}
                 {mobileMenuToggle && (
-                    <div className="sm:hidden bg-green-900 text-white px-4 py-4 space-y-3 border-t border-green-700 animate-fadeIn shadow-inner">
+                    <div className="sm:hidden absolute top-full left-0 w-full bg-green-900 text-white px-4 py-4 space-y-3 border-t border-green-700 shadow-xl z-50">
                         {isAuthenticated === false ? (
                             <div className="flex gap-4 font-semibold text-sm pb-3 border-b border-green-700">
                                 <Link to="/login" onClick={() => setMobileMenuToggle(false)} className="hover:underline">LOGIN</Link>
@@ -144,7 +157,7 @@ const Header = () => {
                                     </span>
                                 </div>
 
-                                {/* Mobile Primary DropDown Menu inside drawer */}
+                                {/* Mobile Primary DropDown Menu */}
                                 {togglePrimaryDropDown && (
                                     <div className="mt-3 bg-white text-black rounded shadow-lg overflow-hidden">
                                         <PrimaryDropDownMenu setTogglePrimaryDropDown={setTogglePrimaryDropDown} user={user} />
@@ -172,8 +185,8 @@ const Header = () => {
                 </div>
             </header>
 
-            {/* Spacer */}
-            <div className="h-14 sm:h-20"></div>
+            {/* Spacer to prevent content overlap */}
+            <div className="h-20 sm:h-20"></div>
         </div>
     );
 };
