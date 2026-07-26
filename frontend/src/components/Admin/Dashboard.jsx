@@ -22,7 +22,7 @@ const Dashboard = ({ activeTab, children }) => {
 
                 <div className="w-full sm:w-4/5 sm:ml-72 min-h-screen">
                     <div className="flex flex-col gap-6 sm:m-8 p-2 pb-6 overflow-hidden">
-                        <button onClick={() => setToggleSidebar(true)} className="sm:hidden bg-gray-700 w-10 h-10 rounded-full shadow text-white flex items-center justify-center"><MenuIcon /></button>
+                        <button onClick={() => setToggleSidebar(true)} className="sm:hidden bg-gray-700 w-10 h-10 rounded-full shadow text-white flex items-center justify-center"><MenuIcon />Admin Panel</button>
                         {children}
                     </div>
                 </div>
