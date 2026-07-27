@@ -74,7 +74,7 @@ const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
     ];
 
     return (
-        <div className="absolute w-64 -left-24 sm:-left-28 ml-2 top-10 bg-emerald-900 text-white shadow-[0_15px_50px_-10px_rgba(0,0,0,0.3)] rounded-2xl flex flex-col text-sm z-50 border border-emerald-700/50 overflow-hidden py-2 backdrop-blur-md">
+        <div className="absolute w-64 -left-24 sm:-left-28 ml-2 top-10 bg-green-900 text-white shadow-[0_15px_50px_-10px_rgba(0,0,0,0.3)] rounded-2xl flex flex-col text-sm z-50 border border-emerald-700/50 overflow-hidden py-2 backdrop-blur-md">
 
             {/* --- USER WELCOME HEADER --- */}
             <div className="px-4 py-3 mx-2 mt-1 mb-2 bg-emerald-800/80 rounded-xl border border-emerald-700/50 flex flex-col">
