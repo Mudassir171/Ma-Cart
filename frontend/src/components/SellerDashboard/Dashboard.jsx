@@ -35,7 +35,7 @@ const Dashboard = ({ activeTab, children }) => {
         {/* Main Content Container */}
         <div className="w-full sm:w-4/5 sm:ml-[20%] min-h-screen">
           <div className="flex flex-col gap-6 sm:m-8 p-2 pb-6 overflow-hidden">
-            <h1 className="text-xl font-bold text-gray-800">Seller Panel</h1>
+           <h1 className="text-xl font-bold text-gray-800">Seller Dashboard</h1>
 
             {/* Mobile Menu & Panel Title */}
             <div className="flex flex-col gap-6 sm:m-8 p-2 pb-6 overflow-hidden">
