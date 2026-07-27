@@ -45,7 +45,7 @@ const Sidebar = ({ activeTab, setToggleSidebar }) => {
     };
 
     return (
-        <aside className="sidebar z-50 sm:z-0 block min-h-screen fixed left-0 top-0 bottom-0 w-[85%] sm:w-1/5 bg-gray-800 text-white overflow-y-auto overflow-x-hidden border-r border-gray-700/50 shadow-2xl transition-all duration-300">
+        <aside className="sidebar z-20 sm:z-0 block min-h-screen fixed left-0 top-0 bottom-0 w-[85%] sm:w-1/5 bg-gray-800 text-white overflow-y-auto overflow-x-hidden border-r border-gray-700/50 shadow-2xl transition-all duration-300">
             
             {/* User Profile Card Header */}
             <div className="sticky top-0 z-20 bg-gray-800/95 backdrop-blur-md pt-4 pb-3 px-3.5 border-b border-gray-700/60 shadow-md">

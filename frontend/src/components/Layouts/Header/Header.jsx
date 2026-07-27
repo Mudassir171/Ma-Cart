@@ -69,7 +69,7 @@ const Header = () => {
                   className="focus:outline-none p-1 flex items-center"
                 >
                   {mobileMenuToggle ? <CloseIcon /> : <MenuIcon />}
-                  <span className="text-xs ml-1 font-medium">Menu</span>
+                  {/* <span className="text-xs ml-1 font-medium">Menu</span> */}
                 </button>
               </div>
 
@@ -211,7 +211,7 @@ const Header = () => {
 
                 {/* Mobile Primary DropDown Menu - Right Aligned */}
                 {togglePrimaryDropDown && (
-                  <div className="absolute right-[0px] left-[12px] mt-2 w-48 bg-white text-black rounded shadow-lg z-50">
+                  <div className="absolute right-[0px] mt-2 w-48 bg-white text-black rounded shadow-lg z-50">
                     <PrimaryDropDownMenu
                       setTogglePrimaryDropDown={setTogglePrimaryDropDown}
                       user={user}
