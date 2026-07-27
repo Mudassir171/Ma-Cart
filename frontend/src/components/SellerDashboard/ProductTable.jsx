@@ -132,7 +132,7 @@ const ProductTable = () => {
 
             <div className="flex justify-between items-center">
                 <h1 className="text-lg font-medium uppercase text-gray-800">My Products</h1>
-                <Link to="/seller/new_product" className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded shadow font-medium">Add New Product</Link>
+                <Link to="/seller/new_products" className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded shadow font-medium">Add New Product</Link>
             </div>
 
             <div className="bg-white rounded-xl shadow-lg w-full" style={{ height: 470 }}>
