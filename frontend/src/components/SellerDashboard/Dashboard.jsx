@@ -38,15 +38,18 @@ const Dashboard = ({ activeTab, children }) => {
             <h1 className="text-xl font-bold text-gray-800">Seller Panel</h1>
 
             {/* Mobile Menu & Panel Title */}
-            <div className="flex items-center justify-between sm:hidden px-2">
-              <button
-                onClick={() => setToggleSidebar(true)}
-                className="sm:hidden bg-gray-700 px-4 h-10 rounded-lg shadow text-white flex items-center justify-center gap-2 w-fit"
-              >
-                <MenuIcon />
-                <span>Seller Panel</span>
-              </button>
-            </div>
+            <div className="flex flex-col gap-6 sm:m-8 p-2 pb-6 overflow-hidden">
+                                   
+                                   {/* Mobile Menu Button */}
+                                   <button 
+                                       onClick={() => setToggleSidebar(true)} 
+                                       className="sm:hidden bg-gray-700 px-4 h-10 rounded-lg shadow text-white flex items-center justify-center gap-2 w-fit"
+                                   >
+                                       <MenuIcon />
+                                       <span>Seller Panel</span>
+                                   </button>
+           
+                               </div>
 
             {/* Top Bar for Desktop (Earnings Quick View) */}
             <div className="hidden sm:flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border-b">

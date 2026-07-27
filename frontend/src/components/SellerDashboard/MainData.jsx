@@ -124,7 +124,7 @@ const MainData = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
                 
                 {/* 1. Wallet Card */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1">
+                <div className="relative overflow-hidden bg-gradient-to-br from-red-500 to-amber-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1">
                     <div className="flex flex-col gap-1 z-10">
                         <span className="text-amber-100 text-xs font-semibold uppercase tracking-wider">Total Earning (90%)</span>
                         <h2 className="text-xl sm:text-2xl font-extrabold">
@@ -137,7 +137,7 @@ const MainData = () => {
                 </div>
 
                 {/* 2. Items Sold Card */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 to-teal-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1">
+                <div className="relative overflow-hidden bg-gradient-to-br from-yellow-600 to-teal-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1">
                     <div className="flex flex-col gap-1 z-10">
                         <span className="text-emerald-100 text-xs font-semibold uppercase tracking-wider">Total Orders</span>
                         <h2 className="text-xl sm:text-2xl font-extrabold">{sellerOrders?.length || 0}</h2>
@@ -159,7 +159,7 @@ const MainData = () => {
                 </div>
 
                 {/* 4. Out of Stock Card */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-rose-500 to-red-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1">
+                <div className="relative overflow-hidden bg-gradient-to-br from-green-500 to-red-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1">
                     <div className="flex flex-col gap-1 z-10">
                         <span className="text-rose-100 text-xs font-semibold uppercase tracking-wider">Out of Stock</span>
                         <h2 className="text-xl sm:text-2xl font-extrabold">{outOfStock}</h2>
