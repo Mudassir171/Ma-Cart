@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Doughnut, Line, Pie } from 'react-chartjs-2';
+import { Doughnut, Line, Pie, Bar } from 'react-chartjs-2';
 import { getAdminProducts } from '../../actions/productAction';
 import { useSelector, useDispatch } from 'react-redux';
 import { getAllOrders } from '../../actions/orderAction';
@@ -8,6 +8,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 const MainData = () => {
     const dispatch = useDispatch();
@@ -40,7 +41,7 @@ const MainData = () => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const date = new Date();
     
-    // 📈 Line Chart Logic
+    // 📈 1. Line Chart Logic: Monthly Earnings (90%)
     const lineState = {
         labels: months,
         datasets: [
@@ -56,10 +57,11 @@ const MainData = () => {
                     let monthlyTotal = 0;
                     sellerOrders?.forEach(order => {
                         const orderDate = new Date(order.createdAt);
+                        // Fixed bug: checking order.orderStatus instead of orderDate.orderStatus
                         if (
                             orderDate.getMonth() === i && 
                             orderDate.getFullYear() === date.getFullYear() &&
-                            orderDate.orderStatus === "Delivered" 
+                            order.orderStatus === "Delivered" 
                         ) {
                             order.orderItems.forEach(item => {
                                 if (item.seller === user?._id || item.seller?._id === user?._id) {
@@ -74,8 +76,8 @@ const MainData = () => {
         ],
     };
 
+    // 🥧 2. Pie Chart Logic: Order Status Breakdown
     const statuses = ['Processing', 'Shipped', 'Delivered'];
-
     const pieState = {
         labels: statuses,
         datasets: [
@@ -88,6 +90,7 @@ const MainData = () => {
         ],
     };
 
+    // 🍩 3. Doughnut Chart Logic: Inventory Stock Overview
     const doughnutState = {
         labels: ['Out of Stock', 'In Stock'],
         datasets: [
@@ -100,91 +103,129 @@ const MainData = () => {
         ],
     };
 
+    // 📊 4. Bar Chart Logic: Performance by Status Count
+    const barState = {
+        labels: statuses,
+        datasets: [
+            {
+                label: 'Orders Count',
+                backgroundColor: '#3b82f6',
+                borderRadius: 6,
+                data: statuses.map((status) => sellerOrders?.filter((item) => item.orderStatus === status).length),
+            },
+        ],
+    };
+
     return (
         <>
             <MetaData title="Seller Dashboard | Overview" />
 
-            {/* --- STATS CARDS GRID --- */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* --- TOP 5 STATS CARDS GRID --- */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
                 
-                {/* Wallet Card */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-2xl shadow-xl p-6 flex justify-between items-center transform transition hover:-translate-y-1">
+                {/* 1. Wallet Card */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1">
                     <div className="flex flex-col gap-1 z-10">
-                        <span className="text-amber-100 text-sm font-medium tracking-wide">Total Earning (90%)</span>
-                        <h2 className="text-2xl sm:text-3xl font-extrabold">
+                        <span className="text-amber-100 text-xs font-semibold uppercase tracking-wider">Total Earning (90%)</span>
+                        <h2 className="text-xl sm:text-2xl font-extrabold">
                             Rs. {totalCommission?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                         </h2>
                     </div>
                     <div className="bg-white/20 p-3 rounded-xl backdrop-blur-md">
-                        <AccountBalanceWalletIcon className="text-white text-3xl" />
+                        <AccountBalanceWalletIcon className="text-white text-2xl" />
                     </div>
                 </div>
 
-                {/* Items Sold Card */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 to-teal-600 text-white rounded-2xl shadow-xl p-6 flex justify-between items-center transform transition hover:-translate-y-1">
+                {/* 2. Items Sold Card */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 to-teal-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1">
                     <div className="flex flex-col gap-1 z-10">
-                        <span className="text-emerald-100 text-sm font-medium tracking-wide">Total Orders Handled</span>
-                        <h2 className="text-2xl sm:text-3xl font-extrabold">{sellerOrders?.length || 0}</h2>
+                        <span className="text-emerald-100 text-xs font-semibold uppercase tracking-wider">Total Orders</span>
+                        <h2 className="text-xl sm:text-2xl font-extrabold">{sellerOrders?.length || 0}</h2>
                     </div>
                     <div className="bg-white/20 p-3 rounded-xl backdrop-blur-md">
-                        <ShoppingBagIcon className="text-white text-3xl" />
+                        <ShoppingBagIcon className="text-white text-2xl" />
                     </div>
                 </div>
 
-                {/* My Products Card */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-2xl shadow-xl p-6 flex justify-between items-center transform transition hover:-translate-y-1">
+                {/* 3. My Products Card */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1">
                     <div className="flex flex-col gap-1 z-10">
-                        <span className="text-blue-100 text-sm font-medium tracking-wide">My Products</span>
-                        <h2 className="text-2xl sm:text-3xl font-extrabold">{sellerProducts?.length || 0}</h2>
+                        <span className="text-blue-100 text-xs font-semibold uppercase tracking-wider">My Products</span>
+                        <h2 className="text-xl sm:text-2xl font-extrabold">{sellerProducts?.length || 0}</h2>
                     </div>
                     <div className="bg-white/20 p-3 rounded-xl backdrop-blur-md">
-                        <Inventory2Icon className="text-white text-3xl" />
+                        <Inventory2Icon className="text-white text-2xl" />
                     </div>
                 </div>
 
-                {/* Out of Stock Card */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-rose-500 to-red-600 text-white rounded-2xl shadow-xl p-6 flex justify-between items-center transform transition hover:-translate-y-1">
+                {/* 4. Out of Stock Card */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-rose-500 to-red-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1">
                     <div className="flex flex-col gap-1 z-10">
-                        <span className="text-rose-100 text-sm font-medium tracking-wide">Out of Stock</span>
-                        <h2 className="text-2xl sm:text-3xl font-extrabold">{outOfStock}</h2>
+                        <span className="text-rose-100 text-xs font-semibold uppercase tracking-wider">Out of Stock</span>
+                        <h2 className="text-xl sm:text-2xl font-extrabold">{outOfStock}</h2>
                     </div>
                     <div className="bg-white/20 p-3 rounded-xl backdrop-blur-md">
-                        <WarningAmberIcon className="text-white text-3xl" />
+                        <WarningAmberIcon className="text-white text-2xl" />
                     </div>
                 </div>
+
+                {/* 5. Shipped Orders Card */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 to-violet-600 text-white rounded-2xl shadow-xl p-5 flex justify-between items-center transform transition hover:-translate-y-1 sm:col-span-2 lg:col-span-1">
+                    <div className="flex flex-col gap-1 z-10">
+                        <span className="text-purple-100 text-xs font-semibold uppercase tracking-wider">Shipped Items</span>
+                        <h2 className="text-xl sm:text-2xl font-extrabold">
+                            {sellerOrders?.filter(o => o.orderStatus === "Shipped")?.length || 0}
+                        </h2>
+                    </div>
+                    <div className="bg-white/20 p-3 rounded-xl backdrop-blur-md">
+                        <LocalShippingIcon className="text-white text-2xl" />
+                    </div>
+                </div>
+
             </div>
 
-            {/* --- CHARTS SECTION: LINE & PIE --- */}
+            {/* --- CHARTS SECTION 1: LINE & PIE --- */}
             <div className="flex flex-col lg:flex-row gap-6 mt-6">
                 
                 {/* Line Chart */}
-                <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 w-full lg:w-3/4 border border-gray-100">
+                <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 w-full lg:w-2/3 border border-gray-100">
                     <div className="flex justify-between items-center mb-4">
                         <span className="font-bold text-gray-700 tracking-wide text-base sm:text-lg">Earning Statistics (Monthly)</span>
                         <span className="text-xs font-semibold px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full">Live Analytics</span>
                     </div>
-                    <div className="w-full h-full flex items-center justify-center">
+                    <div className="w-full flex items-center justify-center">
                         <Line data={lineState} />
                     </div>
                 </div>
 
                 {/* Pie Chart */}
-                <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 w-full lg:w-1/4 border border-gray-100 flex flex-col items-center justify-between">
-                    <span className="font-bold text-gray-700 tracking-wide text-base sm:text-lg mb-2">Order Status</span>
+                <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 w-full lg:w-1/3 border border-gray-100 flex flex-col items-center justify-between">
+                    <span className="font-bold text-gray-700 tracking-wide text-base sm:text-lg mb-2">Order Status Proportion</span>
                     <div className="w-full max-w-[240px] my-auto">
                         <Pie data={pieState} />
                     </div>
                 </div>
             </div>
 
-            {/* --- CHARTS SECTION: INVENTORY --- */}
-            <div className="flex flex-col sm:flex-row gap-6 mt-6 mb-6">
-                <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 w-full sm:w-1/2 border border-gray-100 flex flex-col items-center">
+            {/* --- CHARTS SECTION 2: BAR & DOUGHNUT --- */}
+            <div className="flex flex-col lg:flex-row gap-6 mt-6 mb-6">
+                
+                {/* Bar Chart */}
+                <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 w-full lg:w-1/2 border border-gray-100 flex flex-col items-center">
+                    <span className="font-bold text-gray-700 tracking-wide text-base sm:text-lg mb-4">Orders Distribution by Status</span>
+                    <div className="w-full">
+                        <Bar data={barState} />
+                    </div>
+                </div>
+
+                {/* Doughnut Chart */}
+                <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 w-full lg:w-1/2 border border-gray-100 flex flex-col items-center">
                     <span className="font-bold text-gray-700 tracking-wide text-base sm:text-lg mb-4">Inventory Overview</span>
                     <div className="w-full max-w-[220px]">
                         <Doughnut data={doughnutState} />
                     </div>
                 </div>
+
             </div>
         </>
     );
