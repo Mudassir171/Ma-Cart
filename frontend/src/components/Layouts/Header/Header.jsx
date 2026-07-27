@@ -188,37 +188,37 @@ const Header = () => {
                 </Link>
               </div>
             ) : (
-              <div className="pb-3 border-b border-green-700 relative">
-                <div
-                  className="font-medium flex justify-between items-center cursor-pointer"
-                  onClick={() =>
-                    setTogglePrimaryDropDown(!togglePrimaryDropDown)
-                  }
-                >
-                  <div>
-                    <p className="text-xs text-green-300">Hello,</p>
-                    <p className="text-sm font-bold">{user.name}</p>
-                  </div>
-                  <span className="text-xs bg-green-800 px-2.5 py-1 rounded flex items-center gap-1">
-                    Account{" "}
-                    {togglePrimaryDropDown ? (
-                      <ExpandLessIcon sx={{ fontSize: "14px" }} />
-                    ) : (
-                      <ExpandMoreIcon sx={{ fontSize: "14px" }} />
-                    )}
-                  </span>
-                </div>
+              <div className="pb-3 border-b border-green-700 relative overflow-visible">
+    <div
+        className="font-medium flex justify-between items-center cursor-pointer"
+        onClick={() =>
+            setTogglePrimaryDropDown(!togglePrimaryDropDown)
+        }
+    >
+        <div>
+            <p className="text-xs text-green-300">Hello,</p>
+            <p className="text-sm font-bold">{user.name}</p>
+        </div>
+        <span className="text-xs bg-green-800 px-2.5 py-1 rounded flex items-center gap-1">
+            Account{" "}
+            {togglePrimaryDropDown ? (
+                <ExpandLessIcon sx={{ fontSize: "14px" }} />
+            ) : (
+                <ExpandMoreIcon sx={{ fontSize: "14px" }} />
+            )}
+        </span>
+    </div>
 
-                {/* Mobile Primary DropDown Menu - Right Aligned */}
-                {togglePrimaryDropDown && (
-                  <div className="absolute right-[-20px] sm:right-0 mt-2 w-48 bg-white text-black rounded-xl shadow-2xl z-50 overflow-hidden border border-gray-100">
-                    <PrimaryDropDownMenu
-                      setTogglePrimaryDropDown={setTogglePrimaryDropDown}
-                      user={user}
-                    />
-                  </div>
-                )}
-              </div>
+    {/* Mobile Primary DropDown Menu - Right Aligned */}
+    {togglePrimaryDropDown && (
+        <div className="absolute right-0 sm:right-0 mt-2 w-48 bg-white text-black rounded-xl shadow-2xl z-[9999] border border-gray-100">
+            <PrimaryDropDownMenu
+                setTogglePrimaryDropDown={setTogglePrimaryDropDown}
+                user={user}
+            />
+        </div>
+    )}
+</div>
             )}
             <div className="flex flex-col space-y-2.5 text-xs font-medium pt-1">
               <span className="cursor-pointer hover:text-green-300">
