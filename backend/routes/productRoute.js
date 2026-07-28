@@ -85,7 +85,8 @@ const {
     createProductReview,
     getProductReviews,
     deleteReview,
-    getSellerStore
+    getSellerStore,
+    getSellerReviews
 } = require('../controllers/productController');
 
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
@@ -132,6 +133,12 @@ router.route('/admin/products').get(
     isAuthenticatedUser, 
     authorizeRoles("admin", "seller"), // Yahan "seller" add karein
     getAdminProducts
+);
+// seller review rate
+router.route('/seller/reviews').get(
+    isAuthenticatedUser, 
+    authorizeRoles('seller'), 
+    getSellerReviews
 );
 router.route('/admin/product/status/:id').put(isAuthenticatedUser, authorizeRoles("admin"), updateProductStatus);
 router.route('/admin/reviews').delete(isAuthenticatedUser, authorizeRoles("admin"), deleteReview);

@@ -353,3 +353,31 @@ exports.getSellerStore = asyncErrorHandler(async (req, res, next) => {
     products,
   });
 });
+// ============================================================
+// 12. GET SELLER REVIEWS (Seller Dashboard ke liye)
+// ============================================================
+exports.getSellerReviews = asyncErrorHandler(async (req, res, next) => {
+  // 1. Logged-in seller ke saare products find karein
+  const products = await Product.find({ user: req.user.id });
+
+  let reviews = [];
+  // 2. Har product ke reviews ko ek array mein collect karein
+  products.forEach((product) => {
+    product.reviews.forEach((rev) => {
+      reviews.push({
+        _id: rev._id,
+        rating: rev.rating,
+        comment: rev.comment,
+        name: rev.name,
+        user: rev.user,
+        product: product._id,
+        productName: product.name,
+      });
+    });
+  });
+
+  res.status(200).json({
+    success: true,
+    reviews,
+  });
+});
