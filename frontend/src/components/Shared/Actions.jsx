@@ -17,7 +17,8 @@ const Actions = ({
     name, 
     updateStatusHandler, 
     isOrder, 
-    currentStatus 
+    currentStatus,
+    showApproval = false // <-- Naya prop: By default false rahega
 }) => {
     const [open, setOpen] = useState(false);
 
@@ -40,8 +41,8 @@ const Actions = ({
                         <option value="Delivered">Delivered</option>
                     </select>
                 ) : (
-                    /* CASE 2: PRODUCT APPROVAL - Yeh sirf tabhi dikhega jab updateStatusHandler pass kiya jaye (Admin side) */
-                    updateStatusHandler && !isOrder && editRoute?.includes("admin") && (
+                    /* CASE 2: PRODUCT APPROVAL - Sirf tabhi dikhega jab showApproval ko true karenge */
+                    showApproval && (
                         <>
                             <button 
                                 onClick={() => updateStatusHandler(id, true)} 

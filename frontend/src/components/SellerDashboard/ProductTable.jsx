@@ -175,7 +175,6 @@ const ProductTable = () => {
             editRoute={"seller/update-product"}
             deleteHandler={deleteProductHandler}
             id={params.row.id}
-            // isApproval nahi likhna hai yahan, isliye approve/reject buttons gayab rahenge!
           />
         );
       },
