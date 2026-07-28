@@ -294,6 +294,31 @@ exports.getSellerCustomers = catchAsyncErrors(async (req, res, next) => {
         customers,
     });
 });
+// ============================================================
+// 7. SELLER ANALYTICS & STATS FETCH KARNA
+// ============================================================
+exports.getSellerAnalytics = catchAsyncErrors(async (req, res, next) => {
+    const orders = await Order.find({ "orderItems.seller": req.user._id });
+
+    let totalRevenue = 0;
+    orders.forEach(order => {
+        order.orderItems.forEach(item => {
+            if (item.seller.toString() === req.user._id.toString()) {
+                totalRevenue += item.price * item.quantity;
+            }
+        });
+    });
+
+    const totalOrders = orders.length;
+    const productsCount = await Product.countDocuments({ user: req.user._id });
+
+    res.status(200).json({
+        success: true,
+        totalRevenue,
+        totalOrders,
+        productsCount,
+    });
+});
 // Helper function (check karein ke ye file mein majood hai)
 async function updateStock(id, quantity) {
     console.log("DEBUG: Updating stock for ID:", id, "Reduction:", quantity); // Yeh line add karein

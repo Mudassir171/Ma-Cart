@@ -6,7 +6,8 @@ const {
     getAllOrders, 
     updateOrder, 
     deleteOrder,
-    getSellerCustomers
+    getSellerCustomers,
+    getSellerAnalytics
 } = require('../controllers/orderController');
 
 // Seller Analytics Controller ko import kiya
@@ -42,7 +43,10 @@ router.route('/seller/dashboard/stats').get(
     getSellerDashboardStats
 );
 
+// Seller Analytics Route
+router.route("/seller/analytics").get(isAuthenticatedUser, authorizeRoles("seller"), getSellerAnalytics);
 
+// ============================================================
 // ============================================================
 // 🛠️ ADMIN & SELLER MANAGEMENT ROUTES
 // ============================================================

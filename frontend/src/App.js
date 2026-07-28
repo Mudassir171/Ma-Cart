@@ -315,6 +315,8 @@ import ShopSettings from './components/SellerDashboard/ShopSettings';
 import NewCategory from './components/SellerDashboard/NewCategory';
 import CategoryTable from './components/SellerDashboard/CategoryTable';
 import Customers from './components/SellerDashboard/Customers';
+import Analytics from './components/SellerDashboard/Analytics';
+
 // --- Other Pages ---
 import ContactPage from './components/Home/Contactpage';
 import AboutUs from './components/Home/AboutUs';
@@ -431,6 +433,7 @@ function App() {
                 <Route path='/seller/new-category' element={ <ProtectedRoute isSeller={ true }><SellerDashboard activeTab={ 6 }><NewCategory /></SellerDashboard></ProtectedRoute> } />
                 <Route path="/seller/customers" element={ <ProtectedRoute isSeller={ true }><SellerDashboard activeTab={ 7 }><Customers /></SellerDashboard></ProtectedRoute> } />
                 <Route path="/seller/shop" element={ <ProtectedRoute isSeller={ true }><SellerDashboard activeTab={ 8 }><ShopSettings /></SellerDashboard></ProtectedRoute> } />
+               <Route path="/seller/analytics" element={ <ProtectedRoute isSeller={ true }><SellerDashboard activeTab={ 8 }><Analytics /></SellerDashboard></ProtectedRoute> } />
                 {/* 404 Page */ }
                 <Route path="*" element={<NotFound />} />
             </Routes>
