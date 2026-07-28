@@ -303,6 +303,7 @@ import AdminCategoryTable from './components/Admin/CategoryTable';
 import AdminPendingSellers from './components/Admin/PendingSellers'
 import AdminAllSeller from './components/Admin/AllSeller';
 import AdminPayoutTable from './components/Admin/PayoutTable';
+import Analytics from './components/Admin/Analytics';
 // --- Seller Dashboard Components (Naya Folder) ---
 import SellerDashboard from './components/SellerDashboard/Dashboard';
 import SellerMainData from './components/SellerDashboard/MainData';
@@ -418,7 +419,7 @@ function App() {
                 <Route path="/admin/categories" element={<ProtectedRoute isAdmin={true}><AdminDashboard activeTab={6}><AdminCategoryTable /></AdminDashboard></ProtectedRoute>} />
                 <Route path="/admin/all_seller" element={<ProtectedRoute isAdmin={true}><AdminDashboard activeTab={6}><AdminAllSeller /></AdminDashboard></ProtectedRoute>} />
                 <Route path="/admin/payouts" element={<ProtectedRoute isAdmin={true}><AdminDashboard activeTab={7}><AdminPayoutTable /></AdminDashboard></ProtectedRoute>} />
-                   
+                <Route path="/admin/analytics" element={<ProtectedRoute isAdmin={true}><AdminDashboard activeTab={8}><Analytics /></AdminDashboard></ProtectedRoute>} />
                     {/* --- Seller Routes (Naye Add Kiya Hain) --- */}
                 
                 <Route path="/seller/dashboard" element={<ProtectedRoute isSeller={true}><SellerDashboard activeTab={0}><SellerMainData /></SellerDashboard></ProtectedRoute>} />

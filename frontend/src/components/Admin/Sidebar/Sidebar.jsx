@@ -11,6 +11,7 @@ import PayoutIcon from '@mui/icons-material/AccountBalanceWallet';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import CloseIcon from '@mui/icons-material/Close';
 import Avatar from '@mui/material/Avatar';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 import { useDispatch, useSelector } from 'react-redux';
 import './Sidebar.css';
 import { useSnackbar } from 'notistack';
@@ -26,6 +27,7 @@ const navMenu = [
     { icon: <GroupIcon />, label: "Users", ref: "/admin/users" },
     { icon: <GroupIcon />, label: "Pending Sellers", ref: "/admin/sellers" },
     { icon: <GroupIcon />, label: "All Sellers", ref: "/admin/all_seller" },
+    { icon: <AnalyticsIcon />, label: "Analytics",ref: "/admin/analytics", },
     { icon: <ReviewsIcon />, label: "Reviews", ref: "/admin/reviews" },
     { icon: <PayoutIcon />, label: "Payouts", ref: "/admin/payouts" },
     { icon: <AccountBoxIcon />, label: "My Profile", ref: "/account" },
