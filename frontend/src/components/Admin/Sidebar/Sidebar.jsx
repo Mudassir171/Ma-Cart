@@ -27,7 +27,7 @@ const navMenu = [
     { icon: <GroupIcon />, label: "Users", ref: "/admin/users" },
     { icon: <GroupIcon />, label: "Pending Sellers", ref: "/admin/sellers" },
     { icon: <GroupIcon />, label: "All Sellers", ref: "/admin/all_seller" },
-    { icon: <AnalyticsIcon />, label: "Analytics",ref: "/admin/analytics", },
+    { icon: <AnalyticsIcon />, label: "Analytics",ref: "/admin/analytic", },
     { icon: <ReviewsIcon />, label: "Reviews", ref: "/admin/reviews" },
     { icon: <PayoutIcon />, label: "Payouts", ref: "/admin/payouts" },
     { icon: <AccountBoxIcon />, label: "My Profile", ref: "/account" },
