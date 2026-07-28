@@ -36,7 +36,7 @@ const Customers = () => {
     );
 
     return (
-        <Dashboard activeTab="customers">
+        // <div activeTab="customers">
             <div className="flex flex-col gap-6 animate-fadeIn pb-10">
                 
                 {/* Header Banner with Rich Green Gradient */}
@@ -177,7 +177,7 @@ const Customers = () => {
                 )}
 
             </div>
-        </Dashboard>
+        // </div>
     );
 };
 
