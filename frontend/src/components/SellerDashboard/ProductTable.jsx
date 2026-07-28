@@ -5,10 +5,8 @@ import { useSnackbar } from 'notistack';
 import { Link } from 'react-router-dom';
 import { getAdminProducts, clearErrors, deleteProduct } from '../../actions/productAction';
 import { DELETE_PRODUCT_RESET } from '../../constants/productConstants';
-// import Actions from '../Admin/Actions'; // Purana Actions component use kar sakte hain
 import MetaData from '../Layouts/MetaData';
 import BackdropLoader from '../Layouts/BackdropLoader';
-// Naya import:
 import Actions from '../Shared/Actions';
 
 const ProductTable = () => {
@@ -21,8 +19,7 @@ const ProductTable = () => {
     const { error: deleteError, isDeleted } = useSelector((state) => state.product);
 
     // --- SELLER FILTER LOGIC ---
-    // Sirf wo products filter karein jo is seller ki hain
-    const sellerProducts = products?.filter(p => p.user === user._id || p.user?._id === user._id);
+    const sellerProducts = products?.filter(p => p.user === user?._id || p.user?._id === user?._id);
 
     useEffect(() => {
         if (error) {
@@ -45,19 +42,19 @@ const ProductTable = () => {
     }
 
     const columns = [
-        { field: "id", headerName: "Product ID", minWidth: 200, flex: 0.5 },
+        { field: "id", headerName: "Product ID", minWidth: 180, flex: 0.5 },
         {
             field: "name",
             headerName: "Name",
-            minWidth: 200,
+            minWidth: 180,
             flex: 1,
             renderCell: (params) => {
                 return (
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-full">
+                        <div className="w-10 h-10 rounded-full flex-shrink-0">
                             <img className="w-full h-full rounded-full object-cover" src={params.row.image} alt={params.row.name} />
                         </div>
-                        {params.row.name}
+                        <span className="truncate">{params.row.name}</span>
                     </div>
                 )
             },
@@ -68,6 +65,50 @@ const ProductTable = () => {
             minWidth: 100,
             flex: 0.3,
         },
+        // --- 🎨 COLORS COLUMN ---
+        {
+            field: "colors",
+            headerName: "Colors",
+            minWidth: 120,
+            flex: 0.4,
+            renderCell: (params) => {
+                return (
+                    <div className="flex flex-wrap gap-1 py-1">
+                        {params.row.colors && params.row.colors.length > 0 ? (
+                            params.row.colors.map((c, i) => (
+                                <span key={i} className="bg-purple-100 text-purple-700 text-xs px-1.5 py-0.5 rounded font-medium">
+                                    {c}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-gray-400 text-xs italic">N/A</span>
+                        )}
+                    </div>
+                );
+            }
+        },
+        // --- 📏 SIZES COLUMN ---
+        {
+            field: "sizes",
+            headerName: "Sizes",
+            minWidth: 120,
+            flex: 0.4,
+            renderCell: (params) => {
+                return (
+                    <div className="flex flex-wrap gap-1 py-1">
+                        {params.row.sizes && params.row.sizes.length > 0 ? (
+                            params.row.sizes.map((s, i) => (
+                                <span key={i} className="bg-indigo-100 text-indigo-700 text-xs px-1.5 py-0.5 rounded font-medium">
+                                    {s}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-gray-400 text-xs italic">N/A</span>
+                        )}
+                    </div>
+                );
+            }
+        },
         {
             field: "stock",
             headerName: "Stock",
@@ -76,7 +117,7 @@ const ProductTable = () => {
             flex: 0.2,
             renderCell: (params) => {
                 return (
-                    <span className={params.row.stock < 10 ? "text-red-500 font-medium" : "text-green-500"}>
+                    <span className={params.row.stock < 10 ? "text-red-500 font-medium" : "text-green-500 font-medium"}>
                         {params.row.stock}
                     </span>
                 )
@@ -86,7 +127,7 @@ const ProductTable = () => {
             field: "price",
             headerName: "Price",
             type: "number",
-            minWidth: 100,
+            minWidth: 90,
             flex: 0.2,
             renderCell: (params) => {
                 return <span>₹{params.row.price.toLocaleString()}</span>
@@ -97,15 +138,14 @@ const ProductTable = () => {
             headerName: "Actions",
             minWidth: 100,
             flex: 0.3,
-            type: "number",
             sortable: false,
             renderCell: (params) => {
                 return (
-                    // Edit link ko bhi /seller/ mein change kiya hai
                     <Actions 
-                    editRoute={"seller/update-product"} 
-                    deleteHandler={deleteProductHandler}
-                     id={params.row.id} />
+                        editRoute={"seller/update-product"} 
+                        deleteHandler={deleteProductHandler}
+                        id={params.row.id} 
+                    />
                 );
             },
         },
@@ -117,8 +157,10 @@ const ProductTable = () => {
         rows.push({
             id: item._id,
             name: item.name,
-            image: item.images[0].url,
+            image: item.images && item.images[0] ? item.images[0].url : "",
             category: item.category,
+            colors: item.colors, // Backend se aane wale colors
+            sizes: item.sizes,   // Backend se aane wale sizes
             stock: item.stock,
             price: item.price,
         });
@@ -130,7 +172,7 @@ const ProductTable = () => {
 
             {loading && <BackdropLoader />}
 
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-4">
                 <h1 className="text-lg font-medium uppercase text-gray-800">My Products</h1>
                 <Link to="/seller/new_products" className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded shadow font-medium">Add New Product</Link>
             </div>

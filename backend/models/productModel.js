@@ -3,74 +3,72 @@ const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Please enter product name"],
+    required: [true, "Please enter product name"], // Sirf naam zaroori rakha hai, agar ise bhi optional karna ho toh required hata sakte hain
     trim: true,
   },
   description: {
     type: String,
-    required: [true, "Please enter product description"],
   },
   highlights: [
     {
       type: String,
-      required: true,
     },
   ],
   specifications: [
     {
       title: {
         type: String,
-        required: true,
       },
       description: {
         type: String,
-        required: true,
       },
     },
   ],
   price: {
     type: Number,
-    required: [true, "Please enter product price"],
   },
   cuttedPrice: {
     type: Number,
-    required: [true, "Please enter cutted price"],
   },
+  // --- 🎨 COLORS & 📏 SIZES ADDED ---
+  colors: [
+    {
+      type: String,
+    },
+  ],
+  sizes: [
+    {
+      type: String,
+    },
+  ],
   images: [
     {
       public_id: {
         type: String,
-        required: true,
       },
       url: {
         type: String,
-        required: true,
       },
     },
   ],
   brand: {
     name: {
       type: String,
-      required: true,
     },
     logo: {
       public_id: {
         type: String,
-        required: true,
       },
       url: {
         type: String,
-        required: true,
       },
     },
   },
   category: {
     type: String,
-    required: [true, "Please enter product category"],
   },
   stock: {
     type: Number,
-    required: [true, "Please enter product stock"],
     maxlength: [4, "Stock cannot exceed limit"],
     default: 1,
   },
@@ -91,19 +89,15 @@ const productSchema = new mongoose.Schema({
       user: {
         type: mongoose.Schema.ObjectId,
         ref: "User",
-        required: true,
       },
       name: {
         type: String,
-        required: true,
       },
       rating: {
         type: Number,
-        required: true,
       },
       comment: {
         type: String,
-        required: true,
       },
     },
   ],
@@ -112,13 +106,12 @@ const productSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    required: true,
+    required: true, // User ID zaroori hai taake pata chale kis seller ne product add kiya hai
   },
-  // Admin approval feature taake har product live honay se pehle aap check karein
   isApproved: {
     type: Boolean,
     default: function () {
-      return this.userRole === "admin"; // Agar admin add kare toh true, warna false
+      return false; 
     },
   },
   // --- UPDATES END ---

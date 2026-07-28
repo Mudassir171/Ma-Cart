@@ -74,16 +74,17 @@ exports.getProductDetails = asyncErrorHandler(async (req, res, next) => {
     product,
   });
 });
-
 // ============================================================
 // 4. CREATE PRODUCT (By Seller or Admin)
 // ============================================================
 exports.createProduct = asyncErrorHandler(async (req, res, next) => {
   let images = [];
-  if (typeof req.body.images === "string") {
-    images.push(req.body.images);
-  } else {
-    images = req.body.images;
+  if (req.body.images) {
+    if (typeof req.body.images === "string") {
+      images.push(req.body.images);
+    } else {
+      images = req.body.images;
+    }
   }
 
   const imagesLink = [];
@@ -114,11 +115,34 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
   // Admin approve ho jaye, Seller pending rahe
   req.body.isApproved = req.user.role === "admin" ? true : false;
 
+  // --- 🎨📏 COLORS & SIZES HANDLING ---
+  let colors = req.body.colors;
+  if (colors) {
+    req.body.colors = typeof colors === 'string' ? [colors] : colors;
+  } else {
+    req.body.colors = [];
+  }
+
+  let sizes = req.body.sizes;
+  if (sizes) {
+    req.body.sizes = typeof sizes === 'string' ? [sizes] : sizes;
+  } else {
+    req.body.sizes = [];
+  }
+
   // Specifications Parsing
   if (req.body.specifications) {
     let specs = [];
-    req.body.specifications.forEach((s) => {
-      specs.push(JSON.parse(s));
+    let specsArray = Array.isArray(req.body.specifications) 
+      ? req.body.specifications 
+      : [req.body.specifications];
+
+    specsArray.forEach((s) => {
+      try {
+        specs.push(typeof s === 'string' ? JSON.parse(s) : s);
+      } catch (err) {
+        // Ignore invalid format if empty/optional
+      }
     });
     req.body.specifications = specs;
   }
@@ -130,13 +154,6 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
     product,
   });
 });
-
-// ============================================================
-// 5. UPDATE PRODUCT (Owner or Admin Only)
-// ============================================================
-// ============================================================
-// 5. UPDATE PRODUCT (Owner or Admin Only)
-// ============================================================
 // ============================================================
 // 5. UPDATE PRODUCT (Owner or Admin Only)
 // ============================================================
@@ -147,16 +164,14 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
     return next(new ErrorHandler("Product Not Found", 404));
   }
 
-  // 1. Specifications Handle Karein (Handling the Stringified JSON Array)
+  // 1. Specifications Handle Karein
   if (req.body.specifications) {
     try {
-      // Agar specifications stringify ho kar aa rahe hain, to unhe parse karein
       let specsArray =
         typeof req.body.specifications === "string"
           ? JSON.parse(req.body.specifications)
           : req.body.specifications;
 
-      // Mapping: Har item ko ensure karein ki wo object ho
       product.specifications = specsArray.map((item) => {
         const parsedItem = typeof item === "string" ? JSON.parse(item) : item;
         return {
@@ -174,9 +189,17 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
     }
   }
 
+  // --- 🎨📏 COLORS & SIZES UPDATE HANDLING ---
+  if (req.body.colors) {
+    product.colors = typeof req.body.colors === 'string' ? [req.body.colors] : req.body.colors;
+  }
+
+  if (req.body.sizes) {
+    product.sizes = typeof req.body.sizes === 'string' ? [req.body.sizes] : req.body.sizes;
+  }
+
   // 2. Baaki Fields Update Karein
-  // Hum "specifications" ko alag kar rahe hain kyunki wo upar handle ho chuka hai
-  const { specifications, ...otherData } = req.body;
+  const { specifications, colors, sizes, ...otherData } = req.body;
 
   Object.keys(otherData).forEach((key) => {
     product[key] = otherData[key];
@@ -188,7 +211,6 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
   }
 
   // 4. Save the document
-  // { validateBeforeSave: true } Mongoose model ke 'required' rules check karega
   await product.save({ validateBeforeSave: true });
 
   res.status(200).json({

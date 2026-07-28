@@ -23,6 +23,15 @@ const NewProduct = () => {
 
     const [highlights, setHighlights] = useState([]);
     const [highlightInput, setHighlightInput] = useState("");
+    
+    // --- 🎨 COLORS STATE ---
+    const [colors, setColors] = useState([]);
+    const [colorInput, setColorInput] = useState("");
+
+    // --- 📏 SIZES STATE ---
+    const [sizes, setSizes] = useState([]);
+    const [sizeInput, setSizeInput] = useState("");
+
     const [specs, setSpecs] = useState([]);
     const [specsInput, setSpecsInput] = useState({
         title: "",
@@ -57,6 +66,26 @@ const NewProduct = () => {
         if (!highlightInput.trim()) return;
         setHighlights([...highlights, highlightInput]);
         setHighlightInput("");
+    }
+
+    // --- 🎨 ADD / DELETE COLOR ---
+    const addColor = () => {
+        if (!colorInput.trim()) return;
+        setColors([...colors, colorInput]);
+        setColorInput("");
+    }
+    const deleteColor = (index) => {
+        setColors(colors.filter((c, i) => i !== index));
+    }
+
+    // --- 📏 ADD / DELETE SIZE ---
+    const addSize = () => {
+        if (!sizeInput.trim()) return;
+        setSizes([...sizes, sizeInput]);
+        setSizeInput("");
+    }
+    const deleteSize = (index) => {
+        setSizes(sizes.filter((s, i) => i !== index));
     }
 
     const deleteHighlight = (index) => {
@@ -109,18 +138,18 @@ const NewProduct = () => {
     const newProductSubmitHandler = (e) => {
         e.preventDefault();
 
-        if (highlights.length <= 0) {
-            enqueueSnackbar("Add Highlights", { variant: "warning" });
-            return;
-        }
+        // if (highlights.length <= 0) {
+        //     enqueueSnackbar("Add Highlights", { variant: "warning" });
+        //     return;
+        // }
         if (!logo) {
             enqueueSnackbar("Add Brand Logo", { variant: "warning" });
             return;
         }
-        if (specs.length <= 1) {
-            enqueueSnackbar("Add Minimum 2 Specifications", { variant: "warning" });
-            return;
-        }
+        // if (specs.length <= 1) {
+        //     enqueueSnackbar("Add Minimum 2 Specifications", { variant: "warning" });
+        //     return;
+        // }
         
         if (images.length < 1 || images.length > 5) {
             enqueueSnackbar("Upload between 1 to 5 images", { variant: "warning" });
@@ -141,6 +170,10 @@ const NewProduct = () => {
         images.forEach((image) => { formData.append("images", image); });
         highlights.forEach((h) => { formData.append("highlights", h); });
         specs.forEach((s) => { formData.append("specifications", JSON.stringify(s)); });
+        
+        // --- 🎨📏 APPEND COLORS & SIZES TO FORMDATA ---
+        colors.forEach((c) => { formData.append("colors", c); });
+        sizes.forEach((s) => { formData.append("sizes", s); });
 
         dispatch(createProduct(formData));
     }
@@ -152,19 +185,17 @@ const NewProduct = () => {
             dispatch(clearErrors());
         }
         if (success) {
-            // --- 🚀 NOTIFICATION DISPATCH START ---
             dispatch({
                 type: "ADD_NOTIFICATION",
                 payload: {
                     id: Date.now(),
                     title: "New Product Launched! 🛍️",
                     message: `Mubarak ho! Aik naya product "${name}" brand ${brand} ke saath live kar diya gaya hai.`,
-                    type: "order", // 'order' color theme use hogi
+                    type: "order",
                     createdAt: new Date().toLocaleString(),
                     isRead: false
                 }
             });
-            // --- NOTIFICATION DISPATCH END ---
 
             enqueueSnackbar("Product Created", { variant: "success" });
             dispatch({ type: NEW_PRODUCT_RESET });
@@ -206,6 +237,40 @@ const NewProduct = () => {
 
                         <TextField label="Stock" type="number" variant="outlined" size="small" required value={stock} onChange={(e) => setStock(e.target.value)} />
                         <TextField label="Warranty" type="number" variant="outlined" size="small" required value={warranty} onChange={(e) => setWarranty(e.target.value)} />
+                    </div>
+
+                    {/* --- 🎨 COLOR INPUT SECTION --- */}
+                    <div className="flex flex-col gap-2">
+                        <label className="font-bold text-gray-700 uppercase text-xs tracking-widest">Colors</label>
+                        <div className="flex justify-between items-center border rounded">
+                            <input value={colorInput} onChange={(e) => setColorInput(e.target.value)} type="text" placeholder="Add Color (e.g. Red, Black)" className="px-2 flex-1 outline-none border-none py-1.5" />
+                            <span onClick={addColor} className="py-2 px-6 bg-blue-600 text-white rounded-r cursor-pointer font-bold text-xs uppercase">Add</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {colors.map((c, i) => (
+                                <div key={i} className="flex justify-between items-center py-1 px-3 bg-purple-50 rounded-full border border-purple-200 gap-2">
+                                    <p className="text-purple-800 text-xs font-semibold">{c}</p>
+                                    <span onClick={() => deleteColor(i)} className="text-red-600 cursor-pointer flex items-center"><DeleteIcon fontSize="small" style={{ fontSize: '16px' }} /></span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* --- 📏 SIZE INPUT SECTION --- */}
+                    <div className="flex flex-col gap-2">
+                        <label className="font-bold text-gray-700 uppercase text-xs tracking-widest">Sizes</label>
+                        <div className="flex justify-between items-center border rounded">
+                            <input value={sizeInput} onChange={(e) => setSizeInput(e.target.value)} type="text" placeholder="Add Size (e.g. S, M, L, XL, 42)" className="px-2 flex-1 outline-none border-none py-1.5" />
+                            <span onClick={addSize} className="py-2 px-6 bg-blue-600 text-white rounded-r cursor-pointer font-bold text-xs uppercase">Add</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {sizes.map((s, i) => (
+                                <div key={i} className="flex justify-between items-center py-1 px-3 bg-indigo-50 rounded-full border border-indigo-200 gap-2">
+                                    <p className="text-indigo-800 text-xs font-semibold">{s}</p>
+                                    <span onClick={() => deleteSize(i)} className="text-red-600 cursor-pointer flex items-center"><DeleteIcon fontSize="small" style={{ fontSize: '16px' }} /></span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="flex flex-col gap-2">

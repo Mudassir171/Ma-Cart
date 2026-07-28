@@ -20,10 +20,19 @@ const UpdateProduct = () => {
 
     const { loading, product, error } = useSelector((state) => state.productDetails);
     const { loading: updateLoading, isUpdated, error: updateError } = useSelector((state) => state.product);
-    const { user } = useSelector((state) => state.user); // Seller navigation ke liye
+    const { user } = useSelector((state) => state.user);
 
     const [highlights, setHighlights] = useState([]);
     const [highlightInput, setHighlightInput] = useState("");
+    
+    // --- 🎨 COLORS STATE ---
+    const [colors, setColors] = useState([]);
+    const [colorInput, setColorInput] = useState("");
+
+    // --- 📏 SIZES STATE ---
+    const [sizes, setSizes] = useState([]);
+    const [sizeInput, setSizeInput] = useState("");
+
     const [specs, setSpecs] = useState([]);
     const [specsInput, setSpecsInput] = useState({ title: "", description: "" });
 
@@ -42,6 +51,10 @@ const UpdateProduct = () => {
     const [logo, setLogo] = useState("");
     const [logoPreview, setLogoPreview] = useState("");
 
+    // Dropdown options for colors and sizes
+    const availableColors = ["Red", "Blue", "Green", "Black", "White", "Yellow", "Pink", "Purple", "Orange", "Grey"];
+    const availableSizes = ["S", "M", "L", "XL", "XXL", "Free Size", "28", "30", "32", "34", "36", "38", "40", "42"];
+
     const handleSpecsChange = (e) => {
         setSpecsInput({ ...specsInput, [e.target.name]: e.target.value });
     }
@@ -56,6 +69,26 @@ const UpdateProduct = () => {
         if (!highlightInput.trim()) return;
         setHighlights([...highlights, highlightInput]);
         setHighlightInput("");
+    }
+
+    // --- 🎨 ADD / DELETE COLOR ---
+    const addColor = () => {
+        if (!colorInput.trim() || colors.includes(colorInput)) return;
+        setColors([...colors, colorInput]);
+        setColorInput("");
+    }
+    const deleteColor = (index) => {
+        setColors(colors.filter((c, i) => i !== index));
+    }
+
+    // --- 📏 ADD / DELETE SIZE ---
+    const addSize = () => {
+        if (!sizeInput.trim() || sizes.includes(sizeInput)) return;
+        setSizes([...sizes, sizeInput]);
+        setSizeInput("");
+    }
+    const deleteSize = (index) => {
+        setSizes(sizes.filter((s, i) => i !== index));
     }
 
     const deleteHighlight = (index) => {
@@ -115,11 +148,15 @@ const UpdateProduct = () => {
         formData.set("stock", stock);
         formData.set("warranty", warranty);
         formData.set("brandname", brand);
-        formData.set("logo", logo);
+        if (logo) formData.set("logo", logo);
 
         images.forEach((image) => formData.append("images", image));
         highlights.forEach((h) => formData.append("highlights", h));
         specs.forEach((s) => formData.append("specifications", JSON.stringify(s)));
+        
+        // --- 🎨📏 APPEND COLORS & SIZES ---
+        colors.forEach((c) => formData.append("colors", c));
+        sizes.forEach((s) => formData.append("sizes", s));
 
         dispatch(updateProduct(params.id, formData));
     }
@@ -128,7 +165,6 @@ const UpdateProduct = () => {
         if (product && product._id !== params.id) {
             dispatch(getProductDetails(params.id));
         } else if (product) {
-            // Optional Chaining check
             setName(product.name || "");
             setDescription(product.description || "");
             setPrice(product.price || 0);
@@ -139,6 +175,8 @@ const UpdateProduct = () => {
             setBrand(product.brand?.name || "");
             setHighlights(product.highlights || []);
             setSpecs(product.specifications || []);
+            setColors(product.colors || []);   // Load existing colors
+            setSizes(product.sizes || []);     // Load existing sizes
             setOldImages(product.images || []);
             setLogoPreview(product.brand?.logo?.url || "");
         }
@@ -156,7 +194,6 @@ const UpdateProduct = () => {
             dispatch({ type: UPDATE_PRODUCT_RESET });
             dispatch({ type: REMOVE_PRODUCT_DETAILS });
             
-            // Seller aur Admin ke liye alag navigation
             if(user.role === "seller") {
                 navigate('/seller/products');
             } else {
@@ -167,12 +204,11 @@ const UpdateProduct = () => {
 
     return (
         <>
-            <MetaData title="Update Product | Flipkart" />
+            <MetaData title="Update Product | MA-CART" />
 
             {loading && <BackdropLoader />}
             {updateLoading && <BackdropLoader />}
             
-            {/* Form ko tabhi render karein jab product ka data mil jaye */}
             {product && (
                 <form onSubmit={newProductSubmitHandler} encType="multipart/form-data" className="flex flex-col sm:flex-row bg-white rounded-lg shadow p-4" id="mainform">
                     <div className="flex flex-col gap-3 m-2 sm:w-1/2">
@@ -192,16 +228,76 @@ const UpdateProduct = () => {
                             <TextField label="Warranty" type="number" variant="outlined" size="small" required value={warranty} onChange={(e) => setWarranty(e.target.value)} />
                         </div>
 
+                        {/* --- 🎨 COLOR SELECTION WITH ARROW --- */}
+                        <div className="flex flex-col gap-2">
+                            <div className="flex gap-2 items-center">
+                                <TextField
+                                    label="Select or Add Color"
+                                    select
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                    value={colorInput}
+                                    onChange={(e) => setColorInput(e.target.value)}
+                                >
+                                    {availableColors.map((col, index) => (
+                                        <MenuItem value={col} key={index}>
+                                            {col}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                                <span onClick={addColor} className="py-2 px-6 bg-blue-600 text-white rounded cursor-pointer font-bold text-xs uppercase h-10 flex items-center shadow">Add</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                                {colors.map((c, i) => (
+                                    <div key={i} className="flex justify-between items-center py-1 px-3 bg-purple-50 rounded-full border border-purple-200 gap-2">
+                                        <p className="text-purple-800 text-xs font-semibold">{c}</p>
+                                        <span onClick={() => deleteColor(i)} className="text-red-600 cursor-pointer flex items-center"><DeleteIcon fontSize="small" style={{ fontSize: '16px' }} /></span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* --- 📏 SIZE SELECTION WITH ARROW --- */}
+                        <div className="flex flex-col gap-2">
+                            <div className="flex gap-2 items-center">
+                                <TextField
+                                    label="Select or Add Size"
+                                    select
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                    value={sizeInput}
+                                    onChange={(e) => setSizeInput(e.target.value)}
+                                >
+                                    {availableSizes.map((sz, index) => (
+                                        <MenuItem value={sz} key={index}>
+                                            {sz}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                                <span onClick={addSize} className="py-2 px-6 bg-blue-600 text-white rounded cursor-pointer font-bold text-xs uppercase h-10 flex items-center shadow">Add</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                                {sizes.map((s, i) => (
+                                    <div key={i} className="flex justify-between items-center py-1 px-3 bg-indigo-50 rounded-full border border-indigo-200 gap-2">
+                                        <p className="text-indigo-800 text-xs font-semibold">{s}</p>
+                                        <span onClick={() => deleteSize(i)} className="text-red-600 cursor-pointer flex items-center"><DeleteIcon fontSize="small" style={{ fontSize: '16px' }} /></span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                         <div className="flex flex-col gap-2">
                             <div className="flex justify-between items-center border rounded">
-                                <input value={highlightInput} onChange={(e) => setHighlightInput(e.target.value)} type="text" placeholder="Highlight" className="px-2 flex-1 outline-none border-none" />
-                                <span onClick={addHighlight} className="py-2 px-6 bg-primary-blue text-white rounded-r hover:shadow-lg cursor-pointer">Add</span>
+                                <input value={highlightInput} onChange={(e) => setHighlightInput(e.target.value)} type="text" placeholder="Highlight" className="px-2 flex-1 outline-none border-none py-1.5" />
+                                <span onClick={addHighlight} className="py-2 px-6 bg-blue-600 text-white rounded-r cursor-pointer font-bold">Add</span>
                             </div>
                             <div className="flex flex-col gap-1.5">
                                 {highlights.map((h, i) => (
                                     <div key={i} className="flex justify-between rounded items-center py-1 px-2 bg-green-50">
                                         <p className="text-green-800 text-sm font-medium">{h}</p>
-                                        <span onClick={() => deleteHighlight(i)} className="text-red-600 hover:bg-red-100 p-1 rounded-full cursor-pointer">
+                                        <span onClick={() => deleteHighlight(i)} className="text-red-600 cursor-pointer">
                                             <DeleteIcon />
                                         </span>
                                     </div>
@@ -209,13 +305,13 @@ const UpdateProduct = () => {
                             </div>
                         </div>
 
-                        <h2 className="font-medium">Brand Details</h2>
+                        <h2 className="font-bold text-gray-700 uppercase text-xs mt-2 tracking-widest">Brand Details</h2>
                         <div className="flex justify-between gap-4 items-start">
                             <TextField label="Brand" type="text" variant="outlined" size="small" required value={brand} onChange={(e) => setBrand(e.target.value)} />
-                            <div className="w-24 h-10 flex items-center justify-center border rounded-lg">
-                                {!logoPreview ? <ImageIcon /> : <img src={logoPreview} alt="Brand Logo" className="w-full h-full object-contain" />}
+                            <div className="w-24 h-10 flex items-center justify-center border rounded-lg bg-gray-50">
+                                {!logoPreview ? <ImageIcon className="text-gray-300" /> : <img src={logoPreview} alt="Brand Logo" className="w-full h-full object-contain" />}
                             </div>
-                            <label className="rounded font-medium bg-gray-400 text-center cursor-pointer text-white py-2 px-2.5 shadow hover:shadow-lg text-sm">
+                            <label className="rounded font-bold bg-gray-700 text-center cursor-pointer text-white py-2 px-3 text-xs uppercase shadow hover:bg-black transition-all">
                                 <input type="file" name="logo" accept="image/*" onChange={handleLogoChange} className="hidden" />
                                 Logo
                             </label>
@@ -223,40 +319,40 @@ const UpdateProduct = () => {
                     </div>
 
                     <div className="flex flex-col gap-2 m-2 sm:w-1/2">
-                        <h2 className="font-medium">Specifications</h2>
+                        <h2 className="font-bold text-gray-700 uppercase text-xs tracking-widest">Specifications</h2>
                         <div className="flex justify-evenly gap-2 items-center">
                             <TextField value={specsInput.title} onChange={handleSpecsChange} name="title" label="Title" variant="outlined" size="small" />
                             <TextField value={specsInput.description} onChange={handleSpecsChange} name="description" label="Value" variant="outlined" size="small" />
-                            <span onClick={addSpecs} className="py-2 px-6 bg-primary-blue text-white rounded hover:shadow-lg cursor-pointer text-sm">Add</span>
+                            <span onClick={addSpecs} className="py-2 px-6 bg-blue-600 text-white rounded cursor-pointer font-bold text-sm">Add</span>
                         </div>
-                        <div className="flex flex-col gap-1.5">
+                        <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
                             {specs.map((spec, i) => (
-                                <div key={i} className="flex justify-between items-center text-sm rounded bg-blue-50 py-1 px-2">
-                                    <p className="text-gray-500 font-medium">{spec.title}</p>
-                                    <p>{spec.description}</p>
-                                    <span onClick={() => deleteSpec(i)} className="text-red-600 hover:bg-red-200 bg-red-100 p-1 rounded-full cursor-pointer">
-                                        <DeleteIcon />
+                                <div key={i} className="flex justify-between items-center text-sm rounded bg-blue-50 py-1.5 px-3">
+                                    <p className="text-blue-800 font-bold">{spec.title}</p>
+                                    <p className="text-gray-600">{spec.description}</p>
+                                    <span onClick={() => deleteSpec(i)} className="text-red-600 cursor-pointer">
+                                        <DeleteIcon fontSize="small" />
                                     </span>
                                 </div>
                             ))}
                         </div>
 
-                        <h2 className="font-medium">Product Images</h2>
-                        <div className="flex gap-2 overflow-x-auto h-32 border rounded p-1">
+                        <h2 className="font-bold text-gray-700 uppercase text-xs mt-4 tracking-widest">Product Images</h2>
+                        <div className="flex gap-2 overflow-x-auto h-32 border rounded-xl p-2 bg-gray-50">
                             {oldImages && oldImages.map((image, i) => (
-                                <img key={i} src={image.url} alt="Product" className="h-full object-contain border" />
+                                <img key={i} src={image.url} alt="Product" className="h-full object-contain border rounded-lg bg-white shadow-sm" />
                             ))}
                             {imagesPreview.map((image, i) => (
-                                <img key={i} src={image} alt="Product Preview" className="h-full object-contain border" />
+                                <img key={i} src={image} alt="Product Preview" className="h-full object-contain border rounded-lg bg-white shadow-sm" />
                             ))}
                         </div>
-                        <label className="rounded font-medium bg-gray-400 text-center cursor-pointer text-white p-2 shadow hover:shadow-lg my-2">
+                        <label className="rounded font-bold bg-gray-700 text-center cursor-pointer text-white p-3 shadow uppercase text-xs tracking-widest hover:bg-black transition-all my-2">
                             <input type="file" name="images" accept="image/*" multiple onChange={handleProductImageChange} className="hidden" />
                             Update Images
                         </label>
 
                         <div className="flex justify-end mt-4">
-                            <input type="submit" form="mainform" className="bg-primary-orange uppercase w-full p-3 text-white font-medium rounded shadow hover:shadow-lg cursor-pointer" value="Update Product" />
+                            <input type="submit" form="mainform" className="bg-[#f85606] uppercase w-full p-4 text-white font-black rounded-xl shadow-lg cursor-pointer hover:bg-[#d14905] transition-all tracking-widest" value="Update Product" />
                         </div>
                     </div>
                 </form>
