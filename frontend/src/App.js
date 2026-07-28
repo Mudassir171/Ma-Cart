@@ -314,6 +314,7 @@ import WithdrawalForm from './components/SellerDashboard/WithdrawalForm';
 import ShopSettings from './components/SellerDashboard/ShopSettings';
 import NewCategory from './components/SellerDashboard/NewCategory';
 import CategoryTable from './components/SellerDashboard/CategoryTable';
+import Customers from './components/SellerDashboard/Customers';
 // --- Other Pages ---
 import ContactPage from './components/Home/Contactpage';
 import AboutUs from './components/Home/AboutUs';
@@ -428,6 +429,7 @@ function App() {
                 <Route path="/sellerstore/Home" element={<ProtectedRoute isSeller={true}><SellerDashboard activeTab={0}><SellerMainData /></SellerDashboard></ProtectedRoute>} />
                 <Route path='/seller/categories' element={ <ProtectedRoute isSeller={ true }><SellerDashboard activeTab={ 6 }><CategoryTable /></SellerDashboard></ProtectedRoute> } />
                 <Route path='/seller/new-category' element={ <ProtectedRoute isSeller={ true }><SellerDashboard activeTab={ 6 }><NewCategory /></SellerDashboard></ProtectedRoute> } />
+                <Route path="/seller/customers" element={<ProtectedRoute isAuthenticated={isAuthenticated} sellerRoute={true}><Customers /> </ProtectedRoute> } />
                 <Route path="/seller/shop" element={ <ProtectedRoute isSeller={ true }><SellerDashboard activeTab={ 8 }><ShopSettings /></SellerDashboard></ProtectedRoute> } />
                 {/* 404 Page */ }
                 <Route path="*" element={<NotFound />} />

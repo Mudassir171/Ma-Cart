@@ -272,6 +272,28 @@ const updateItemStatus = catchAsyncErrors(async (req, res, next) => {
         message: "Status updated successfully",
     });
 });
+
+// ============================================================
+// 6. SELLER CUSTOMERS FETCH KARNA
+// ============================================================
+exports.getSellerCustomers = catchAsyncErrors(async (req, res, next) => {
+    // Seller ke products ke orders nikal kar unique customers find karna
+    const orders = await Order.find({ "orderItems.seller": req.user._id }).populate("user", "name email createdAt");
+    
+    // Unique customers ki list nikalne ke liye Map ka use
+    const customersMap = new Map();
+    orders.forEach(order => {
+        if (order.user) {
+            customersMap.set(order.user._id.toString(), order.user);
+        }
+    });
+    const customers = Array.from(customersMap.values());
+
+    res.status(200).json({
+        success: true,
+        customers,
+    });
+});
 // Helper function (check karein ke ye file mein majood hai)
 async function updateStock(id, quantity) {
     console.log("DEBUG: Updating stock for ID:", id, "Reduction:", quantity); // Yeh line add karein

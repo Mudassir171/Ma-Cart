@@ -5,7 +5,8 @@ const {
     getSingleOrder, 
     getAllOrders, 
     updateOrder, 
-    deleteOrder 
+    deleteOrder,
+    getSellerCustomers
 } = require('../controllers/orderController');
 
 // Seller Analytics Controller ko import kiya
@@ -28,7 +29,8 @@ router.route('/orders/me').get(isAuthenticatedUser, myOrders);
 // Specific order ki details dekhne ke liye
 router.route('/order/:id').get(isAuthenticatedUser, getSingleOrder);
 
-
+// Seller customers route
+router.route("/seller/customers").get(isAuthenticatedUser, authorizeRoles("seller"), getSellerCustomers);
 // ============================================================
 // 👨‍💼 SELLER DASHBOARD ROUTES
 // ============================================================
