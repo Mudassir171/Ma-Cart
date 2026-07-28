@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Dashboard from './Dashboard';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import ReviewsIcon from '@mui/icons-material/Reviews';
@@ -40,7 +39,6 @@ const Reviews = () => {
     };
 
     return (
-        <Dashboard activeTab={5}>
             <div className="flex flex-col gap-6 animate-fadeIn pb-10 bg-gray-50 p-2 sm:p-4 rounded-3xl">
                 
                 {/* Header Banner - Green-800 & White Theme */}
@@ -121,7 +119,6 @@ const Reviews = () => {
                 )}
 
             </div>
-        </Dashboard>
     );
 };
 
