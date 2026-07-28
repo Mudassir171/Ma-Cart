@@ -53,7 +53,8 @@ const ProductDetails = () => {
   const [comment, setComment] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState("");
-
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
   const { product, loading, error } = useSelector(
     (state) => state.productDetails,
   );
@@ -98,7 +99,7 @@ const ProductDetails = () => {
       enqueueSnackbar("Product is Out of Stock", { variant: "error" });
       return;
     }
-    dispatch(addItemsToCart(productId, quantity));
+    dispatch(addItemsToCart(productId, quantity, selectedColor, selectedSize));
     enqueueSnackbar("Added to Cart Successfully", { variant: "success" });
   };
 
@@ -135,7 +136,14 @@ const ProductDetails = () => {
       dispatch(getSimilarProducts(product.category));
     }
   }, [dispatch, product]);
-
+  useEffect(() => {
+    if (product?.colors?.length > 0) {
+      setSelectedColor(product.colors[0]);
+    }
+    if (product?.sizes?.length > 0) {
+      setSelectedSize(product.sizes[0]);
+    }
+  }, [product]);
   return (
     <>
       {loading || !product ? (
@@ -275,7 +283,53 @@ const ProductDetails = () => {
                       </span>
                     </div>
                   </div>
+                  {/* --- COLORS SELECTION --- */}
+                  {product.colors && product.colors.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-gray-500 text-[13px] font-bold uppercase mb-2">
+                        Color
+                      </p>
+                      <div className="flex gap-2">
+                        {product.colors.map((color, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setSelectedColor(color)}
+                            className={`px-3 py-1.5 text-xs border rounded transition-all ${
+                              selectedColor === color
+                                ? "border-[#f57224] text-[#f57224] font-bold bg-orange-50"
+                                : "border-gray-300 text-gray-700"
+                            }`}
+                          >
+                            {color}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
+                  {/* --- SIZES SELECTION --- */}
+                  {product.sizes && product.sizes.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-gray-500 text-[13px] font-bold uppercase mb-2">
+                        Size
+                      </p>
+                      <div className="flex gap-2">
+                        {product.sizes.map((size, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setSelectedSize(size)}
+                            className={`px-3 py-1.5 text-xs border rounded transition-all ${
+                              selectedSize === size
+                                ? "border-[#f57224] text-[#f57224] font-bold bg-orange-50"
+                                : "border-gray-300 text-gray-700"
+                            }`}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center gap-10 mb-8">
                     <span className="text-gray-500 text-[13px] font-bold uppercase">
                       Quantity

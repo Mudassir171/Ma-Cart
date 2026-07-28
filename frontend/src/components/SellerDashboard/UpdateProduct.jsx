@@ -175,8 +175,8 @@ const UpdateProduct = () => {
             setBrand(product.brand?.name || "");
             setHighlights(product.highlights || []);
             setSpecs(product.specifications || []);
-            setColors(product.colors || []);   // Load existing colors
-            setSizes(product.sizes || []);     // Load existing sizes
+            setColors(product.colors || []);   
+            setSizes(product.sizes || []);     
             setOldImages(product.images || []);
             setLogoPreview(product.brand?.logo?.url || "");
         }
@@ -203,161 +203,185 @@ const UpdateProduct = () => {
     }, [dispatch, error, updateError, isUpdated, params.id, product, navigate, enqueueSnackbar, user.role]);
 
     return (
-        <>
+        <div className="min-h-screen bg-gray-50 p-2 sm:p-6">
             <MetaData title="Update Product | MA-CART" />
 
             {loading && <BackdropLoader />}
             {updateLoading && <BackdropLoader />}
             
             {product && (
-                <form onSubmit={newProductSubmitHandler} encType="multipart/form-data" className="flex flex-col sm:flex-row bg-white rounded-lg shadow p-4" id="mainform">
-                    <div className="flex flex-col gap-3 m-2 sm:w-1/2">
-                        <TextField label="Name" variant="outlined" size="small" required value={name} onChange={(e) => setName(e.target.value)} />
-                        <TextField label="Description" multiline rows={3} required variant="outlined" size="small" value={description} onChange={(e) => setDescription(e.target.value)} />
-                        <div className="flex justify-between gap-2">
-                            <TextField label="Price" type="number" variant="outlined" size="small" required value={price} onChange={(e) => setPrice(e.target.value)} />
-                            <TextField label="Cutted Price" type="number" variant="outlined" size="small" required value={cuttedPrice} onChange={(e) => setCuttedPrice(e.target.value)} />
-                        </div>
-                        <div className="flex justify-between gap-4">
-                            <TextField label="Category" select fullWidth variant="outlined" size="small" required value={category} onChange={(e) => setCategory(e.target.value)}>
-                                {categories.map((el, i) => (
-                                    <MenuItem value={el} key={i}>{el}</MenuItem>
-                                ))}
-                            </TextField>
-                            <TextField label="Stock" type="number" variant="outlined" size="small" required value={stock} onChange={(e) => setStock(e.target.value)} />
-                            <TextField label="Warranty" type="number" variant="outlined" size="small" required value={warranty} onChange={(e) => setWarranty(e.target.value)} />
-                        </div>
+                <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                    <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-6 text-white">
+                        <h1 className="text-xl sm:text-2xl font-black tracking-wide uppercase">Update Product</h1>
+                        <p className="text-xs sm:text-sm text-gray-400 mt-1">Modify product information, specifications, and media assets seamlessly.</p>
+                    </div>
 
-                        {/* --- 🎨 COLOR SELECTION WITH ARROW --- */}
-                        <div className="flex flex-col gap-2">
-                            <div className="flex gap-2 items-center">
-                                <TextField
-                                    label="Select or Add Color"
-                                    select
-                                    fullWidth
-                                    variant="outlined"
-                                    size="small"
-                                    value={colorInput}
-                                    onChange={(e) => setColorInput(e.target.value)}
-                                >
-                                    {availableColors.map((col, index) => (
-                                        <MenuItem value={col} key={index}>
-                                            {col}
-                                        </MenuItem>
+                    <form onSubmit={newProductSubmitHandler} encType="multipart/form-data" className="flex flex-col lg:flex-row gap-6 p-4 sm:p-8" id="mainform">
+                        
+                        {/* LEFT COLUMN */}
+                        <div className="flex flex-col gap-5 flex-1">
+                            <h2 className="font-bold text-gray-800 uppercase text-xs tracking-wider border-b pb-2">General Information</h2>
+                            
+                            <TextField label="Name" variant="outlined" size="small" required value={name} onChange={(e) => setName(e.target.value)} fullWidth />
+                            
+                            <TextField label="Description" multiline rows={3} required variant="outlined" size="small" value={description} onChange={(e) => setDescription(e.target.value)} fullWidth />
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <TextField label="Price" type="number" variant="outlined" size="small" required value={price} onChange={(e) => setPrice(e.target.value)} fullWidth />
+                                <TextField label="Cutted Price" type="number" variant="outlined" size="small" required value={cuttedPrice} onChange={(e) => setCuttedPrice(e.target.value)} fullWidth />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <TextField label="Category" select fullWidth variant="outlined" size="small" required value={category} onChange={(e) => setCategory(e.target.value)}>
+                                    {categories.map((el, i) => (
+                                        <MenuItem value={el} key={i}>{el}</MenuItem>
                                     ))}
                                 </TextField>
-                                <span onClick={addColor} className="py-2 px-6 bg-blue-600 text-white rounded cursor-pointer font-bold text-xs uppercase h-10 flex items-center shadow">Add</span>
+                                <TextField label="Stock" type="number" variant="outlined" size="small" required value={stock} onChange={(e) => setStock(e.target.value)} fullWidth />
+                                <TextField label="Warranty" type="number" variant="outlined" size="small" required value={warranty} onChange={(e) => setWarranty(e.target.value)} fullWidth />
                             </div>
-                            <div className="flex flex-wrap gap-1.5">
-                                {colors.map((c, i) => (
-                                    <div key={i} className="flex justify-between items-center py-1 px-3 bg-purple-50 rounded-full border border-purple-200 gap-2">
-                                        <p className="text-purple-800 text-xs font-semibold">{c}</p>
-                                        <span onClick={() => deleteColor(i)} className="text-red-600 cursor-pointer flex items-center"><DeleteIcon fontSize="small" style={{ fontSize: '16px' }} /></span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
 
-                        {/* --- 📏 SIZE SELECTION WITH ARROW --- */}
-                        <div className="flex flex-col gap-2">
-                            <div className="flex gap-2 items-center">
-                                <TextField
-                                    label="Select or Add Size"
-                                    select
-                                    fullWidth
-                                    variant="outlined"
-                                    size="small"
-                                    value={sizeInput}
-                                    onChange={(e) => setSizeInput(e.target.value)}
-                                >
-                                    {availableSizes.map((sz, index) => (
-                                        <MenuItem value={sz} key={index}>
-                                            {sz}
-                                        </MenuItem>
+                            {/* COLORS */}
+                            <div className="flex flex-col gap-2.5 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                <label className="font-bold text-gray-700 text-xs uppercase tracking-wider">Product Colors</label>
+                                <div className="flex gap-2 items-center">
+                                    <TextField
+                                        label="Select or Add Color"
+                                        select
+                                        fullWidth
+                                        variant="outlined"
+                                        size="small"
+                                        value={colorInput}
+                                        onChange={(e) => setColorInput(e.target.value)}
+                                    >
+                                        {availableColors.map((col, index) => (
+                                            <MenuItem value={col} key={index}>{col}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                    <button type="button" onClick={addColor} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs uppercase h-10 shadow transition-all shrink-0">Add</button>
+                                </div>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                    {colors.map((c, i) => (
+                                        <div key={i} className="flex items-center py-1.5 px-3 bg-purple-100 rounded-full border border-purple-200 gap-2 shadow-sm">
+                                            <span className="text-purple-900 text-xs font-bold">{c}</span>
+                                            <span onClick={() => deleteColor(i)} className="text-red-600 hover:text-red-800 cursor-pointer flex items-center"><DeleteIcon style={{ fontSize: '15px' }} /></span>
+                                        </div>
                                     ))}
-                                </TextField>
-                                <span onClick={addSize} className="py-2 px-6 bg-blue-600 text-white rounded cursor-pointer font-bold text-xs uppercase h-10 flex items-center shadow">Add</span>
+                                </div>
                             </div>
-                            <div className="flex flex-wrap gap-1.5">
-                                {sizes.map((s, i) => (
-                                    <div key={i} className="flex justify-between items-center py-1 px-3 bg-indigo-50 rounded-full border border-indigo-200 gap-2">
-                                        <p className="text-indigo-800 text-xs font-semibold">{s}</p>
-                                        <span onClick={() => deleteSize(i)} className="text-red-600 cursor-pointer flex items-center"><DeleteIcon fontSize="small" style={{ fontSize: '16px' }} /></span>
+
+                            {/* SIZES */}
+                            <div className="flex flex-col gap-2.5 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                <label className="font-bold text-gray-700 text-xs uppercase tracking-wider">Product Sizes</label>
+                                <div className="flex gap-2 items-center">
+                                    <TextField
+                                        label="Select or Add Size"
+                                        select
+                                        fullWidth
+                                        variant="outlined"
+                                        size="small"
+                                        value={sizeInput}
+                                        onChange={(e) => setSizeInput(e.target.value)}
+                                    >
+                                        {availableSizes.map((sz, index) => (
+                                            <MenuItem value={sz} key={index}>{sz}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                    <button type="button" onClick={addSize} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs uppercase h-10 shadow transition-all shrink-0">Add</button>
+                                </div>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                    {sizes.map((s, i) => (
+                                        <div key={i} className="flex items-center py-1.5 px-3 bg-indigo-100 rounded-full border border-indigo-200 gap-2 shadow-sm">
+                                            <span className="text-indigo-900 text-xs font-bold">{s}</span>
+                                            <span onClick={() => deleteSize(i)} className="text-red-600 hover:text-red-800 cursor-pointer flex items-center"><DeleteIcon style={{ fontSize: '15px' }} /></span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* HIGHLIGHTS */}
+                            <div className="flex flex-col gap-2.5 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                <label className="font-bold text-gray-700 text-xs uppercase tracking-wider">Highlights</label>
+                                <div className="flex items-center bg-white border rounded-lg overflow-hidden shadow-sm">
+                                    <input value={highlightInput} onChange={(e) => setHighlightInput(e.target.value)} type="text" placeholder="Enter product highlight..." className="px-3 flex-1 outline-none border-none py-2 text-sm" />
+                                    <button type="button" onClick={addHighlight} className="py-2 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase transition-all">Add</button>
+                                </div>
+                                <div className="flex flex-col gap-1.5 mt-1 max-h-36 overflow-y-auto">
+                                    {highlights.map((h, i) => (
+                                        <div key={i} className="flex justify-between rounded-lg items-center py-1.5 px-3 bg-green-50 border border-green-200">
+                                            <p className="text-green-900 text-xs font-semibold">{h}</p>
+                                            <span onClick={() => deleteHighlight(i)} className="text-red-600 hover:text-red-800 cursor-pointer">
+                                                <DeleteIcon fontSize="small" />
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* BRAND DETAILS */}
+                            <h2 className="font-bold text-gray-800 uppercase text-xs tracking-wider border-b pb-2 pt-2">Brand Details</h2>
+                            <div className="flex flex-col sm:flex-row gap-4 items-center bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                <TextField label="Brand Name" type="text" variant="outlined" size="small" required value={brand} onChange={(e) => setBrand(e.target.value)} fullWidth />
+                                <div className="flex items-center gap-3 w-full sm:w-auto justify-between">
+                                    <div className="w-16 h-12 flex items-center justify-center border rounded-lg bg-white shadow-sm overflow-hidden p-1">
+                                        {!logoPreview ? <ImageIcon className="text-gray-300" /> : <img src={logoPreview} alt="Brand Logo" className="w-full h-full object-contain" />}
                                     </div>
-                                ))}
+                                    <label className="rounded-lg font-bold bg-gray-700 hover:bg-black text-center cursor-pointer text-white py-2.5 px-4 text-xs uppercase shadow transition-all tracking-wider shrink-0">
+                                        <input type="file" name="logo" accept="image/*" onChange={handleLogoChange} className="hidden" />
+                                        Upload Logo
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-2">
-                            <div className="flex justify-between items-center border rounded">
-                                <input value={highlightInput} onChange={(e) => setHighlightInput(e.target.value)} type="text" placeholder="Highlight" className="px-2 flex-1 outline-none border-none py-1.5" />
-                                <span onClick={addHighlight} className="py-2 px-6 bg-blue-600 text-white rounded-r cursor-pointer font-bold">Add</span>
+                        {/* RIGHT COLUMN */}
+                        <div className="flex flex-col gap-5 flex-1">
+                            <h2 className="font-bold text-gray-800 uppercase text-xs tracking-wider border-b pb-2">Specifications</h2>
+                            <div className="flex flex-col sm:flex-row gap-2 items-center bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                <TextField value={specsInput.title} onChange={handleSpecsChange} name="title" label="Title" variant="outlined" size="small" fullWidth />
+                                <TextField value={specsInput.description} onChange={handleSpecsChange} name="description" label="Value" variant="outlined" size="small" fullWidth />
+                                <button type="button" onClick={addSpecs} className="py-2.5 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs uppercase shadow transition-all w-full sm:w-auto shrink-0">Add</button>
                             </div>
-                            <div className="flex flex-col gap-1.5">
-                                {highlights.map((h, i) => (
-                                    <div key={i} className="flex justify-between rounded items-center py-1 px-2 bg-green-50">
-                                        <p className="text-green-800 text-sm font-medium">{h}</p>
-                                        <span onClick={() => deleteHighlight(i)} className="text-red-600 cursor-pointer">
-                                            <DeleteIcon />
+                            <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
+                                {specs.map((spec, i) => (
+                                    <div key={i} className="flex justify-between items-center text-xs rounded-lg bg-blue-50 border border-blue-100 py-2.5 px-4 shadow-sm">
+                                        <p className="text-blue-900 font-bold w-1/3">{spec.title}</p>
+                                        <p className="text-gray-600 w-1/2">{spec.description}</p>
+                                        <span onClick={() => deleteSpec(i)} className="text-red-600 hover:text-red-800 cursor-pointer">
+                                            <DeleteIcon fontSize="small" />
                                         </span>
                                     </div>
                                 ))}
                             </div>
-                        </div>
 
-                        <h2 className="font-bold text-gray-700 uppercase text-xs mt-2 tracking-widest">Brand Details</h2>
-                        <div className="flex justify-between gap-4 items-start">
-                            <TextField label="Brand" type="text" variant="outlined" size="small" required value={brand} onChange={(e) => setBrand(e.target.value)} />
-                            <div className="w-24 h-10 flex items-center justify-center border rounded-lg bg-gray-50">
-                                {!logoPreview ? <ImageIcon className="text-gray-300" /> : <img src={logoPreview} alt="Brand Logo" className="w-full h-full object-contain" />}
+                            <h2 className="font-bold text-gray-800 uppercase text-xs tracking-wider border-b pb-2 pt-2">Product Images</h2>
+                            <div className="flex gap-3 overflow-x-auto h-36 border-2 border-dashed border-gray-300 rounded-2xl p-3 bg-gray-50 items-center">
+                                {oldImages && oldImages.map((image, i) => (
+                                    <img key={i} src={image.url} alt="Product" className="h-full object-contain border rounded-xl bg-white shadow-md p-1 shrink-0" />
+                                ))}
+                                {imagesPreview.map((image, i) => (
+                                    <img key={i} src={image} alt="Product Preview" className="h-full object-contain border rounded-xl bg-white shadow-md p-1 shrink-0" />
+                                ))}
+                                {oldImages.length === 0 && imagesPreview.length === 0 && (
+                                    <p className="text-gray-400 text-xs w-full text-center">No images uploaded yet</p>
+                                )}
                             </div>
-                            <label className="rounded font-bold bg-gray-700 text-center cursor-pointer text-white py-2 px-3 text-xs uppercase shadow hover:bg-black transition-all">
-                                <input type="file" name="logo" accept="image/*" onChange={handleLogoChange} className="hidden" />
-                                Logo
+                            <label className="rounded-xl font-bold bg-gray-800 hover:bg-black text-center cursor-pointer text-white p-3.5 shadow-md uppercase text-xs tracking-widest transition-all">
+                                <input type="file" name="images" accept="image/*" multiple onChange={handleProductImageChange} className="hidden" />
+                                Update Product Images
                             </label>
-                        </div>
-                    </div>
 
-                    <div className="flex flex-col gap-2 m-2 sm:w-1/2">
-                        <h2 className="font-bold text-gray-700 uppercase text-xs tracking-widest">Specifications</h2>
-                        <div className="flex justify-evenly gap-2 items-center">
-                            <TextField value={specsInput.title} onChange={handleSpecsChange} name="title" label="Title" variant="outlined" size="small" />
-                            <TextField value={specsInput.description} onChange={handleSpecsChange} name="description" label="Value" variant="outlined" size="small" />
-                            <span onClick={addSpecs} className="py-2 px-6 bg-blue-600 text-white rounded cursor-pointer font-bold text-sm">Add</span>
-                        </div>
-                        <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
-                            {specs.map((spec, i) => (
-                                <div key={i} className="flex justify-between items-center text-sm rounded bg-blue-50 py-1.5 px-3">
-                                    <p className="text-blue-800 font-bold">{spec.title}</p>
-                                    <p className="text-gray-600">{spec.description}</p>
-                                    <span onClick={() => deleteSpec(i)} className="text-red-600 cursor-pointer">
-                                        <DeleteIcon fontSize="small" />
-                                    </span>
-                                </div>
-                            ))}
+                            <div className="mt-auto pt-4">
+                                <button type="submit" form="mainform" className="w-full bg-gradient-to-r from-[#f85606] to-[#d14905] uppercase py-4 text-white font-black rounded-2xl shadow-xl hover:shadow-orange-200 transition-all tracking-widest text-sm">
+                                    Update Product
+                                </button>
+                            </div>
                         </div>
 
-                        <h2 className="font-bold text-gray-700 uppercase text-xs mt-4 tracking-widest">Product Images</h2>
-                        <div className="flex gap-2 overflow-x-auto h-32 border rounded-xl p-2 bg-gray-50">
-                            {oldImages && oldImages.map((image, i) => (
-                                <img key={i} src={image.url} alt="Product" className="h-full object-contain border rounded-lg bg-white shadow-sm" />
-                            ))}
-                            {imagesPreview.map((image, i) => (
-                                <img key={i} src={image} alt="Product Preview" className="h-full object-contain border rounded-lg bg-white shadow-sm" />
-                            ))}
-                        </div>
-                        <label className="rounded font-bold bg-gray-700 text-center cursor-pointer text-white p-3 shadow uppercase text-xs tracking-widest hover:bg-black transition-all my-2">
-                            <input type="file" name="images" accept="image/*" multiple onChange={handleProductImageChange} className="hidden" />
-                            Update Images
-                        </label>
-
-                        <div className="flex justify-end mt-4">
-                            <input type="submit" form="mainform" className="bg-[#f85606] uppercase w-full p-4 text-white font-black rounded-xl shadow-lg cursor-pointer hover:bg-[#d14905] transition-all tracking-widest" value="Update Product" />
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             )}
-        </>
+        </div>
     );
 };
 
