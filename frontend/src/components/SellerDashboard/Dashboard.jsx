@@ -24,7 +24,7 @@ const Dashboard = ({ activeTab, children }) => {
 
   return (
     <>
-      <main className="flex min-h-screen mt-14 sm:min-w-full bg-slate-50 font-sans">
+      <main className="flex min-h-screen mt-14 sm:min-w-full bg-green-50 font-sans">
         {/* Permanent Sidebar for Desktop */}
         {!onMobile && <Sidebar activeTab={activeTab} />}
 
@@ -47,7 +47,7 @@ const Dashboard = ({ activeTab, children }) => {
                 {/* Mobile Menu Button */}
                 <button 
                   onClick={() => setToggleSidebar(true)} 
-                  className="bg-emerald-900 hover:bg-emerald-800 p-2.5 rounded-xl shadow-md text-white flex items-center justify-center transition-all"
+                  className="bg-green-900 hover:bg-green-800 p-2.5 rounded-xl shadow-md text-white flex items-center justify-center transition-all"
                   aria-label="Open Menu"
                 >
                   <MenuIcon fontSize="small" />
@@ -57,7 +57,7 @@ const Dashboard = ({ activeTab, children }) => {
               {/* Mobile Wallet Balance Card */}
               <div className="flex items-center justify-between bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-100">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-600 text-white rounded-lg shadow-sm">
+                  <div className="p-2 bg-green-600 text-white rounded-lg shadow-sm">
                     <AccountBalanceWalletIcon fontSize="small" />
                   </div>
                   <div>
