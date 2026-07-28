@@ -40,23 +40,25 @@ const Actions = ({
                         <option value="Delivered">Delivered</option>
                     </select>
                 ) : (
-                    /* CASE 2: PRODUCT APPROVAL (Approve/Reject Buttons) */
-                    <>
-                        <button 
-                            onClick={() => updateStatusHandler(id, true)} 
-                            className="text-green-600 hover:bg-green-200 p-1 rounded-full bg-green-100"
-                            title="Approve"
-                        >
-                            <CheckCircleIcon />
-                        </button>
-                        <button 
-                            onClick={() => updateStatusHandler(id, false)} 
-                            className="text-yellow-600 hover:bg-yellow-200 p-1 rounded-full bg-yellow-100"
-                            title="Reject"
-                        >
-                            <DoDisturbIcon />
-                        </button>
-                    </>
+                    /* CASE 2: PRODUCT APPROVAL - Yeh sirf tabhi dikhega jab updateStatusHandler pass kiya jaye (Admin side) */
+                    updateStatusHandler && !isOrder && editRoute?.includes("admin") && (
+                        <>
+                            <button 
+                                onClick={() => updateStatusHandler(id, true)} 
+                                className="text-green-600 hover:bg-green-200 p-1 rounded-full bg-green-100"
+                                title="Approve"
+                            >
+                                <CheckCircleIcon />
+                            </button>
+                            <button 
+                                onClick={() => updateStatusHandler(id, false)} 
+                                className="text-yellow-600 hover:bg-yellow-200 p-1 rounded-full bg-yellow-100"
+                                title="Reject"
+                            >
+                                <DoDisturbIcon />
+                            </button>
+                        </>
+                    )
                 )}
 
                 {/* EDIT BUTTON */}
