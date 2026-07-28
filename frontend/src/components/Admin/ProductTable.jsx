@@ -59,7 +59,9 @@ const ProductTable = () => {
   const deleteProductHandler = (id) => {
     dispatch(deleteProduct(id));
   };
-
+const updateProductStatusHandler = (id, status) => {
+    dispatch(updateProductStatus(id, status));
+};
   const columns = [
     {
       field: "id",
