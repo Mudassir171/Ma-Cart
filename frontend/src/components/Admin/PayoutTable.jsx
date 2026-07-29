@@ -12,7 +12,7 @@ const PayoutsTable = () => {
     const { enqueueSnackbar } = useSnackbar();
 
     const { payouts, error, loading } = useSelector((state) => state.payouts || { payouts: [] });
-    const { isUpdated, error: updateError, loading: updateLoading } = useSelector((state) => state.payout || {});
+    const { isUpdated, message, error: updateError, loading: updateLoading } = useSelector((state) => state.payout || {});
 
     useEffect(() => {
         dispatch(getAdminPayouts());
@@ -24,11 +24,11 @@ const PayoutsTable = () => {
             enqueueSnackbar(updateError, { variant: "error" });
         }
         if (isUpdated) {
-            enqueueSnackbar("Payout Status Updated Successfully", { variant: "success" });
+            enqueueSnackbar(message || "Payout Status Updated Successfully", { variant: "success" });
             dispatch({ type: UPDATE_PAYOUT_RESET });
             dispatch(getAdminPayouts());
         }
-    }, [dispatch, error, updateError, isUpdated, enqueueSnackbar]);
+    }, [dispatch, error, updateError, isUpdated, message, enqueueSnackbar]);
 
     const handleStatusChange = (id, status) => {
         dispatch(updatePayoutStatus(id, status));
@@ -95,7 +95,7 @@ const PayoutsTable = () => {
                             </button>
                             <button
                                 onClick={() => handleStatusChange(params.row.id, "Rejected")}
-                                className="bg-rose-600 text-white px-2.5 py-1 rounded text-xs font-semibold hover:bg-rose-700 transition"
+                                className="bg-red-600 text-white px-2.5 py-1 rounded text-xs font-semibold hover:bg-rose-700 transition"
                             >
                                 Reject
                             </button>
