@@ -157,7 +157,7 @@ const ReviewsTable = () => {
 
     return (
         <>
-            <MetaData title="All Reviews | Flipkart" />
+            <MetaData title="All Reviews | Ma-Cart" />
 
             {(loading || tableLoading) && <BackdropLoader />}
             <div className="flex justify-between items-center mb-4">
