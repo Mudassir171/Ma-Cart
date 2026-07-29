@@ -17,21 +17,22 @@ const ReviewsTable = () => {
 
     const { reviews, error } = useSelector((state) => state.reviews);
     const { products } = useSelector((state) => state.products);
+    const { user } = useSelector((state) => state.user);
     const { loading, isDeleted, error: deleteError } = useSelector((state) => state.review);
 
-    // 1. Page load hote hi admin ke products fetch karo
+    // 1. Page load hote hi saari products (Admin & Seller dono) fetch karo
     useEffect(() => {
         dispatch(getAdminProducts());
     }, [dispatch]);
 
-    // 2. Jaise hi products mil jayein, pehli product ki ID automatically set kar do taaki reviews load ho jayein
+    // 2. Jaise hi products mil jayein, pehli product ki ID automatically set kar do
     useEffect(() => {
         if (products && products.length > 0 && !productId) {
             setProductId(products[0]._id);
         }
     }, [products, productId]);
 
-    // 3. Product ID milne par reviews fetch karo
+    // 3. Product ID milne par uske reviews fetch karo
     useEffect(() => {
         if (productId) {
             dispatch(getAllReviews(productId));
@@ -54,24 +55,45 @@ const ReviewsTable = () => {
         dispatch(deleteReview(id, productId));
     }
 
+    // Find the currently selected product object to check its ownership (Admin or Seller)
+    const currentProduct = products?.find(p => p._id === productId);
+    
+    // Check if the product belongs to a seller or admin
+    // Agar product mein 'user' field mojood hai aur woh current user se alag hai (ya role seller hai), toh status Seller hoga
+    const isSellerProduct = currentProduct?.user ? true : false;
+    const productStatus = isSellerProduct ? "Seller" : "Admin";
+
     const columns = [
         {
             field: "id",
             headerName: "Review ID",
-            minWidth: 200,
-            flex: 0.5,
+            minWidth: 180,
+            flex: 0.4,
         },
         {
             field: "user",
             headerName: "User",
-            minWidth: 150,
-            flex: 0.5,
+            minWidth: 130,
+            flex: 0.4,
+        },
+        {
+            field: "status",
+            headerName: "Status",
+            minWidth: 120,
+            flex: 0.3,
+            renderCell: (params) => {
+                return (
+                    <span className={`px-2 py-1 text-xs font-bold rounded-full ${params.row.status === 'Admin' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {params.row.status}
+                    </span>
+                );
+            }
         },
         {
             field: "rating",
             headerName: "Rating",
             type: "number",
-            minWidth: 200,
+            minWidth: 150,
             flex: 0.3,
             align: "left",
             headerAlign: "left",
@@ -88,7 +110,7 @@ const ReviewsTable = () => {
         {
             field: "actions",
             headerName: "Actions",
-            minWidth: 150,
+            minWidth: 130,
             flex: 0.3,
             type: "number",
             sortable: false,
@@ -108,30 +130,36 @@ const ReviewsTable = () => {
             rating: rev.rating,
             comment: rev.comment,
             user: rev.name,
+            status: productStatus, // Yahan har review ke sath Admin ya Seller assign ho raha hai
         });
     });
 
     return (
         <>
-            <MetaData title="Admin Reviews | Flipkart" />
+            <MetaData title="Admin & Seller Reviews | Ma-Cart" />
 
             {loading && <BackdropLoader />}
-            <div className="flex justify-between items-center gap-2 sm:gap-12 mb-4">
-                <h1 className="text-lg font-medium uppercase">All Product Reviews</h1>
-                {/* Dropdown taaki aap product switch bhi kar sakein */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                <h1 className="text-lg font-medium uppercase">Product Reviews (Admin & Seller)</h1>
+                
+                {/* Product Dropdown Selector */}
                 <select 
                     value={productId} 
                     onChange={(e) => setProductId(e.target.value)} 
-                    className="outline-none border rounded p-2 bg-white shadow-sm max-w-xs"
+                    className="outline-none border rounded p-2 bg-white shadow-sm w-full sm:w-72"
                 >
                     <option value="">Select Product</option>
-                    {products && products.map((item) => (
-                        <option key={item._id} value={item._id}>
-                            {item.name}
-                        </option>
-                    ))}
+                    {products && products.map((item) => {
+                        const ownerType = item.user ? "Seller" : "Admin";
+                        return (
+                            <option key={item._id} value={item._id}>
+                                {item.name} ({ownerType})
+                            </option>
+                        );
+                    })}
                 </select>
             </div>
+
             <div className="bg-white rounded-xl shadow-lg w-full" style={{ height: 450 }}>
                 <DataGrid
                     rows={rows}
