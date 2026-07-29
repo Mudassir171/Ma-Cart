@@ -94,106 +94,101 @@ const Analytics = () => {
 
     const isLoading = productLoading || orderLoading || userLoading;
 
-    // --- CHART DATA CONFIGURATIONS (Matching Image Aesthetics: Red & Green Palette) ---
-    
-    // 1. Widget Production (Pie Chart)
+    // --- LIVE DYNAMIC CHART DATA CONFIGURATIONS ---
+
+    // 1. Product Categories Distribution (Pie Chart) - Live Categories se data
+    const categoryCounts = products?.reduce((acc, product) => {
+        const cat = product.category || 'Uncategorized';
+        acc[cat] = (acc[cat] || 0) + 1;
+        return acc;
+    }, {}) || {};
+
     const pieData = {
-        labels: ['Widget 1', 'Widget 2', 'Widget 3', 'Widget 4', 'Widget 5', 'Widget 6'],
+        labels: Object.keys(categoryCounts).length > 0 ? Object.keys(categoryCounts) : ['No Categories'],
         datasets: [{
-            data: [15, 30, 35, 10, 5, 5],
-            backgroundColor: ['#ef4444', '#22c55e', '#3b82f6', '#a855f7', '#1e293b', '#10b981'],
+            data: Object.keys(categoryCounts).length > 0 ? Object.values(categoryCounts) : [1],
+            backgroundColor: ['#ef4444', '#22c55e', '#3b82f6', '#a855f7', '#1e293b', '#10b981', '#f59e0b'],
             borderWidth: 1
         }]
     };
 
-    // 2. Widget Counts (Bar Chart)
+    // 2. Stock Status Overview (Bar Chart) - In Stock vs Out of Stock
+    const inStockCount = products?.filter(p => p.stock > 0).length || 0;
     const barData = {
-        labels: ['Widget 1', 'Widget 2', 'Widget 3', 'Widget 4', 'Widget 5', 'Widget 6'],
+        labels: ['Products Stock Status'],
         datasets: [
             {
-                label: 'Total',
-                data: [5, 20, 36, 10, 10, 20],
-                backgroundColor: '#ef4444',
+                label: 'In Stock',
+                data: [inStockCount],
+                backgroundColor: '#22c55e',
             },
             {
-                label: 'Other',
-                data: [12, 17, 28, 22, 8, 31],
-                backgroundColor: '#22c55e',
+                label: 'Out of Stock',
+                data: [outOfStockGlobal],
+                backgroundColor: '#ef4444',
             }
         ]
     };
 
-    // 3. Sales and Maintenance (Line Chart)
+    // 3. Monthly Revenue Trend (Line Chart) - Orders createdAt ke mutabiq
+    const monthlyRevenue = orders?.reduce((acc, order) => {
+        if (!order.createdAt) return acc;
+        const month = new Date(order.createdAt).toLocaleString('default', { month: 'short', year: '2-digit' });
+        acc[month] = (acc[month] || 0) + (order.totalPrice || 0);
+        return acc;
+    }, {}) || {};
+
+    const sortedMonths = Object.keys(monthlyRevenue).sort((a, b) => new Date(a) - new Date(b));
     const lineData = {
-        labels: ['12-31-15', '12-31-16', '12-31-17', '12-31-18', '12-31-19', '12-31-20'],
+        labels: sortedMonths.length > 0 ? sortedMonths : ['No Data'],
         datasets: [
             {
-                label: 'Sales Total',
-                data: [10000, 35000, 60000, 85000, 110000, 135000],
+                label: 'Revenue Total (₹)',
+                data: sortedMonths.length > 0 ? sortedMonths.map(m => monthlyRevenue[m]) : [0],
                 borderColor: '#ef4444',
                 backgroundColor: '#ef4444',
                 tension: 0.1
-            },
-            {
-                label: 'Maintenance Total',
-                data: [8000, 28000, 50000, 72000, 95000, 120000],
-                borderColor: '#22c55e',
-                backgroundColor: '#22c55e',
-                tension: 0.1
             }
         ]
     };
 
-    // 4. Widget Orders (Horizontal Bar Chart)
+    // 4. Order Status Breakdown (Horizontal Bar Chart)
+    const processingOrders = orders?.filter(o => o.orderStatus === 'Processing').length || 0;
+    const shippedOrders = orders?.filter(o => o.orderStatus === 'Shipped').length || 0;
+    const deliveredOrdersCount = orders?.filter(o => o.orderStatus === 'Delivered').length || 0;
+
     const horizontalBarData = {
-        labels: ['Widget 1', 'Widget 2', 'Widget 3', 'Widget 4', 'Widget 5', 'Widget 6'],
+        labels: ['Processing', 'Shipped', 'Delivered'],
         datasets: [
             {
-                label: 'Total',
-                data: [4, 20, 36, 12, 8, 20],
-                backgroundColor: '#ef4444',
-            },
-            {
-                label: 'Other',
-                data: [11, 16, 28, 21, 10, 31],
-                backgroundColor: '#22c55e',
+                label: 'Orders Count',
+                data: [processingOrders, shippedOrders, deliveredOrdersCount],
+                backgroundColor: ['#f59e0b', '#3b82f6', '#22c55e'],
             }
         ]
     };
 
-    // 5. Sales and Renewals (Scatter Chart)
+    // 5. User Roles Distribution (Scatter / Bar alternative - Using Scatter with live user metrics)
     const scatterData = {
         datasets: [
             {
-                label: 'Sale Total',
-                data: [{x: 20, y: 20000}, {x: 40, y: 70000}, {x: 65, y: 30000}, {x: 120, y: 135000}, {x: 180, y: 60000}],
-                backgroundColor: '#ef4444',
-            },
-            {
-                label: 'Renewal Potential',
-                data: [{x: 15, y: 10000}, {x: 35, y: 55000}, {x: 70, y: 15000}, {x: 125, y: 120000}, {x: 185, y: 58000}],
-                backgroundColor: '#22c55e',
+                label: 'Users Activity Metrics',
+                data: users?.map((u, index) => ({ x: index + 1, y: u.role === 'admin' ? 100 : u.role === 'seller' ? 50 : 10 })) || [],
+                backgroundColor: '#3b82f6',
             }
         ]
     };
 
-    // 6. Widget Sales Projections (Radar Chart)
+    // 6. Platform Entities Overview (Radar Chart)
     const radarData = {
-        labels: ['Widget 2', 'Widget 3', 'Widget 4', 'Widget 5', 'Widget 6'],
+        labels: ['Products', 'Orders', 'Users', 'Sellers', 'Out of Stock'],
         datasets: [
             {
-                label: 'Total',
-                data: [65, 59, 90, 81, 56],
-                backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                borderColor: '#ef4444',
-                pointBackgroundColor: '#ef4444',
-            },
-            {
-                label: 'Other',
-                data: [28, 48, 40, 19, 96],
-                backgroundColor: 'rgba(34, 197, 94, 0.2)',
-                borderColor: '#22c55e',
-                pointBackgroundColor: '#22c55e',
+                label: 'Platform Metrics Overview',
+                data: [totalProducts, totalOrders, totalUsers, totalSellers, outOfStockGlobal],
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                borderColor: '#3b82f6',
+                pointBackgroundColor: '#3b82f6',
             }
         ]
     };
@@ -218,7 +213,7 @@ const Analytics = () => {
                         Analytics Dashboard
                     </h1>
                     <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-                        Platform metrics & interactive visual graphs styled identically to corporate dashboard standards.
+                        Live platform metrics & interactive visual graphs synced with your database backend.
                     </p>
                 </div>
                 
@@ -301,7 +296,7 @@ const Analytics = () => {
                 <div className="space-y-6">
                     <div className="flex items-center gap-2 text-slate-900 font-extrabold px-1 text-base uppercase tracking-wide">
                         <AdminPanelSettings className="text-blue-600" />
-                        <h2>Admin Analytics (5 Key Metrics)</h2>
+                        <h2>Admin Analytics</h2>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
@@ -349,7 +344,7 @@ const Analytics = () => {
                 <div className="space-y-6">
                     <div className="flex items-center gap-2 text-slate-900 font-extrabold px-1 text-base uppercase tracking-wide">
                         <Storefront className="text-amber-500" />
-                        <h2>Seller Analytics (5 Key Metrics)</h2>
+                        <h2>Seller Analytics</h2>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
@@ -392,52 +387,52 @@ const Analytics = () => {
                 </div>
             )}
 
-            {/* ================= CHARTS GRID (Matching Reference Layout & Color Scheme) ================= */}
+            {/* ================= LIVE CHARTS GRID ================= */}
             <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
-                {/* 1. Widget Production (Pie) */}
+                {/* 1. Category Distribution (Pie) */}
                 <div className="bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex flex-col">
-                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Widget Production</h3>
+                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Product Categories</h3>
                     <div className="relative h-64 w-full flex items-center justify-center">
                         <Pie data={pieData} options={chartOptions} />
                     </div>
                 </div>
 
-                {/* 2. Widget Counts (Bar) */}
+                {/* 2. Stock Counts (Bar) */}
                 <div className="bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex flex-col">
-                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Widget Counts</h3>
+                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Inventory Stock Status</h3>
                     <div className="relative h-64 w-full flex items-center justify-center">
                         <Bar data={barData} options={chartOptions} />
                     </div>
                 </div>
 
-                {/* 3. Sales and Maintenance (Line) */}
+                {/* 3. Monthly Revenue Trend (Line) */}
                 <div className="bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex flex-col">
-                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Sales and Maintenance</h3>
+                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Revenue Trend (Monthly)</h3>
                     <div className="relative h-64 w-full flex items-center justify-center">
                         <Line data={lineData} options={chartOptions} />
                     </div>
                 </div>
 
-                {/* 4. Widget Orders (Horizontal Bar) */}
+                {/* 4. Order Status Breakdown (Horizontal Bar) */}
                 <div className="bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex flex-col">
-                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Widget Orders</h3>
+                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Orders Status Breakdown</h3>
                     <div className="relative h-64 w-full flex items-center justify-center">
                         <Bar data={horizontalBarData} options={{ ...chartOptions, indexAxis: 'y' }} />
                     </div>
                 </div>
 
-                {/* 5. Sales and Renewals (Scatter) */}
+                {/* 5. User Activity (Scatter) */}
                 <div className="bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex flex-col">
-                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Sales and Renewals</h3>
+                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">User Activity Scatter</h3>
                     <div className="relative h-64 w-full flex items-center justify-center">
                         <Scatter data={scatterData} options={chartOptions} />
                     </div>
                 </div>
 
-                {/* 6. Widget Sales Projections (Radar) */}
+                {/* 6. Platform Overview (Radar) */}
                 <div className="bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex flex-col">
-                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Widget Sales Projections</h3>
+                    <h3 className="text-xs font-black uppercase text-slate-900 mb-4 tracking-wider text-center">Platform Entities Overview</h3>
                     <div className="relative h-64 w-full flex items-center justify-center">
                         <Radar data={radarData} options={chartOptions} />
                     </div>
