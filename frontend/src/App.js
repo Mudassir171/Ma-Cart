@@ -419,7 +419,7 @@ function App() {
                 <Route path="/admin/categories" element={<ProtectedRoute isAdmin={true}><AdminDashboard activeTab={6}><AdminCategoryTable /></AdminDashboard></ProtectedRoute>} />
                 <Route path="/admin/all_seller" element={<ProtectedRoute isAdmin={true}><AdminDashboard activeTab={6}><AdminAllSeller /></AdminDashboard></ProtectedRoute>} />
                 <Route path="/admin/payouts" element={<ProtectedRoute isAdmin={true}><AdminDashboard activeTab={7}><AdminPayoutTable /></AdminDashboard></ProtectedRoute>} />
-                <Route path="/admin/analytics" element={<ProtectedRoute isAdmin={true}><AdminDashboard activeTab={8}><Analytic /></AdminDashboard></ProtectedRoute>} />
+                <Route path="/admin/analytic" element={<ProtectedRoute isAdmin={true}><AdminDashboard activeTab={8}><Analytic /></AdminDashboard></ProtectedRoute>} />
                     {/* --- Seller Routes (Naye Add Kiya Hain) --- */}
                 
                 <Route path="/seller/dashboard" element={<ProtectedRoute isSeller={true}><SellerDashboard activeTab={0}><SellerMainData /></SellerDashboard></ProtectedRoute>} />
