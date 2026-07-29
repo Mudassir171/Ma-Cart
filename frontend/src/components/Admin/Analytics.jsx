@@ -55,8 +55,7 @@ const Analytics = () => {
 
     const { products, loading: productLoading } = useSelector((state) => state.products);
     const { orders, loading: orderLoading } = useSelector((state) => state.allOrders || { orders: [] });
-    const { users, loading: userLoading } = useSelector((state) => state.allUsers || { users: [] });
-    const { user } = useSelector((state) => state.user);
+const { users, loading: userLoading } = useSelector((state) => state.users || { users: [] });    const { user } = useSelector((state) => state.user);
 
     const [activeTab, setActiveTab] = useState('combined');
 
