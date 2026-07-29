@@ -2,8 +2,10 @@ const Payout = require("../models/payoutModel");
 const User = require("../models/userModel");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middlewares/asyncErrorHandler");
+const sendEmail = require("../utils/sendEmail"); // Aapka pehle wala Gmail function
+const { sendWhatsAppMessage } = require("../utils/whatsappService"); // Naya WhatsApp function
 
-// 1. Seller: Request Payout (New Request)
+// 1. Seller: Request Payout
 exports.requestPayout = catchAsyncErrors(async (req, res, next) => {
     const { amount } = req.body;
 
@@ -13,7 +15,6 @@ exports.requestPayout = catchAsyncErrors(async (req, res, next) => {
 
     const seller = await User.findById(req.user._id);
 
-    // Check agar wallet mein kaafi balance hai
     if (amount > seller.walletBalance) {
         return next(new ErrorHandler("Insufficient wallet balance for this withdrawal", 400));
     }
@@ -29,9 +30,9 @@ exports.requestPayout = catchAsyncErrors(async (req, res, next) => {
     });
 });
 
-// 2. Admin: Get All Payout Requests (For Admin Dashboard)
+// 2. Admin: Get All Payout Requests
 exports.getAllPayouts = catchAsyncErrors(async (req, res, next) => {
-    const payouts = await Payout.find().populate("seller", "name email shopName");
+    const payouts = await Payout.find().populate("seller", "name email phone shopName");
     
     res.status(200).json({
         success: true,
@@ -57,18 +58,39 @@ exports.approvePayout = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler("Seller not found", 404));
     }
 
-    // Wallet se balance deduct karein
+    // Wallet balance update
     seller.walletBalance -= payout.amount;
     await seller.save({ validateBeforeSave: false });
 
-    // Payout status update karein
     payout.status = "Approved";
     payout.processedAt = Date.now();
     await payout.save();
 
+    const messageText = `Hello ${seller.name},\n\nYour payout request of Rs.${payout.amount} has been APPROVED successfully.\n\nThank you!`;
+
+    // --- 1. GMAIL NOTIFICATION ---
+    try {
+        await sendEmail({
+            email: seller.email,
+            subject: "Payout Request Approved",
+            message: messageText,
+        });
+    } catch (error) {
+        console.log("Email error:", error.message);
+    }
+
+    // --- 2. WHATSAPP NOTIFICATION ---
+    if (seller.phone) {
+        try {
+            await sendWhatsAppMessage(seller.phone, messageText);
+        } catch (error) {
+            console.log("WhatsApp error:", error.message);
+        }
+    }
+
     res.status(200).json({
         success: true,
-        message: "Payout approved and wallet balance updated successfully",
+        message: "Payout approved, wallet updated, and notifications sent!",
     });
 });
 
@@ -84,8 +106,34 @@ exports.rejectPayout = catchAsyncErrors(async (req, res, next) => {
     payout.adminNote = req.body.adminNote || "Request rejected by admin";
     await payout.save();
 
+    const seller = await User.findById(payout.seller);
+
+    if (seller) {
+        const messageText = `Hello ${seller.name},\n\nYour payout request of Rs.${payout.amount} has been REJECTED.\nReason: ${payout.adminNote}\n\nThank you!`;
+
+        // --- 1. GMAIL NOTIFICATION ---
+        try {
+            await sendEmail({
+                email: seller.email,
+                subject: "Payout Request Rejected",
+                message: messageText,
+            });
+        } catch (error) {
+            console.log("Email error:", error.message);
+        }
+
+        // --- 2. WHATSAPP NOTIFICATION ---
+        if (seller.phone) {
+            try {
+                await sendWhatsAppMessage(seller.phone, messageText);
+            } catch (error) {
+                console.log("WhatsApp error:", error.message);
+            }
+        }
+    }
+
     res.status(200).json({
         success: true,
-        message: "Payout request rejected",
+        message: "Payout request rejected and notifications sent!",
     });
 });
