@@ -7,7 +7,7 @@ import {
     CLEAR_ERRORS,
 } from "../constants/payoutConstants";
 
-// 1. Request Payout
+// 1. Request Payout (Seller)
 export const requestPayout = (payoutData) => async (dispatch) => {
     try {
         dispatch({ type: PAYOUT_REQUEST_REQUEST });
@@ -18,8 +18,8 @@ export const requestPayout = (payoutData) => async (dispatch) => {
     }
 };
 
-// 2. Get All Payouts (Admin)
-export const getAllPayouts = () => async (dispatch) => {
+// 2. Get All Payouts (Admin) - Name matched with component usage
+export const getAdminPayouts = () => async (dispatch) => {
     try {
         dispatch({ type: GET_PAYOUTS_REQUEST });
         const { data } = await axios.get(`/api/v1/admin/payouts`);
@@ -51,6 +51,7 @@ export const rejectPayout = (id) => async (dispatch) => {
     }
 };
 
+// Clear Errors
 export const clearErrors = () => async (dispatch) => {
     dispatch({ type: CLEAR_ERRORS });
 };
