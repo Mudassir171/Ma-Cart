@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSnackbar } from 'notistack';
-import { clearErrors, deleteReview, getAllReviews, getAdminProducts } from '../../actions/productAction';
+import { clearErrors, deleteReview, getAdminProducts } from '../../actions/productAction';
+import axios from 'axios';
 import Rating from '@mui/material/Rating';
 import Actions from './Actions';
 import { DELETE_REVIEW_RESET } from '../../constants/productConstants';
@@ -13,30 +14,50 @@ const ReviewsTable = () => {
 
     const dispatch = useDispatch();
     const { enqueueSnackbar } = useSnackbar();
-    const [productId, setProductId] = useState("");
 
-    const { reviews, error } = useSelector((state) => state.reviews);
-    const { products } = useSelector((state) => state.products);
-    const { user } = useSelector((state) => state.user);
+    const { products, error } = useSelector((state) => state.products);
     const { loading, isDeleted, error: deleteError } = useSelector((state) => state.review);
 
-    // 1. Page load hote hi saari products (Admin & Seller dono) fetch karo
+    const [allReviews, setAllReviews] = useState([]);
+    const [tableLoading, setTableLoading] = useState(false);
+
+    // 1. Page load hote hi admin/sellers ki saari products fetch karo
     useEffect(() => {
         dispatch(getAdminProducts());
     }, [dispatch]);
 
-    // 2. Jaise hi products mil jayein, pehli product ki ID automatically set kar do
+    // 2. Saari products ke reviews ko fetch karke ek array mein combine karo
     useEffect(() => {
-        if (products && products.length > 0 && !productId) {
-            setProductId(products[0]._id);
-        }
-    }, [products, productId]);
+        const fetchAllReviews = async () => {
+            if (products && products.length > 0) {
+                setTableLoading(true);
+                try {
+                    let loadedReviews = [];
+                    for (const product of products) {
+                        const { data } = await axios.get(`/api/v1/reviews?id=${product._id}`);
+                        if (data && data.reviews) {
+                            // Har review ke sath product ka naam aur status (Admin/Seller) attach kar do
+                            const productReviews = data.reviews.map(rev => ({
+                                ...rev,
+                                productId: product._id,
+                                productName: product.name,
+                                status: product.user ? "Seller" : "Admin"
+                            }));
+                            loadedReviews = [...loadedReviews, ...productReviews];
+                        }
+                    }
+                    setAllReviews(loadedReviews);
+                } catch (err) {
+                    enqueueSnackbar("Failed to load reviews", { variant: "error" });
+                }
+                setTableLoading(false);
+            }
+        };
 
-    // 3. Product ID milne par uske reviews fetch karo
+        fetchAllReviews();
+    }, [products, isDeleted, enqueueSnackbar]);
+
     useEffect(() => {
-        if (productId) {
-            dispatch(getAllReviews(productId));
-        }
         if (error) {
             enqueueSnackbar(error, { variant: "error" });
             dispatch(clearErrors());
@@ -49,19 +70,11 @@ const ReviewsTable = () => {
             enqueueSnackbar("Review Deleted Successfully", { variant: "success" });
             dispatch({ type: DELETE_REVIEW_RESET });
         }
-    }, [dispatch, error, deleteError, isDeleted, productId, enqueueSnackbar]);
+    }, [dispatch, error, deleteError, isDeleted, enqueueSnackbar]);
 
-    const deleteReviewHandler = (id) => {
+    const deleteReviewHandler = (id, productId) => {
         dispatch(deleteReview(id, productId));
     }
-
-    // Find the currently selected product object to check its ownership (Admin or Seller)
-    const currentProduct = products?.find(p => p._id === productId);
-    
-    // Check if the product belongs to a seller or admin
-    // Agar product mein 'user' field mojood hai aur woh current user se alag hai (ya role seller hai), toh status Seller hoga
-    const isSellerProduct = currentProduct?.user ? true : false;
-    const productStatus = isSellerProduct ? "Seller" : "Admin";
 
     const columns = [
         {
@@ -69,6 +82,12 @@ const ReviewsTable = () => {
             headerName: "Review ID",
             minWidth: 180,
             flex: 0.4,
+        },
+        {
+            field: "productName",
+            headerName: "Product",
+            minWidth: 180,
+            flex: 0.5,
         },
         {
             field: "user",
@@ -79,7 +98,7 @@ const ReviewsTable = () => {
         {
             field: "status",
             headerName: "Status",
-            minWidth: 120,
+            minWidth: 110,
             flex: 0.3,
             renderCell: (params) => {
                 return (
@@ -93,7 +112,7 @@ const ReviewsTable = () => {
             field: "rating",
             headerName: "Rating",
             type: "number",
-            minWidth: 150,
+            minWidth: 140,
             flex: 0.3,
             align: "left",
             headerAlign: "left",
@@ -110,13 +129,13 @@ const ReviewsTable = () => {
         {
             field: "actions",
             headerName: "Actions",
-            minWidth: 130,
+            minWidth: 120,
             flex: 0.3,
             type: "number",
             sortable: false,
             renderCell: (params) => {
                 return (
-                    <Actions editRoute={"review"} deleteHandler={deleteReviewHandler} id={params.row.id} />
+                    <Actions editRoute={"review"} deleteHandler={(id) => deleteReviewHandler(id, params.row.productId)} id={params.row.id} />
                 );
             },
         },
@@ -124,40 +143,25 @@ const ReviewsTable = () => {
 
     const rows = [];
 
-    reviews && reviews.forEach((rev) => {
+    allReviews && allReviews.forEach((rev) => {
         rows.push({
             id: rev._id,
+            productId: rev.productId,
+            productName: rev.productName,
             rating: rev.rating,
             comment: rev.comment,
             user: rev.name,
-            status: productStatus, // Yahan har review ke sath Admin ya Seller assign ho raha hai
+            status: rev.status,
         });
     });
 
     return (
         <>
-            <MetaData title="Admin & Seller Reviews | Ma-Cart" />
+            <MetaData title="All Reviews | Flipkart" />
 
-            {loading && <BackdropLoader />}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                <h1 className="text-lg font-medium uppercase">Product Reviews (Admin & Seller)</h1>
-                
-                {/* Product Dropdown Selector */}
-                <select 
-                    value={productId} 
-                    onChange={(e) => setProductId(e.target.value)} 
-                    className="outline-none border rounded p-2 bg-white shadow-sm w-full sm:w-72"
-                >
-                    <option value="">Select Product</option>
-                    {products && products.map((item) => {
-                        const ownerType = item.user ? "Seller" : "Admin";
-                        return (
-                            <option key={item._id} value={item._id}>
-                                {item.name} ({ownerType})
-                            </option>
-                        );
-                    })}
-                </select>
+            {(loading || tableLoading) && <BackdropLoader />}
+            <div className="flex justify-between items-center mb-4">
+                <h1 className="text-lg font-medium uppercase">All Products Reviews (Admin & Seller)</h1>
             </div>
 
             <div className="bg-white rounded-xl shadow-lg w-full" style={{ height: 450 }}>
