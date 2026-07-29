@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSnackbar } from 'notistack';
-import { clearErrors, deleteReview, getAllReviews } from '../../actions/productAction';
+import { clearErrors, deleteReview, getAllReviews, getAdminProducts } from '../../actions/productAction';
 import Rating from '@mui/material/Rating';
 import Actions from './Actions';
 import { DELETE_REVIEW_RESET } from '../../constants/productConstants';
@@ -16,10 +16,24 @@ const ReviewsTable = () => {
     const [productId, setProductId] = useState("");
 
     const { reviews, error } = useSelector((state) => state.reviews);
+    const { products } = useSelector((state) => state.products);
     const { loading, isDeleted, error: deleteError } = useSelector((state) => state.review);
 
+    // 1. Page load hote hi admin ke products fetch karo
     useEffect(() => {
-        if (productId.length === 24) {
+        dispatch(getAdminProducts());
+    }, [dispatch]);
+
+    // 2. Jaise hi products mil jayein, pehli product ki ID automatically set kar do taaki reviews load ho jayein
+    useEffect(() => {
+        if (products && products.length > 0 && !productId) {
+            setProductId(products[0]._id);
+        }
+    }, [products, productId]);
+
+    // 3. Product ID milne par reviews fetch karo
+    useEffect(() => {
+        if (productId) {
             dispatch(getAllReviews(productId));
         }
         if (error) {
@@ -102,12 +116,23 @@ const ReviewsTable = () => {
             <MetaData title="Admin Reviews | Flipkart" />
 
             {loading && <BackdropLoader />}
-            <div className="flex justify-between items-center gap-2 sm:gap-12">
-                <h1 className="text-lg font-medium uppercase">reviews</h1>
-                <input type="text" placeholder="Product ID" value={productId} onChange={(e) => setProductId(e.target.value)} className="outline-none border-0 rounded p-2 w-full shadow hover:shadow-lg" />
+            <div className="flex justify-between items-center gap-2 sm:gap-12 mb-4">
+                <h1 className="text-lg font-medium uppercase">All Product Reviews</h1>
+                {/* Dropdown taaki aap product switch bhi kar sakein */}
+                <select 
+                    value={productId} 
+                    onChange={(e) => setProductId(e.target.value)} 
+                    className="outline-none border rounded p-2 bg-white shadow-sm max-w-xs"
+                >
+                    <option value="">Select Product</option>
+                    {products && products.map((item) => (
+                        <option key={item._id} value={item._id}>
+                            {item.name}
+                        </option>
+                    ))}
+                </select>
             </div>
             <div className="bg-white rounded-xl shadow-lg w-full" style={{ height: 450 }}>
-
                 <DataGrid
                     rows={rows}
                     columns={columns}
