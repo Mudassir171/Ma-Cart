@@ -89,7 +89,7 @@ const PayoutsTable = () => {
                         <div className="flex gap-2">
                             <button
                                 onClick={() => handleStatusChange(params.row.id, "Approved")}
-                                className="bg-emerald-600 text-white px-2.5 py-1 rounded text-xs font-semibold hover:bg-emerald-700 transition"
+                                className="bg-green-600 text-white px-2.5 py-1 rounded text-xs font-semibold hover:bg-emerald-700 transition"
                             >
                                 Approve
                             </button>
