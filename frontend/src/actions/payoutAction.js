@@ -18,7 +18,7 @@ export const requestPayout = (payoutData) => async (dispatch) => {
     }
 };
 
-// 2. Get All Payouts (Admin) - Name matched with component usage
+// 2. Get All Payouts (Admin)
 export const getAdminPayouts = () => async (dispatch) => {
     try {
         dispatch({ type: GET_PAYOUTS_REQUEST });
@@ -48,6 +48,15 @@ export const rejectPayout = (id) => async (dispatch) => {
         dispatch({ type: REJECT_PAYOUT_SUCCESS, payload: data.message });
     } catch (error) {
         dispatch({ type: REJECT_PAYOUT_FAIL, payload: error.response.data.message });
+    }
+};
+
+// --- Added to resolve component import error ---
+export const updatePayoutStatus = (id, status) => async (dispatch) => {
+    if (status === "Approved") {
+        dispatch(approvePayout(id));
+    } else {
+        dispatch(rejectPayout(id));
     }
 };
 
