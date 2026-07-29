@@ -82,7 +82,7 @@ const reducer = combineReducers({
     // --- Notification Reducer (Ab notification show hogi) ---
     notifications: notificationReducer, // <-- Ye line add ki hai
     newPayout: newPayoutReducer,
-    allPayouts: allPayoutsReducer,
+    payouts: allPayoutsReducer,
 });
 
 // Initial State Setup
