@@ -130,122 +130,135 @@ const Home = () => {
 
           {/* --- CATEGORIES SECTION (Matching Categories page design & structure) --- */}
           <section className="bg-white mt-2 mb-2 w-full shadow-sm rounded-sm overflow-hidden border border-gray-100">
-            <div className="flex justify-between items-center px-4 py-3 border-b border-gray-50">
-              <h2 className="text-lg font-bold text-green-800 uppercase tracking-tight">
-                Categories
-              </h2>
-              <Link to="/products" className="text-green-800 border border-green-800 px-5 py-2 text-sm font-semibold hover:bg-green-800 hover:text-white transition-all uppercase rounded-sm">
-                Shop All Categories
-              </Link>
-            </div>
             <div className="p-2">
               <Categories />
             </div>
           </section>
 
-          {/* --- 1. LATEST PRODUCTS SECTION (Above Just For You, Matches Design Style) --- */}
-          {latestProducts && latestProducts.length > 0 && (
-            <section className="bg-white rounded-md shadow-sm overflow-hidden relative border border-gray-100 mt-2">
-              {/* Header style matching Categories/Sections */}
-              <div className="flex justify-between items-center px-4 py-3 border-b border-gray-50">
-                <h2 className="text-lg font-bold text-green-800 uppercase tracking-tight">
-                  Latest Products
+{latestProducts && latestProducts.length > 0 && (
+    <section className="bg-gradient-to-b from-white to-gray-50/50 my-6 w-full shadow-md rounded-2xl overflow-hidden relative border border-emerald-100/60 p-4 md:p-6">
+        
+        {/* --- Header Section --- */}
+        <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
+            <div className="flex items-center gap-2.5">
+                <div className="h-6 w-1.5 bg-emerald-600 rounded-full"></div>
+                <h2 className="text-lg md:text-xl font-extrabold text-emerald-900 tracking-tight">
+                    Latest Products
                 </h2>
-                <Link to="/products" className="text-green-800 border border-green-800 px-5 py-2 text-sm font-semibold hover:bg-green-800 hover:text-white transition-all uppercase rounded-sm">
-                  View All
-                </Link>
-              </div>
+            </div>
 
-              {latestProducts.length >= 4 && (
-                <>
-                  <button 
+            <Link 
+                to="/products" 
+                className="group relative inline-flex items-center gap-2 px-5 py-2 text-xs md:text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-300 shadow-sm"
+            >
+                <span>View All</span>
+                <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </Link>
+        </div>
+
+        {/* --- Floating Scroll Navigation Arrows --- */}
+        {latestProducts.length >= 4 && (
+            <>
+                <button 
                     onClick={() => scrollLatest("left")} 
-                    className="absolute left-1 top-[60%] -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-md border border-gray-200 p-1 rounded-full hidden sm:flex items-center justify-center cursor-pointer"
-                  >
-                    <ChevronLeftIcon fontSize="medium" />
-                  </button>
-                  <button 
+                    aria-label="Scroll Left"
+                    className="absolute left-2 top-[58%] -translate-y-1/2 z-30 bg-white/90 hover:bg-emerald-600 hover:text-white text-emerald-900 shadow-lg border border-emerald-100 p-2.5 rounded-full hidden sm:flex items-center justify-center cursor-pointer transition-all duration-300 backdrop-blur-md"
+                >
+                    <ChevronLeftIcon fontSize="small" />
+                </button>
+                <button 
                     onClick={() => scrollLatest("right")} 
-                    className="absolute right-1 top-[60%] -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-md border border-gray-200 p-1 rounded-full hidden sm:flex items-center justify-center cursor-pointer"
-                  >
-                    <ChevronRightIcon fontSize="medium" />
-                  </button>
-                </>
-              )}
+                    aria-label="Scroll Right"
+                    className="absolute right-2 top-[58%] -translate-y-1/2 z-30 bg-white/90 hover:bg-emerald-600 hover:text-white text-emerald-900 shadow-lg border border-emerald-100 p-2.5 rounded-full hidden sm:flex items-center justify-center cursor-pointer transition-all duration-300 backdrop-blur-md"
+                >
+                    <ChevronRightIcon fontSize="small" />
+                </button>
+            </>
+        )}
 
-              <div 
-                ref={latestScrollRef}
-                className="flex items-stretch overflow-x-auto scroll-smooth scrollbar-none"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                <div className="flex flex-1 items-stretch">
-                  {!loading && latestProducts.map((item) => {
-                    const discountPercentage = item.discount || (item.cuttedPrice && item.price
-                      ? Math.round(((item.cuttedPrice - item.price) / item.cuttedPrice) * 100)
-                      : 0);
-
-                    return (
-                      <div 
+        {/* --- Product Horizontal Scroll Track (Limited to 30 Products) --- */}
+        <div 
+            ref={latestScrollRef}
+            className="flex items-stretch overflow-x-auto scroll-smooth scrollbar-none gap-4 py-2"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+            {!loading && latestProducts.slice(0, 30).map((item) => {
+                return (
+                    <div 
                         key={item._id} 
-                        className="min-w-[50%] sm:min-w-[210px] border-r border-gray-200 p-2 sm:p-3 flex flex-col justify-between relative bg-white flex-shrink-0 group hover:shadow-md transition-all"
-                      >
-                        {discountPercentage > 0 && (
-                          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 bg-pink-100 text-rose-600 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
-                            -{discountPercentage}%
-                          </div>
-                        )}
+                        className="min-w-[160px] sm:min-w-[210px] md:min-w-[230px] flex-shrink-0"
+                    >
+                        {/* Passes data directly into your newly styled <Product /> component */}
                         <Product {...item} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* --- 2. DISCOUNTED / DEALS PRODUCTS SECTION (With individual product timer) --- */}
-          {discountedProducts && discountedProducts.length > 0 && (
-            <section className="bg-white rounded-md shadow-sm overflow-hidden relative border border-gray-100 mt-2">
-              <div className="flex justify-between items-center px-4 py-3 border-b border-gray-50">
-                <h2 className="text-lg font-bold text-green-800 uppercase tracking-tight">
-                  Special Discounts & Offers
+                    </div>
+                );
+            })}
+        </div>
+    </section>
+)}
+{/* --- 2. DISCOUNTED / DEALS PRODUCTS SECTION --- */}
+{discountedProducts && discountedProducts.length > 0 && (
+    <section className="bg-gradient-to-b from-white to-gray-50/50 my-6 w-full shadow-md rounded-2xl overflow-hidden relative border border-emerald-100/60 p-4 md:p-6">
+        
+        {/* --- Header Section --- */}
+        <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
+            <div className="flex items-center gap-2.5">
+                <div className="h-6 w-1.5 bg-emerald-600 rounded-full"></div>
+                <h2 className="text-lg md:text-xl font-extrabold text-emerald-950 tracking-tight">
+                    Special Discounts & Offers
                 </h2>
-                <Link to="/products" className="text-green-800 border border-green-800 px-5 py-2 text-sm font-semibold hover:bg-green-800 hover:text-white transition-all uppercase rounded-sm">
-                  View All
-                </Link>
-              </div>
+            </div>
 
-              {discountedProducts.length >= 4 && (
-                <>
-                  <button 
+            <Link 
+                to="/products" 
+                className="group relative inline-flex items-center gap-2 px-5 py-2 text-xs md:text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-300 shadow-sm"
+            >
+                <span>View All</span>
+                <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </Link>
+        </div>
+
+        {/* --- Floating Scroll Navigation Arrows --- */}
+        {discountedProducts.length >= 4 && (
+            <>
+                <button 
                     onClick={() => scrollDeals("left")} 
-                    className="absolute left-1 top-[60%] -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-md border border-gray-200 p-1 rounded-full hidden sm:flex items-center justify-center cursor-pointer"
-                  >
-                    <ChevronLeftIcon fontSize="medium" />
-                  </button>
-                  <button 
+                    aria-label="Scroll Left"
+                    className="absolute left-2 top-[58%] -translate-y-1/2 z-30 bg-white/90 hover:bg-emerald-600 hover:text-white text-emerald-900 shadow-lg border border-emerald-100 p-2.5 rounded-full hidden sm:flex items-center justify-center cursor-pointer transition-all duration-300 backdrop-blur-md"
+                >
+                    <ChevronLeftIcon fontSize="small" />
+                </button>
+                <button 
                     onClick={() => scrollDeals("right")} 
-                    className="absolute right-1 top-[60%] -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-md border border-gray-200 p-1 rounded-full hidden sm:flex items-center justify-center cursor-pointer"
-                  >
-                    <ChevronRightIcon fontSize="medium" />
-                  </button>
-                </>
-              )}
+                    aria-label="Scroll Right"
+                    className="absolute right-2 top-[58%] -translate-y-1/2 z-30 bg-white/90 hover:bg-emerald-600 hover:text-white text-emerald-900 shadow-lg border border-emerald-100 p-2.5 rounded-full hidden sm:flex items-center justify-center cursor-pointer transition-all duration-300 backdrop-blur-md"
+                >
+                    <ChevronRightIcon fontSize="small" />
+                </button>
+            </>
+        )}
 
-              <div 
-                ref={dealsScrollRef}
-                className="flex items-stretch overflow-x-auto scroll-smooth scrollbar-none"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                <div className="flex flex-1 items-stretch">
-                  {!loading && discountedProducts.map((item) => (
-                    <DealProductItem key={item._id} item={item} />
-                  ))}
+        {/* --- Product Horizontal Scroll Track (Limited to 30 Deals) --- */}
+        <div 
+            ref={dealsScrollRef}
+            className="flex items-stretch overflow-x-auto scroll-smooth scrollbar-none gap-4 py-2"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+            {!loading && discountedProducts.slice(0, 30).map((item) => (
+                <div 
+                    key={item._id} 
+                    className="min-w-[160px] sm:min-w-[210px] md:min-w-[230px] flex-shrink-0"
+                >
+                    <DealProductItem item={item} />
                 </div>
-              </div>
-            </section>
-          )}
-
+            ))}
+        </div>
+    </section>
+)}
           {/* --- 3. JUST FOR YOU SECTION (All Products Grid - Same Design Structure) --- */}
           <section className="bg-white rounded-md shadow-sm overflow-hidden border border-gray-100 mt-2">
             <div className="flex justify-between items-center px-4 py-3 border-b border-gray-50 mb-2">
