@@ -8,14 +8,14 @@ const Categories = () => {
     const dispatch = useDispatch();
     const { categories, loading } = useSelector((state) => state.allCategories);
     
-    // State to track active row index (0 to 4 for 5 rows)
+    // State to track active row index
     const [activeRowIndex, setActiveRowIndex] = useState(0);
 
     useEffect(() => {
         dispatch(getCategories());
     }, [dispatch]);
 
-    // Row-specific Banners mapped dynamically (Row 1 to Row 5)
+    // Row-specific Banners mapped dynamically
     const rowBanners = [
         {
             id: 1,
@@ -67,6 +67,10 @@ const Categories = () => {
     // Current active banner based on the active row
     const currentBanner = rowBanners[activeRowIndex] || rowBanners[0];
 
+    // Responsive items limit: 15 for mobile (3 lines x 5 columns), 14 for desktop (2 lines x 7 columns)
+    // To handle both nicely, we can slice up to 14 or 15. Let's slice up to 14 or 15 based on max requirements (14/15).
+    const displayCategories = categories ? categories.slice(0, 14) : [];
+
     return (
         <>
             <MetaData title="Shop By Categories - Premium Store" />
@@ -93,7 +97,7 @@ const Categories = () => {
                     </Link>
                 </div>
 
-                {/* --- Main Split Layout: Dynamic Banner Left | 5x5 Grid Right --- */}
+                {/* --- Main Split Layout: Dynamic Banner Left | Grid Right --- */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                     
                     {/* Left Side: Dynamic Banner Changing per Row (Col Span 4) */}
@@ -135,33 +139,34 @@ const Categories = () => {
                         </div>
                     </div>
 
-                    {/* Right Side: 5x5 Grid for Categories (Col Span 8) */}
-                    <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                    {/* Right Side: Grid for Categories (Col Span 8) */}
+                    {/* Mobile: 3 columns (grid-cols-3) | Desktop: 7 columns (md:grid-cols-7) */}
+                    <div className="lg:col-span-8 grid grid-cols-3 md:grid-cols-7 gap-3 bg-gray-50/50 p-4 rounded-xl border border-gray-100">
                         {loading ? (
-                            // Skeleton Loading State (25 items for 5 rows x 5 columns)
-                            [...Array(25)].map((_, i) => (
+                            // Skeleton Loading State (14 items matching desktop layout)
+                            [...Array(14)].map((_, i) => (
                                 <div key={i} className="bg-white p-3 rounded-xl flex flex-col items-center gap-3 animate-pulse shadow-sm">
-                                    <div className="h-14 w-14 sm:h-16 sm:w-16 bg-gray-200 rounded-full"></div>
-                                    <div className="h-3 w-12 bg-gray-200 rounded"></div>
+                                    <div className="h-12 w-12 sm:h-14 sm:w-14 bg-gray-200 rounded-full"></div>
+                                    <div className="h-3 w-10 bg-gray-200 rounded"></div>
                                 </div>
                             ))
                         ) : (
-                            // Displaying up to 25 Categories mapped with row tracker on hover/interaction
-                            categories && categories.slice(0, 25).map((item, index) => {
-                                // Determine which row this item belongs to (5 items per row)
-                                const rowIndex = Math.floor(index / 5);
+                            displayCategories.map((item, index) => {
+                                // For desktop (7 items per row) vs mobile (3 items per row) row calculation
+                                // Using desktop 7 items per row as baseline for row index
+                                const rowIndex = Math.floor(index / 7);
 
                                 return (
                                     <Link
                                         key={item._id}
                                         to={`/products?category=${item.name}`}
-                                        onMouseEnter={() => setActiveRowIndex(rowIndex)} // Changes banner dynamically on hover
+                                        onMouseEnter={() => setActiveRowIndex(rowIndex)}
                                         className="group bg-white flex flex-col items-center justify-between p-3 rounded-xl hover:shadow-md hover:-translate-y-1 transition-all duration-300 border border-gray-100 hover:border-emerald-200 relative overflow-hidden"
                                     >
                                         <div className="absolute inset-0 bg-emerald-50/0 group-hover:bg-emerald-50/30 transition-colors duration-300"></div>
 
                                         {/* Circle Image Container */}
-                                        <div className="relative z-10 h-14 w-14 sm:h-16 sm:w-16 mb-2 p-2 bg-gray-50 group-hover:bg-white rounded-full flex items-center justify-center shadow-inner overflow-hidden group-hover:scale-105 transition-all duration-300 border border-gray-100">
+                                        <div className="relative z-10 h-12 w-12 sm:h-14 sm:w-14 mb-2 p-2 bg-gray-50 group-hover:bg-white rounded-full flex items-center justify-center shadow-inner overflow-hidden group-hover:scale-105 transition-all duration-300 border border-gray-100">
                                             {item.image && (
                                                 <img
                                                     draggable="false"
@@ -173,7 +178,7 @@ const Categories = () => {
                                         </div>
                                         
                                         {/* Category Name */}
-                                        <span className="relative z-10 text-[11px] sm:text-[12px] text-gray-700 font-semibold text-center leading-tight group-hover:text-emerald-700 transition-colors line-clamp-1">
+                                        <span className="relative z-10 text-[10px] sm:text-[11px] text-gray-700 font-semibold text-center leading-tight group-hover:text-emerald-700 transition-colors line-clamp-1">
                                             {item.name}
                                         </span>
                                     </Link>
