@@ -118,7 +118,7 @@ const Home = () => {
 
   return (
     <>
-      <MetaData title="Daraz.pk | Online Shopping Site" />
+      <MetaData title="Ma-Cart | Online Shopping Site" />
 
       <main className="w-full bg-[#f4f4f4] min-h-screen pb-10 overflow-x-hidden mt-5">
         
