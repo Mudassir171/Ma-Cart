@@ -276,5 +276,4 @@ const ProductTable = () => {
   );
 };
 
-ProductTable.jsx;
 export default ProductTable;
