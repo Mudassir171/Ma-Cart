@@ -1,6 +1,6 @@
 import Product from './Product';
 import Slider from 'react-slick';
-import { NextBtn, PreviousBtn } from '../Banner/Banner';
+import Banner from '../Banner/Banner';
 import { Link } from 'react-router-dom';
 import { offerProducts } from '../../../utils/constants';
 import { getRandomProducts } from '../../../utils/functions';
@@ -13,8 +13,7 @@ export const settings = {
     slidesToScroll: 6,
     initialSlide: 1,
     swipe: false,
-    prevArrow: <PreviousBtn />,
-    nextArrow: <NextBtn />,
+    // Removed prevArrow and nextArrow to fix the crash
     responsive: [
         {
             breakpoint: 1024,
@@ -51,11 +50,11 @@ const DealSlider = ({ title }) => {
             <hr />
             {/* <!-- header --> */}
 
-                <Slider {...settings}>
-                    {getRandomProducts(offerProducts, 12).map((item, i) => (
-                        <Product {...item} key={i} />
-                    ))}
-                </Slider>
+            <Slider {...settings}>
+                {getRandomProducts(offerProducts, 12).map((item, i) => (
+                    <Product {...item} key={i} />
+                ))}
+            </Slider>
 
         </section>
     );
