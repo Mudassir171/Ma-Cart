@@ -129,6 +129,7 @@ const Home = () => {
     : [];
 
   // --- 2. Discounted / Deal Products ---
+  // --- 2. Discounted / Deal Products ---
   const discountedProducts = products?.filter((item) => {
     const disc =
       item.discount ||
@@ -137,6 +138,10 @@ const Home = () => {
         : 0);
     return disc > 0;
   });
+
+  // Yahan check karein ke data aa raha hai ya nahi
+  console.log("All Products:", products);
+  console.log("Discounted Products:", discountedProducts);
 
   return (
     <>
