@@ -6,7 +6,8 @@ const cors = require("cors");
 const cloudinary = require("cloudinary");
 const errorMiddleware = require("./middlewares/error");
 
-// --- WhatsApp Service Import --
+// --- WhatsApp Service Import ---
+const { connectToWhatsApp } = require("./utils/whatsappService");
 
 const app = express();
 
@@ -53,6 +54,6 @@ app.use(errorMiddleware);
 
 // --- WhatsApp Connection Call ---
 // Jab app start hogi, yeh WhatsApp ko connect karne ki koshish karegi aur terminal par QR code dikhayegi
-conne
+connectToWhatsApp();
 
 module.exports = app;
