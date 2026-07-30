@@ -2,8 +2,7 @@ const Payout = require("../models/payoutModel");
 const User = require("../models/userModel");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middlewares/asyncErrorHandler");
-const sendEmail = require("../utils/sendEmail"); // Aapka pehle wala Gmail function
-const { sendWhatsAppMessage } = require("../utils/whatsappService"); // Naya WhatsApp function
+const sendEmail = require("../utils/sendEmail"); // Sirf Gmail function import hai
 
 // 1. Seller: Request Payout
 exports.requestPayout = catchAsyncErrors(async (req, res, next) => {
@@ -32,7 +31,7 @@ exports.requestPayout = catchAsyncErrors(async (req, res, next) => {
 
 // 2. Admin: Get All Payout Requests
 exports.getAllPayouts = catchAsyncErrors(async (req, res, next) => {
-    const payouts = await Payout.find().populate("seller", "name email phone shopName");
+    const payouts = await Payout.find().populate("seller", "name email shopName");
     
     res.status(200).json({
         success: true,
@@ -68,7 +67,7 @@ exports.approvePayout = catchAsyncErrors(async (req, res, next) => {
 
     const messageText = `Hello ${seller.name},\n\nYour payout request of Rs.${payout.amount} has been APPROVED successfully.\n\nThank you!`;
 
-    // --- 1. GMAIL NOTIFICATION ---
+    // --- GMAIL NOTIFICATION ---
     try {
         await sendEmail({
             email: seller.email,
@@ -79,18 +78,9 @@ exports.approvePayout = catchAsyncErrors(async (req, res, next) => {
         console.log("Email error:", error.message);
     }
 
-    // --- 2. WHATSAPP NOTIFICATION ---
-    if (seller.phone) {
-        try {
-            await sendWhatsAppMessage(seller.phone, messageText);
-        } catch (error) {
-            console.log("WhatsApp error:", error.message);
-        }
-    }
-
     res.status(200).json({
         success: true,
-        message: "Payout approved, wallet updated, and notifications sent!",
+        message: "Payout approved, wallet updated, and email sent successfully!",
     });
 });
 
@@ -111,7 +101,7 @@ exports.rejectPayout = catchAsyncErrors(async (req, res, next) => {
     if (seller) {
         const messageText = `Hello ${seller.name},\n\nYour payout request of Rs.${payout.amount} has been REJECTED.\nReason: ${payout.adminNote}\n\nThank you!`;
 
-        // --- 1. GMAIL NOTIFICATION ---
+        // --- GMAIL NOTIFICATION ---
         try {
             await sendEmail({
                 email: seller.email,
@@ -121,19 +111,10 @@ exports.rejectPayout = catchAsyncErrors(async (req, res, next) => {
         } catch (error) {
             console.log("Email error:", error.message);
         }
-
-        // --- 2. WHATSAPP NOTIFICATION ---
-        if (seller.phone) {
-            try {
-                await sendWhatsAppMessage(seller.phone, messageText);
-            } catch (error) {
-                console.log("WhatsApp error:", error.message);
-            }
-        }
     }
 
     res.status(200).json({
         success: true,
-        message: "Payout request rejected and notifications sent!",
+        message: "Payout request rejected and email sent successfully!",
     });
 });
