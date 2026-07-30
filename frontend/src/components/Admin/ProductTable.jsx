@@ -10,14 +10,9 @@ import {
 } from "../../actions/productAction";
 import Rating from "@mui/material/Rating";
 import { DELETE_PRODUCT_RESET } from "../../constants/productConstants";
-// import Actions from './Actions';
 import MetaData from "../Layouts/MetaData";
 import BackdropLoader from "../Layouts/BackdropLoader";
 import { updateProductStatus } from "../../actions/productAction";
-// Purana import shayad aisa tha:
-// import Actions from './Actions';
-
-// Naya import aisa hoga:
 import Actions from "../Shared/Actions";
 
 const ProductTable = () => {
@@ -32,9 +27,6 @@ const ProductTable = () => {
     error: deleteError,
   } = useSelector((state) => state.product);
 
-  const updateStatusHandler = (id, status) => {
-    dispatch(updateProductStatus(id, { isApproved: status }));
-  };
   useEffect(() => {
     if (error) {
       enqueueSnackbar(error, { variant: "error" });
@@ -50,7 +42,7 @@ const ProductTable = () => {
     }
     if (isUpdated) {
       enqueueSnackbar("Product Status Updated", { variant: "success" });
-      dispatch({ type: "UPDATE_PRODUCT_STATUS_RESET" }); // Ensure karein ye constant aapke constants file mein ho
+      dispatch({ type: "UPDATE_PRODUCT_STATUS_RESET" });
       dispatch(getAdminProducts());
     }
     dispatch(getAdminProducts());
@@ -59,9 +51,11 @@ const ProductTable = () => {
   const deleteProductHandler = (id) => {
     dispatch(deleteProduct(id));
   };
-const updateProductStatusHandler = (id, status) => {
+
+  const updateProductStatusHandler = (id, status) => {
     dispatch(updateProductStatus(id, status));
-};
+  };
+
   const columns = [
     {
       field: "id",
@@ -106,14 +100,12 @@ const updateProductStatusHandler = (id, status) => {
         );
       },
     },
-    // Admin wali file mein columns ke andar ye add karein
     {
       field: "owner",
       headerName: "Added By",
       minWidth: 100,
       flex: 0.2,
       renderCell: (params) => {
-        // Agar backend se product ke sath user populate ho kar aa raha hai
         return (
           <span>{params.row.ownerRole === "admin" ? "Admin" : "Seller"}</span>
         );
@@ -171,6 +163,27 @@ const updateProductStatusHandler = (id, status) => {
         return <span>₹{params.row.cprice.toLocaleString()}</span>;
       },
     },
+    // --- Naye Columns: Discount aur Offer Timer ke liye ---
+    {
+      field: "discount",
+      headerName: "Discount",
+      type: "number",
+      minWidth: 90,
+      flex: 0.1,
+      renderCell: (params) => {
+        return <span className="text-green-700 font-medium">{params.row.discount}%</span>;
+      },
+    },
+    {
+      field: "offerTimer",
+      headerName: "Timer (Hrs)",
+      type: "number",
+      minWidth: 100,
+      flex: 0.1,
+      renderCell: (params) => {
+        return <span>{params.row.offerTimer} hrs</span>;
+      },
+    },
     {
       field: "rating",
       headerName: "Rating",
@@ -190,12 +203,10 @@ const updateProductStatusHandler = (id, status) => {
         );
       },
     },
-
-    // ProductTable.jsx mein 'actions' column ka part:
     {
       field: "actions",
       headerName: "Actions",
-      minWidth: 200, // Size thoda badha diya taake saare buttons fit aa jayein
+      minWidth: 200,
       flex: 0.4,
       sortable: false,
       renderCell: (params) => (
@@ -205,7 +216,7 @@ const updateProductStatusHandler = (id, status) => {
           id={params.row.id}
           name={params.row.name}
           updateStatusHandler={updateProductStatusHandler}
-          showApproval={true} // <-- Yeh true karte hi Admin mein approve/reject aa jayenge
+          showApproval={true}
         />
       ),
     },
@@ -219,16 +230,18 @@ const updateProductStatusHandler = (id, status) => {
         id: item._id,
         isApproved: item.isApproved,
         name: item.name,
-        image: item.images[0].url,
+        image: item.images && item.images.length > 0 ? item.images[0].url : "",
         category: item.category,
         stock: item.stock,
         price: item.price,
         cprice: item.cuttedPrice,
+        discount: item.discount || 0,       // <-- Discount map kar diya
+        offerTimer: item.offerTimer || 0,   // <-- Offer Timer map kar diya
         rating: item.ratings,
-        // Yahan se data utha rahe hain jo ab backend se populate ho kar aa raha hai
         ownerRole: item.user?.role || "seller",
       });
     });
+
   return (
     <>
       <MetaData title="Admin Products | Flipkart" />
@@ -245,7 +258,7 @@ const updateProductStatusHandler = (id, status) => {
         </Link>
       </div>
       <div
-        className="bg-white rounded-xl shadow-lg w-full"
+        className="bg-white rounded-xl shadow-lg w-full mt-4"
         style={{ height: 470 }}
       >
         <DataGrid
@@ -263,4 +276,5 @@ const updateProductStatusHandler = (id, status) => {
   );
 };
 
+ProductTable.jsx;
 export default ProductTable;

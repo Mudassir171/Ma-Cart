@@ -37,6 +37,11 @@ const NewProduct = () => {
     const [stock, setStock] = useState(0);
     const [warranty, setWarranty] = useState(0);
     const [brand, setBrand] = useState("");
+    
+    // --- Naye States: Discount aur Offer Timer ke liye ---
+    const [discount, setDiscount] = useState(0);
+    const [offerTimer, setOfferTimer] = useState(""); // Misal ke taur par hours ya date (e.g. 48 hours)
+
     const [images, setImages] = useState([]);
     const [imagesPreview, setImagesPreview] = useState([]);
 
@@ -137,6 +142,10 @@ const NewProduct = () => {
         formData.set("warranty", warranty);
         formData.set("brandname", brand);
         formData.set("logo", logo);
+        
+        // --- FormData mein Discount aur Timer append kar diye hain ---
+        formData.set("discount", discount);
+        formData.set("offerTimer", offerTimer);
 
         images.forEach((image) => { formData.append("images", image); });
         highlights.forEach((h) => { formData.append("highlights", h); });
@@ -152,19 +161,17 @@ const NewProduct = () => {
             dispatch(clearErrors());
         }
         if (success) {
-            // --- 🚀 NOTIFICATION DISPATCH START ---
             dispatch({
                 type: "ADD_NOTIFICATION",
                 payload: {
                     id: Date.now(),
                     title: "New Product Launched! 🛍️",
                     message: `Mubarak ho! Aik naya product "${name}" brand ${brand} ke saath live kar diya gaya hai.`,
-                    type: "order", // 'order' color theme use hogi
+                    type: "order",
                     createdAt: new Date().toLocaleString(),
                     isRead: false
                 }
             });
-            // --- NOTIFICATION DISPATCH END ---
 
             enqueueSnackbar("Product Created", { variant: "success" });
             dispatch({ type: NEW_PRODUCT_RESET });
@@ -184,6 +191,12 @@ const NewProduct = () => {
                     <div className="flex justify-between gap-4">
                         <TextField label="Price" type="number" variant="outlined" size="small" required value={price} onChange={(e) => setPrice(e.target.value)} />
                         <TextField label="Cutted Price" type="number" variant="outlined" size="small" required value={cuttedPrice} onChange={(e) => setCuttedPrice(e.target.value)} />
+                    </div>
+
+                    {/* --- Naye Input Fields: Discount % aur Timer (Hours/Days) --- */}
+                    <div className="flex justify-between gap-4">
+                        <TextField label="Discount % (e.g. 25)" type="number" variant="outlined" size="small" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+                        <TextField label="Offer Timer (Hours e.g. 48)" type="number" variant="outlined" size="small" value={offerTimer} onChange={(e) => setOfferTimer(e.target.value)} />
                     </div>
 
                     <div className="flex justify-between gap-4">

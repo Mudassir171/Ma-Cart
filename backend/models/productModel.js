@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Please enter product name"], // Sirf naam zaroori rakha hai, agar ise bhi optional karna ho toh required hata sakte hain
+    required: [true, "Please enter product name"],
     trim: true,
   },
   description: {
@@ -30,7 +30,16 @@ const productSchema = new mongoose.Schema({
   cuttedPrice: {
     type: Number,
   },
-  // --- 🎨 COLORS & 📏 SIZES ADDED ---
+  // --- 🏷️ DISCOUNT & ⏱️ TIMER ADDED ---
+  discount: {
+    type: Number,
+    default: 0,
+  },
+  offerTimer: {
+    type: Number, // Hours mein timer store hoga (e.g. 24, 48)
+    default: 0,
+  },
+  // -----------------------------------
   colors: [
     {
       type: String,
@@ -106,7 +115,7 @@ const productSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    required: true, // User ID zaroori hai taake pata chale kis seller ne product add kiya hai
+    required: true,
   },
   isApproved: {
     type: Boolean,

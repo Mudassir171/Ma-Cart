@@ -1,17 +1,83 @@
-import { useEffect } from 'react';
-import Categories from '../Layouts/Categories';
-import Banner from './Banner/Banner';
-import { useDispatch, useSelector } from 'react-redux';
-import { clearErrors, getSliderProducts } from '../../actions/productAction';
-import { useSnackbar } from 'notistack';
-import MetaData from '../Layouts/MetaData';
-import Product from './ProductSlider/Product';
-import { Link } from 'react-router-dom';
+import { useEffect, useState, useRef } from "react";
+import Categories from "../Layouts/Categories";
+import Banner from "./Banner/Banner";
+import { useDispatch, useSelector } from "react-redux";
+import { clearErrors, getSliderProducts } from "../../actions/productAction";
+import { useSnackbar } from "notistack";
+import MetaData from "../Layouts/MetaData";
+import Product from "./ProductSlider/Product";
+import { Link } from "react-router-dom";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 const Home = () => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { error, loading, products } = useSelector((state) => state.products);
+
+  // --- Scroll References for both sections ---
+  const dealsScrollRef = useRef(null);
+  const discountScrollRef = useRef(null);
+
+  const scrollDeals = (direction) => {
+    if (dealsScrollRef.current) {
+      const { scrollLeft, clientWidth } = dealsScrollRef.current;
+      const scrollAmount = clientWidth * 0.75;
+      dealsScrollRef.current.scrollTo({
+        left: direction === "left" ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollDiscount = (direction) => {
+    if (discountScrollRef.current) {
+      const { scrollLeft, clientWidth } = discountScrollRef.current;
+      const scrollAmount = clientWidth * 0.75;
+      discountScrollRef.current.scrollTo({
+        left: direction === "left" ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // --- Countdown Timer State (Deals Section) ---
+  const [timeLeft, setTimeLeft] = useState({
+    days: 4,
+    hours: 13,
+    minutes: 34,
+    seconds: 56,
+  });
+
+  // --- Countdown Timer State (Discount Section) ---
+  const [discountTimeLeft, setDiscountTimeLeft] = useState({
+    days: 2,
+    hours: 8,
+    minutes: 15,
+    seconds: 30,
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
+        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        if (prev.days > 0) return { days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
+        return prev;
+      });
+
+      setDiscountTimeLeft((prev) => {
+        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
+        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        if (prev.days > 0) return { days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
+        return prev;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -21,76 +87,206 @@ const Home = () => {
     dispatch(getSliderProducts());
   }, [dispatch, error, enqueueSnackbar]);
 
+  // --- Filter Products with Discount > 0 ---
+  const discountedProducts = products?.filter((item) => {
+    const disc = item.discount || (item.cuttedPrice && item.price ? Math.round(((item.cuttedPrice - item.price) / item.cuttedPrice) * 100) : 0);
+    return disc > 0;
+  });
+
   return (
     <>
       <MetaData title="Daraz.pk | Online Shopping Site" />
 
-      {/* 1. Main Background Wrapper */ }
       <main className="w-full bg-[#f4f4f4] min-h-screen pb-10 overflow-x-hidden mt-5">
-
-        {/* 2. Full Width Banner Section */ }
-
-        <div className="w-full mt-12 bg-white shadow-sm ">
+        <div className="w-full mt-12 bg-white shadow-sm">
           <Banner />
         </div>
 
-        {/* --- Content Container (Maximum Width 1200px) --- */ }
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
 
-          {/* 3. FLASH SALE SECTION */ }
-          <section className="bg-white rounded-sm shadow-sm overflow-hidden">
-            <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
-              <span className="text-green-800 font-bold text-lg uppercase">Flash Sale</span>
-              <Link to="/products" className="border border-green-800 text-green-800 rounded-sm px-5 py-2 text-sm font-semibold hover:bg-green-800 hover:text-white transition-all duration-300">
-                SHOP ALL PRODUCTS
-              </Link>
-            </div>
+          {/* --- 1. DEALS AND OFFERS SECTION --- */}
+          {discountedProducts && discountedProducts.length > 0 && (
+            <section className="bg-white rounded-md shadow-sm overflow-hidden relative border border-gray-100 mt-4">
+              {discountedProducts.length >= 4 && (
+                <>
+                  <button 
+                    onClick={() => scrollDeals("left")} 
+                    className="absolute left-1 top-[60%] -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-md border border-gray-200 p-1 rounded-full hidden sm:flex items-center justify-center cursor-pointer"
+                  >
+                    <ChevronLeftIcon fontSize="medium" />
+                  </button>
+                  <button 
+                    onClick={() => scrollDeals("right")} 
+                    className="absolute right-1 top-[60%] -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-md border border-gray-200 p-1 rounded-full hidden sm:flex items-center justify-center cursor-pointer"
+                  >
+                    <ChevronRightIcon fontSize="medium" />
+                  </button>
+                </>
+              )}
 
-            {/* Grid for Flash Sale (6 items per row on desktop) */ }
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              { !loading && products?.slice(0, 6).map((item) => (
-                <div key={ item._id } className="border-r border-b border-gray-100 last:border-r-0">
-                  <Product { ...item } />
+              <div 
+                ref={dealsScrollRef}
+                className="flex items-stretch overflow-x-auto scroll-smooth scrollbar-none"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {/* Timer Box */}
+                <div className="min-w-[220px] sm:min-w-[260px] p-5 flex flex-col justify-center border-r border-gray-200 bg-white flex-shrink-0">
+                  <h2 className="text-gray-900 font-bold text-xl leading-tight">Deals and offers</h2>
+                  <p className="text-gray-500 text-xs mb-4">Hygiene equipments</p>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-center bg-gradient-to-b from-gray-800 to-gray-900 text-white rounded-lg px-2.5 py-1.5 shadow">
+                      <span className="text-base font-bold">{String(timeLeft.days).padStart(2, '0')}</span>
+                      <span className="text-[9px] text-gray-300 uppercase tracking-wider">Days</span>
+                    </div>
+                    <span className="text-gray-400 font-bold">:</span>
+                    <div className="flex flex-col items-center bg-gradient-to-b from-gray-800 to-gray-900 text-white rounded-lg px-2.5 py-1.5 shadow">
+                      <span className="text-base font-bold">{String(timeLeft.hours).padStart(2, '0')}</span>
+                      <span className="text-[9px] text-gray-300 uppercase tracking-wider">Hour</span>
+                    </div>
+                    <span className="text-gray-400 font-bold">:</span>
+                    <div className="flex flex-col items-center bg-gradient-to-b from-gray-800 to-gray-900 text-white rounded-lg px-2.5 py-1.5 shadow">
+                      <span className="text-base font-bold">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                      <span className="text-[9px] text-gray-300 uppercase tracking-wider">Min</span>
+                    </div>
+                    <span className="text-gray-400 font-bold">:</span>
+                    <div className="flex flex-col items-center bg-gradient-to-b from-gray-800 to-gray-900 text-white rounded-lg px-2.5 py-1.5 shadow">
+                      <span className="text-base font-bold">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                      <span className="text-[9px] text-gray-300 uppercase tracking-wider">Sec</span>
+                    </div>
+                  </div>
                 </div>
-              )) }
-            </div>
-          </section>
 
-          {/* 4. CATEGORIES SECTION */ }
+                {/* Products List */}
+                <div className="flex flex-1 items-stretch">
+                  {!loading && discountedProducts.map((item) => {
+                    const discountPercentage = item.discount || (item.cuttedPrice && item.price
+                      ? Math.round(((item.cuttedPrice - item.price) / item.cuttedPrice) * 100)
+                      : 0);
+
+                    return (
+                      <div 
+                        key={item._id} 
+                        className="min-w-[180px] sm:min-w-[210px] border-r border-gray-200 p-3 flex flex-col justify-between relative bg-white flex-shrink-0 group hover:shadow-md transition-all"
+                      >
+                        {discountPercentage > 0 && (
+                          <div className="absolute top-3 right-3 z-10 bg-pink-100 text-rose-600 text-xs font-bold px-2.5 py-0.5 rounded-full shadow-sm">
+                            -{discountPercentage}%
+                          </div>
+                        )}
+                        <Product {...item} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* --- 2. DISCOUNTED PRODUCTS SECTION WITH TIMER --- */}
+          {discountedProducts && discountedProducts.length > 0 && (
+            <section className="bg-white rounded-md shadow-sm overflow-hidden relative border border-gray-100 mt-4">
+              {discountedProducts.length >= 4 && (
+                <>
+                  <button 
+                    onClick={() => scrollDiscount("left")} 
+                    className="absolute left-1 top-[60%] -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-md border border-gray-200 p-1 rounded-full hidden sm:flex items-center justify-center cursor-pointer"
+                  >
+                    <ChevronLeftIcon fontSize="medium" />
+                  </button>
+                  <button 
+                    onClick={() => scrollDiscount("right")} 
+                    className="absolute right-1 top-[60%] -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-md border border-gray-200 p-1 rounded-full hidden sm:flex items-center justify-center cursor-pointer"
+                  >
+                    <ChevronRightIcon fontSize="medium" />
+                  </button>
+                </>
+              )}
+
+              <div 
+                ref={discountScrollRef}
+                className="flex items-stretch overflow-x-auto scroll-smooth scrollbar-none"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {/* Timer Box for Discounted Products */}
+                <div className="min-w-[220px] sm:min-w-[260px] p-5 flex flex-col justify-center border-r border-gray-200 bg-white flex-shrink-0">
+                  <h2 className="text-gray-900 font-bold text-xl leading-tight">Special Discounts</h2>
+                  <p className="text-gray-500 text-xs mb-4">Limited time offers</p>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-center bg-gradient-to-b from-gray-800 to-gray-900 text-white rounded-lg px-2.5 py-1.5 shadow">
+                      <span className="text-base font-bold">{String(discountTimeLeft.days).padStart(2, '0')}</span>
+                      <span className="text-[9px] text-gray-300 uppercase tracking-wider">Days</span>
+                    </div>
+                    <span className="text-gray-400 font-bold">:</span>
+                    <div className="flex flex-col items-center bg-gradient-to-b from-gray-800 to-gray-900 text-white rounded-lg px-2.5 py-1.5 shadow">
+                      <span className="text-base font-bold">{String(discountTimeLeft.hours).padStart(2, '0')}</span>
+                      <span className="text-[9px] text-gray-300 uppercase tracking-wider">Hour</span>
+                    </div>
+                    <span className="text-gray-400 font-bold">:</span>
+                    <div className="flex flex-col items-center bg-gradient-to-b from-gray-800 to-gray-900 text-white rounded-lg px-2.5 py-1.5 shadow">
+                      <span className="text-base font-bold">{String(discountTimeLeft.minutes).padStart(2, '0')}</span>
+                      <span className="text-[9px] text-gray-300 uppercase tracking-wider">Min</span>
+                    </div>
+                    <span className="text-gray-400 font-bold">:</span>
+                    <div className="flex flex-col items-center bg-gradient-to-b from-gray-800 to-gray-900 text-white rounded-lg px-2.5 py-1.5 shadow">
+                      <span className="text-base font-bold">{String(discountTimeLeft.seconds).padStart(2, '0')}</span>
+                      <span className="text-[9px] text-gray-300 uppercase tracking-wider">Sec</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Products List */}
+                <div className="flex flex-1 items-stretch">
+                  {!loading && discountedProducts.map((item) => {
+                    const discountPercentage = item.discount || (item.cuttedPrice && item.price
+                      ? Math.round(((item.cuttedPrice - item.price) / item.cuttedPrice) * 100)
+                      : 0);
+
+                    return (
+                      <div 
+                        key={item._id} 
+                        className="min-w-[180px] sm:min-w-[210px] border-r border-gray-200 p-3 flex flex-col justify-between relative bg-white flex-shrink-0 group hover:shadow-md transition-all"
+                      >
+                        {discountPercentage > 0 && (
+                          <div className="absolute top-3 right-3 z-10 bg-pink-100 text-rose-600 text-xs font-bold px-2.5 py-0.5 rounded-full shadow-sm">
+                            -{discountPercentage}%
+                          </div>
+                        )}
+                        <Product {...item} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Categories Section */}
           <section>
             <div className="flex items-center gap-4 mb-4">
               <h2 className="text-green-700 text-xl font-medium">Categories</h2>
               <div className="h-[1px] bg-gray-300 flex-1"></div>
             </div>
-              <div className="bg-white rounded-sm shadow-sm p-2">
-                <Categories />
-              </div>
+            <div className="bg-white rounded-sm shadow-sm p-2">
+              <Categories />
+            </div>
           </section>
 
-          {/* 5. JUST FOR YOU (Main Product Grid) */ }
+          {/* Just For You Section */}
           <section className="mt-2">
             <div className="flex items-center gap-4 mb-4">
               <h2 className="text-green-700 text-xl font-medium">Just For You</h2>
               <div className="h-[1px] bg-gray-300 flex-1"></div>
             </div>
 
-            {/* Responsive Grid: 2 columns mobile, 6 columns desktop */ }
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-              { !loading && products && products.slice(0, 30).map((item) => (
-                <div key={ item._id } className="h-full">
-                  <Product { ...item } />
+              {!loading && products && products.slice(0, 30).map((item) => (
+                <div key={item._id} className="h-full">
+                  <Product {...item} />
                 </div>
-              )) }
+              ))}
             </div>
-
-            {/* Loading Skeleton Placeholder */ }
-            { loading && (
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 py-10">
-                { [...Array(6)].map((_, i) => (
-                  <div key={ i } className="h-64 bg-white animate-pulse rounded-sm shadow-sm"></div>
-                )) }
-              </div>
-            ) }
           </section>
 
         </div>

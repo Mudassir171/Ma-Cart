@@ -6,9 +6,6 @@ const cloudinary = require("cloudinary");
 const User = require("../models/userModel");
 
 // ============================================================
-// 1. GET ALL PRODUCTS (Public - Sirf Approved Wale)
-// ============================================================
-// ============================================================
 // 1. GET ALL PRODUCTS (Public - Sab Products Dikhane ke liye)
 // ============================================================
 exports.getAllProducts = asyncErrorHandler(async (req, res, next) => {
@@ -44,11 +41,11 @@ exports.getAllProducts = asyncErrorHandler(async (req, res, next) => {
     filteredProductsCount,
   });
 });
+
 // ============================================================
 // 2. GET PRODUCTS (Simple List for Sliders - Public)
 // ============================================================
 exports.getProducts = asyncErrorHandler(async (req, res, next) => {
-  // Sirf testing ke liye filter hata diya gaya hai
   const products = await Product.find({});
   res.status(200).json({
     success: true,
@@ -74,6 +71,7 @@ exports.getProductDetails = asyncErrorHandler(async (req, res, next) => {
     product,
   });
 });
+
 // ============================================================
 // 4. CREATE PRODUCT (By Seller or Admin)
 // ============================================================
@@ -130,6 +128,14 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
     req.body.sizes = [];
   }
 
+  // --- 🏷️ DISCOUNT & ⏱️ TIMER HANDLING ---
+  if (req.body.discount) {
+    req.body.discount = Number(req.body.discount);
+  }
+  if (req.body.offerTimer) {
+    req.body.offerTimer = Number(req.body.offerTimer);
+  }
+
   // Specifications Parsing
   if (req.body.specifications) {
     let specs = [];
@@ -154,6 +160,7 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
     product,
   });
 });
+
 // ============================================================
 // 5. UPDATE PRODUCT (Owner or Admin Only)
 // ============================================================
@@ -198,8 +205,16 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
     product.sizes = typeof req.body.sizes === 'string' ? [req.body.sizes] : req.body.sizes;
   }
 
+  // --- 🏷️ DISCOUNT & ⏱️ TIMER UPDATE HANDLING ---
+  if (req.body.discount !== undefined) {
+    product.discount = Number(req.body.discount);
+  }
+  if (req.body.offerTimer !== undefined) {
+    product.offerTimer = Number(req.body.offerTimer);
+  }
+
   // 2. Baaki Fields Update Karein
-  const { specifications, colors, sizes, ...otherData } = req.body;
+  const { specifications, colors, sizes, discount, offerTimer, ...otherData } = req.body;
 
   Object.keys(otherData).forEach((key) => {
     product[key] = otherData[key];
@@ -218,6 +233,7 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
     product,
   });
 });
+
 // ============================================================
 // 6. DELETE PRODUCT
 // ============================================================
@@ -255,9 +271,7 @@ exports.getSellerProducts = asyncErrorHandler(async (req, res, next) => {
 // ============================================================
 // 8. GET ADMIN PRODUCTS (All Marketplace)
 // ============================================================
-// SIRF backend/controllers/productController.js mein ye change karein
 exports.getAdminProducts = asyncErrorHandler(async (req, res, next) => {
-  // Yahan .populate("user", "role") add karna zaroori hai
   const products = await Product.find().populate("user", "role");
 
   res.status(200).json({
@@ -265,6 +279,7 @@ exports.getAdminProducts = asyncErrorHandler(async (req, res, next) => {
     products,
   });
 });
+
 // ============================================================
 // 9. UPDATE PRODUCT STATUS (Admin Approval)
 // ============================================================
@@ -353,17 +368,14 @@ exports.deleteReview = asyncErrorHandler(async (req, res, next) => {
 
   res.status(200).json({ success: true });
 });
+
 // ============================================================
 // 11. GET SPECIFIC SELLER STORE (Frontend ke liye)
 // ============================================================
 exports.getSellerStore = asyncErrorHandler(async (req, res, next) => {
-  // 1. Seller ki details (User model se)
-  // Backend (Controller mein aisa hona chahiye)
   const seller = await User.findById(req.params.id).select(
     "shopName description logo banner",
   );
-  // 2. Sirf us seller ke products (Product model se)
-  // Hum "user" field use kar rahe hain kyunki aapne createProduct mein user: req.user.id save kiya tha
   const products = await Product.find({
     user: req.params.id,
     isApproved: true,
@@ -375,15 +387,14 @@ exports.getSellerStore = asyncErrorHandler(async (req, res, next) => {
     products,
   });
 });
+
 // ============================================================
 // 12. GET SELLER REVIEWS (Seller Dashboard ke liye)
 // ============================================================
 exports.getSellerReviews = asyncErrorHandler(async (req, res, next) => {
-  // 1. Logged-in seller ke saare products find karein
   const products = await Product.find({ user: req.user.id });
 
   let reviews = [];
-  // 2. Har product ke reviews ko ek array mein collect karein
   products.forEach((product) => {
     product.reviews.forEach((rev) => {
       reviews.push({

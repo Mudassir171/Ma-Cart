@@ -38,6 +38,11 @@ const UpdateProduct = () => {
     const [stock, setStock] = useState(0);
     const [warranty, setWarranty] = useState(0);
     const [brand, setBrand] = useState("");
+    
+    // --- Naye States: Discount aur Offer Timer ke liye ---
+    const [discount, setDiscount] = useState(0);
+    const [offerTimer, setOfferTimer] = useState(0);
+
     const [images, setImages] = useState([]);
     const [oldImages, setOldImages] = useState([]);
     const [imagesPreview, setImagesPreview] = useState([]);
@@ -50,7 +55,7 @@ const UpdateProduct = () => {
     }
 
     const addSpecs = () => {
-        if (!specsInput.title.trim() || !specsInput.title.trim()) return;
+        if (!specsInput.title.trim() || !specsInput.description.trim()) return;
         setSpecs([...specs, specsInput]);
         setSpecsInput({ title: "", description: "" });
     }
@@ -129,6 +134,10 @@ const UpdateProduct = () => {
         formData.set("warranty", warranty);
         formData.set("brandname", brand);
         formData.set("logo", logo);
+        
+        // --- FormData mein Discount aur Timer append kar diye hain ---
+        formData.set("discount", discount);
+        formData.set("offerTimer", offerTimer);
 
         images.forEach((image) => {
             formData.append("images", image);
@@ -151,7 +160,7 @@ const UpdateProduct = () => {
 
         if (product && product._id !== productId) {
             dispatch(getProductDetails(productId));
-        } else {
+        } else if (product) {
             setName(product.name);
             setDescription(product.description);
             setPrice(product.price);
@@ -159,12 +168,17 @@ const UpdateProduct = () => {
             setCategory(product.category);
             setStock(product.stock);
             setWarranty(product.warranty);
-            setBrand(product.brand.name);
-            setHighlights(product.highlights);
-            setSpecs(product.specifications);
-            setOldImages(product.images);
-            setLogoPreview(product.brand.logo.url);
+            setBrand(product.brand ? product.brand.name : "");
+            setHighlights(product.highlights || []);
+            setSpecs(product.specifications || []);
+            setOldImages(product.images || []);
+            setLogoPreview(product.brand && product.brand.logo ? product.brand.logo.url : "");
+            
+            // --- Existing Product se Discount aur Timer set karna ---
+            setDiscount(product.discount || 0);
+            setOfferTimer(product.offerTimer || 0);
         }
+
         if (error) {
             enqueueSnackbar(error, { variant: "error" });
             dispatch(clearErrors());
@@ -208,7 +222,7 @@ const UpdateProduct = () => {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                     />
-                    <div className="flex justify-between">
+                    <div className="flex justify-between gap-4">
                         <TextField
                             label="Price"
                             type="number"
@@ -238,6 +252,27 @@ const UpdateProduct = () => {
                             onChange={(e) => setCuttedPrice(e.target.value)}
                         />
                     </div>
+
+                    {/* --- Naye Input Fields: Discount % aur Timer (Hours) --- */}
+                    <div className="flex justify-between gap-4">
+                        <TextField
+                            label="Discount % (e.g. 25)"
+                            type="number"
+                            variant="outlined"
+                            size="small"
+                            value={discount}
+                            onChange={(e) => setDiscount(e.target.value)}
+                        />
+                        <TextField
+                            label="Offer Timer (Hours e.g. 48)"
+                            type="number"
+                            variant="outlined"
+                            size="small"
+                            value={offerTimer}
+                            onChange={(e) => setOfferTimer(e.target.value)}
+                        />
+                    </div>
+
                     <div className="flex justify-between gap-4">
                         <TextField
                             label="Category"
@@ -293,7 +328,7 @@ const UpdateProduct = () => {
 
                         <div className="flex flex-col gap-1.5">
                             {highlights.map((h, i) => (
-                                <div className="flex justify-between rounded items-center py-1 px-2 bg-green-50">
+                                <div key={i} className="flex justify-between rounded items-center py-1 px-2 bg-green-50">
                                     <p className="text-green-800 text-sm font-medium">{h}</p>
                                     <span onClick={() => deleteHighlight(i)} className="text-red-600 hover:bg-red-100 p-1 rounded-full cursor-pointer">
                                         <DeleteIcon />
@@ -344,7 +379,7 @@ const UpdateProduct = () => {
 
                     <div className="flex flex-col gap-1.5">
                         {specs.map((spec, i) => (
-                            <div className="flex justify-between items-center text-sm rounded bg-blue-50 py-1 px-2">
+                            <div key={i} className="flex justify-between items-center text-sm rounded bg-blue-50 py-1 px-2">
                                 <p className="text-gray-500 font-medium">{spec.title}</p>
                                 <p>{spec.description}</p>
                                 <span onClick={() => deleteSpec(i)} className="text-red-600 hover:bg-red-200 bg-red-100 p-1 rounded-full cursor-pointer">
