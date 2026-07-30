@@ -6,8 +6,7 @@ const cors = require("cors");
 const cloudinary = require("cloudinary");
 const errorMiddleware = require("./middlewares/error");
 
-// --- WhatsApp Service Import ---
-const { connectToWhatsApp } = require("./utils/whatsappService");
+// --- WhatsApp Service Import --
 
 const app = express();
 
