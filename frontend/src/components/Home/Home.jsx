@@ -6,10 +6,11 @@ import { clearErrors, getSliderProducts } from "../../actions/productAction";
 import { useSnackbar } from "notistack";
 import MetaData from "../Layouts/MetaData";
 import Product from "./ProductSlider/Product";
+import { Link } from "react-router-dom";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
-// --- Sub-component for individual product timers in Deals Section ---
+// --- Sub-component for individual product timers in Discounted/Deals Section ---
 const DealProductItem = ({ item }) => {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -19,8 +20,6 @@ const DealProductItem = ({ item }) => {
   });
 
   useEffect(() => {
-    // Assuming item has an expiry/timer field like item.dealTime or item.createdAt + duration
-    // Adjust targetTime according to your backend schema (e.g., item.dealExpiry or item.timer)
     const targetTime = item.dealExpiry ? new Date(item.dealExpiry).getTime() : new Date().getTime() + 86400000 * 3;
 
     const interval = setInterval(() => {
@@ -54,7 +53,6 @@ const DealProductItem = ({ item }) => {
       )}
       <Product {...item} />
       
-      {/* Individual Product Timer */}
       <div className="mt-2 pt-2 border-t border-gray-100">
         <p className="text-[10px] text-gray-500 text-center mb-1 font-medium">Offers ends in:</p>
         <div className="flex items-center justify-center gap-1 text-[10px] font-bold text-gray-800 bg-gray-50 py-1 rounded">
@@ -107,12 +105,12 @@ const Home = () => {
     dispatch(getSliderProducts());
   }, [dispatch, error, enqueueSnackbar]);
 
-  // --- 1. Latest Products (Sorted by newest first, assuming item.createdAt exists) ---
+  // --- 1. Latest Products (Sorted by newest first) ---
   const latestProducts = products 
     ? [...products].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
     : [];
 
-  // --- 2. Discounted Products ---
+  // --- 2. Discounted / Deal Products ---
   const discountedProducts = products?.filter((item) => {
     const disc = item.discount || (item.cuttedPrice && item.price ? Math.round(((item.cuttedPrice - item.price) / item.cuttedPrice) * 100) : 0);
     return disc > 0;
@@ -130,20 +128,34 @@ const Home = () => {
 
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
 
-          {/* Categories Section */}
-          <section className="mt-4">
-            <div className="flex items-center gap-4 mb-3">
-              <h2 className="text-gray-900 text-lg sm:text-xl font-bold">Categories</h2>
-              <div className="h-[1px] bg-gray-300 flex-1"></div>
+          {/* --- CATEGORIES SECTION (Matching Categories page design & structure) --- */}
+          <section className="bg-white mt-2 mb-2 w-full shadow-sm rounded-sm overflow-hidden border border-gray-100">
+            <div className="flex justify-between items-center px-4 py-3 border-b border-gray-50">
+              <h2 className="text-lg font-bold text-green-800 uppercase tracking-tight">
+                Categories
+              </h2>
+              <Link to="/products" className="text-green-800 border border-green-800 px-5 py-2 text-sm font-semibold hover:bg-green-800 hover:text-white transition-all uppercase rounded-sm">
+                Shop All Categories
+              </Link>
             </div>
-            <div className="bg-white rounded-sm shadow-sm p-2">
+            <div className="p-2">
               <Categories />
             </div>
           </section>
 
-          {/* --- 1. LATEST PRODUCTS SECTION (No Timer, Newest First) --- */}
+          {/* --- 1. LATEST PRODUCTS SECTION (Above Just For You, Matches Design Style) --- */}
           {latestProducts && latestProducts.length > 0 && (
             <section className="bg-white rounded-md shadow-sm overflow-hidden relative border border-gray-100 mt-2">
+              {/* Header style matching Categories/Sections */}
+              <div className="flex justify-between items-center px-4 py-3 border-b border-gray-50">
+                <h2 className="text-lg font-bold text-green-800 uppercase tracking-tight">
+                  Latest Products
+                </h2>
+                <Link to="/products" className="text-green-800 border border-green-800 px-5 py-2 text-sm font-semibold hover:bg-green-800 hover:text-white transition-all uppercase rounded-sm">
+                  View All
+                </Link>
+              </div>
+
               {latestProducts.length >= 4 && (
                 <>
                   <button 
@@ -166,13 +178,6 @@ const Home = () => {
                 className="flex items-stretch overflow-x-auto scroll-smooth scrollbar-none"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {/* Section Title Box */}
-                <div className="min-w-[160px] sm:min-w-[260px] p-3 sm:p-5 flex flex-col justify-center border-r border-gray-200 bg-white flex-shrink-0">
-                  <h2 className="text-gray-900 font-bold text-base sm:text-xl leading-tight">Latest Products</h2>
-                  <p className="text-gray-500 text-[11px] sm:text-xs">Newly uploaded items</p>
-                </div>
-
-                {/* Products List */}
                 <div className="flex flex-1 items-stretch">
                   {!loading && latestProducts.map((item) => {
                     const discountPercentage = item.discount || (item.cuttedPrice && item.price
@@ -198,9 +203,18 @@ const Home = () => {
             </section>
           )}
 
-          {/* --- 2. DEALS AND OFFERS SECTION (Individual Product Timers) --- */}
+          {/* --- 2. DISCOUNTED / DEALS PRODUCTS SECTION (With individual product timer) --- */}
           {discountedProducts && discountedProducts.length > 0 && (
             <section className="bg-white rounded-md shadow-sm overflow-hidden relative border border-gray-100 mt-2">
+              <div className="flex justify-between items-center px-4 py-3 border-b border-gray-50">
+                <h2 className="text-lg font-bold text-green-800 uppercase tracking-tight">
+                  Special Discounts & Offers
+                </h2>
+                <Link to="/products" className="text-green-800 border border-green-800 px-5 py-2 text-sm font-semibold hover:bg-green-800 hover:text-white transition-all uppercase rounded-sm">
+                  View All
+                </Link>
+              </div>
+
               {discountedProducts.length >= 4 && (
                 <>
                   <button 
@@ -223,13 +237,6 @@ const Home = () => {
                 className="flex items-stretch overflow-x-auto scroll-smooth scrollbar-none"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {/* Section Title Box */}
-                <div className="min-w-[160px] sm:min-w-[260px] p-3 sm:p-5 flex flex-col justify-center border-r border-gray-200 bg-white flex-shrink-0">
-                  <h2 className="text-gray-900 font-bold text-base sm:text-xl leading-tight">Deals & Discounts</h2>
-                  <p className="text-gray-500 text-[11px] sm:text-xs">Timed promotional items</p>
-                </div>
-
-                {/* Products List with Individual Timers */}
                 <div className="flex flex-1 items-stretch">
                   {!loading && discountedProducts.map((item) => (
                     <DealProductItem key={item._id} item={item} />
@@ -239,16 +246,17 @@ const Home = () => {
             </section>
           )}
 
-          {/* --- 3. JUST FOR YOU SECTION (All Products) --- */}
-          <section className="mt-2">
-            <div className="flex items-center gap-4 mb-4">
-              <h2 className="text-gray-900 text-lg sm:text-xl font-bold">Just For You</h2>
-              <div className="h-[1px] bg-gray-300 flex-1"></div>
+          {/* --- 3. JUST FOR YOU SECTION (All Products Grid - Same Design Structure) --- */}
+          <section className="bg-white rounded-md shadow-sm overflow-hidden border border-gray-100 mt-2">
+            <div className="flex justify-between items-center px-4 py-3 border-b border-gray-50 mb-2">
+              <h2 className="text-lg font-bold text-green-800 uppercase tracking-tight">
+                Just For You
+              </h2>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4 p-2 sm:p-4">
               {!loading && products && products.map((item) => (
-                <div key={item._id} className="h-full bg-white p-2 rounded shadow-sm">
+                <div key={item._id} className="h-full bg-white p-2 rounded border border-gray-100 shadow-sm hover:shadow-md transition-all">
                   <Product {...item} />
                 </div>
               ))}
