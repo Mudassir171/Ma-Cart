@@ -154,55 +154,91 @@ const Home = () => {
               <Categories />
             </div>
           </section>
-          {/* --- LATEST PRODUCTS SECTION (Grid Layout - 6 per row) --- */}
-          {latestProducts && latestProducts.length > 0 && (
-            <section className="bg-gradient-to-b from-white to-gray-50/50 my-6 w-full shadow-md rounded-2xl overflow-hidden border border-emerald-100/60 p-4 md:p-6">
-              {/* --- Header Section --- */}
-              <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-6 w-1.5 bg-emerald-600 rounded-full"></div>
-                  <h2 className="text-lg md:text-xl font-extrabold text-emerald-900 tracking-tight">
-                    Latest Products
-                  </h2>
-                </div>
+        {/* --- LATEST PRODUCTS SECTION (Banner Left + 4 Products Right in a Single Line) --- */}
+{latestProducts && latestProducts.length > 0 && (
+  <section className="bg-gradient-to-b from-white to-gray-50/50 my-6 w-full shadow-md rounded-2xl overflow-hidden border border-emerald-100/60 p-4 md:p-6">
+    
+    {/* --- Header Section --- */}
+    <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
+      <div className="flex items-center gap-2.5">
+        <div className="h-6 w-1.5 bg-emerald-600 rounded-full"></div>
+        <h2 className="text-lg md:text-xl font-extrabold text-emerald-900 tracking-tight">
+          Latest Products
+        </h2>
+      </div>
 
-                <Link
-                  to="/products"
-                  className="group relative inline-flex items-center gap-2 px-5 py-2 text-xs md:text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-300 shadow-sm"
+      <Link
+        to="/products"
+        className="group relative inline-flex items-center gap-2 px-5 py-2 text-xs md:text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-300 shadow-sm"
+      >
+        <span>View All</span>
+        <svg
+          className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </Link>
+    </div>
+
+    {/* --- Main Container: Left Banner + Right 4 Products --- */}
+    <div className="flex flex-col lg:flex-row gap-4 items-stretch">
+      
+      {/* Left Side: Banner */}
+      <div className="w-full lg:w-[260px] flex-shrink-0">
+        <Link 
+          to="/products" 
+          className="group relative h-full min-h-[300px] rounded-xl overflow-hidden shadow-sm border border-emerald-100 flex flex-col justify-end p-5 block"
+        >
+          <img 
+            src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=600&q=80" 
+            alt="Latest Collection Banner"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+          
+          <div className="relative z-10 text-white">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-950/70 px-2.5 py-1 rounded-md backdrop-blur-md">
+              Special Offer
+            </span>
+            <h3 className="text-lg font-extrabold mt-2 leading-snug">
+              Hot New Arrivals & Deals
+            </h3>
+            <span className="inline-flex items-center gap-1 mt-2 text-xs font-bold text-white bg-emerald-600 px-3 py-1.5 rounded-lg group-hover:bg-emerald-500 transition-colors">
+              Shop Now &rarr;
+            </span>
+          </div>
+        </Link>
+      </div>
+
+      {/* Right Side: 4 Products in a Single Line (Fixed Width 200px, Height 300px) */}
+      <div className="flex-grow overflow-x-auto pb-2">
+        <div className="flex gap-4 items-center justify-start lg:justify-between">
+          {!loading &&
+            latestProducts.slice(0, 4).map((item) => {
+              return (
+                <div
+                  key={item._id}
+                  style={{ width: '200px', height: '300px' }}
+                  className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-emerald-200 transition-all duration-300 flex-shrink-0 flex flex-col shadow-sm"
                 >
-                  <span>View All</span>
-                  <svg
-                    className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </Link>
-              </div>
+                  <Product {...item} />
+                </div>
+              );
+            })}
+        </div>
+      </div>
 
-              {/* --- Product Grid Layout (Mobile: 2 cols, Desktop: 6 cols, Limit: 12) --- */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-                {!loading &&
-                  latestProducts.slice(0, 12).map((item) => {
-                    return (
-                      <div
-                        key={item._id}
-                        className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-emerald-200 transition-all duration-300"
-                      >
-                        <Product {...item} />
-                      </div>
-                    );
-                  })}
-              </div>
-            </section>
-          )}
+    </div>
+  </section>
+)}
           {/* --- 2. DISCOUNTED / DEALS PRODUCTS SECTION --- */}
           {discountedProducts && discountedProducts.length > 0 && (
             <section className="bg-gradient-to-b from-white to-gray-50/50 my-6 w-full shadow-md rounded-2xl overflow-hidden relative border border-emerald-100/60 p-4 md:p-6">
