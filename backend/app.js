@@ -54,6 +54,6 @@ app.use(errorMiddleware);
 
 // --- WhatsApp Connection Call ---
 // Jab app start hogi, yeh WhatsApp ko connect karne ki koshish karegi aur terminal par QR code dikhayegi
-connectToWhatsApp();
+conne
 
 module.exports = app;
