@@ -300,26 +300,27 @@ const ProductDetails = () => {
 
   <div className="flex items-center gap-2 flex-wrap">
     {product.colors && product.colors.map((colorItem, i) => {
-      // Helper function to safely parse nested/stringified JSON data
-      const getParsedColor = (item) => {
-        let current = item;
-        // Loop to handle double or single stringified JSON
-        for (let step = 0; step < 2; step++) {
-          if (typeof current === 'string') {
-            try {
-              current = JSON.parse(current);
-            } catch (e) {
-              break;
-            }
-          }
-        }
-        return current;
-      };
+      let colorName = "";
+      let colorImg = null;
 
-      const parsedObj = getParsedColor(colorItem);
-      
-      const colorName = typeof parsedObj === 'object' && parsedObj !== null ? parsedObj.name : colorItem;
-      const colorImg = typeof parsedObj === 'object' && parsedObj !== null ? parsedObj.image : null;
+      try {
+        // Agar data string hai toh usko parse karte hain
+        let parsed = colorItem;
+        while (typeof parsed === 'string') {
+          parsed = JSON.parse(parsed);
+        }
+        
+        // Agar parse hone ke baad object ban gaya hai
+        if (typeof parsed === 'object' && parsed !== null) {
+          colorName = parsed.name || "";
+          colorImg = parsed.image || null;
+        } else {
+          colorName = colorItem;
+        }
+      } catch (error) {
+        // Agar JSON parse fail ho jaye (matlab normal text ho)
+        colorName = colorItem;
+      }
 
       const isSelected = selectedColor === colorName;
 
@@ -358,7 +359,6 @@ const ProductDetails = () => {
     })}
   </div>
 </div>
-
                     
                   {/* --- SIZES SELECTION --- */}
                   {product.sizes && product.sizes.length > 0 && (
