@@ -59,7 +59,7 @@ const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
         {
             title: "My Chats",
             icon: <ChatIcon sx={{ fontSize: "18px" }} />,
-            redirect: "/",
+            redirect: "/chats",
         },
         {
             title: "Coupons",

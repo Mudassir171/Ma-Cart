@@ -323,7 +323,7 @@ import ContactPage from './components/Home/Contactpage';
 import AboutUs from './components/Home/AboutUs';
 import Notification from './components/Notification/Notification';
 import PaymentPage from './components/Home/Paymentpage';
-
+import MyChats from './components/Mychats/MyChats';
 // --- Actions & Protection ---
 import { loadUser } from './actions/userAction';
 import ProtectedRoute from './Routes/ProtectedRoute';
@@ -378,6 +378,7 @@ function App() {
                 <Route path="/password/forgot" element={<ForgotPassword />} />
                 <Route path="/password/reset/:token" element={<ResetPassword />} />
                 <Route path="/seller/store/:id" element={ <SellerStore /> } />
+                <Route path="/chats" element={<MyChats />} />
                 {/* App.js mein: */}
                 <Route path="/sellerstore/:id" element={<SellerStore />} />
                 {/* --- Protected User Routes --- */}
@@ -389,7 +390,7 @@ function App() {
                 <Route path="/shipping" element={<ProtectedRoute><Shipping /></ProtectedRoute>} />
                 <Route path="/order/confirm" element={<ProtectedRoute><OrderConfirm /></ProtectedRoute>} />
                 <Route path="/become-seller" element={<ProtectedRoute><BecomeSeller /></ProtectedRoute>} />
-
+                
                 <Route path="/process/payment" element={
                     stripeApiKey && (
                         <Elements stripe={loadStripe(stripeApiKey)}>
