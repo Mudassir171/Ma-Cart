@@ -295,7 +295,11 @@ const ProductDetails = () => {
 <div className="mb-4">
   <div className="flex items-center gap-4 mb-2">
     <span className="text-gray-500 text-sm">Color Family</span>
-    <span className="text-black font-medium text-sm">{selectedColor}</span>
+    <span className="text-black font-medium text-sm">
+      {typeof selectedColor === 'object' && selectedColor !== null 
+        ? selectedColor.name 
+        : selectedColor}
+    </span>
   </div>
 
   <div className="flex items-center gap-2 flex-wrap">
@@ -304,13 +308,11 @@ const ProductDetails = () => {
       let colorImg = null;
 
       try {
-        // Agar data string hai toh usko parse karte hain
         let parsed = colorItem;
         while (typeof parsed === 'string') {
           parsed = JSON.parse(parsed);
         }
         
-        // Agar parse hone ke baad object ban gaya hai
         if (typeof parsed === 'object' && parsed !== null) {
           colorName = parsed.name || "";
           colorImg = parsed.image || null;
@@ -318,16 +320,20 @@ const ProductDetails = () => {
           colorName = colorItem;
         }
       } catch (error) {
-        // Agar JSON parse fail ho jaye (matlab normal text ho)
         colorName = colorItem;
       }
 
-      const isSelected = selectedColor === colorName;
+      // Yahan hum object ya string dono ko safely match kar rahe hain
+      const currentName = typeof colorName === 'object' ? colorName.name : colorName;
+      const isSelected = typeof selectedColor === 'object' 
+        ? selectedColor?.name === currentName 
+        : selectedColor === currentName;
 
       return (
         <div
           key={i}
           onClick={() => {
+            // State mein poora object ya sirf name save karne ke liye
             setSelectedColor(colorName);
             if (colorImg) {
               setMainImage(colorImg);
@@ -340,12 +346,12 @@ const ProductDetails = () => {
           {colorImg ? (
             <img 
               src={colorImg} 
-              alt={colorName} 
+              alt={currentName} 
               className="w-10 h-12 object-cover block" 
             />
           ) : (
             <div className="w-10 h-12 bg-gray-100 flex items-center justify-center text-xs px-1 text-center">
-              {colorName || "Color"}
+              {currentName || "Color"}
             </div>
           )}
 
