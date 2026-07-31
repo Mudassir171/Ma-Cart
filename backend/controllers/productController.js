@@ -114,12 +114,21 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
   req.body.isApproved = req.user.role === "admin" ? true : false;
 
   // --- 🎨📏 COLORS & SIZES HANDLING ---
+ // --- 🎨📏 COLORS & SIZES HANDLING ---
   let colors = req.body.colors;
   if (colors) {
-    req.body.colors = typeof colors === 'string' ? [colors] : colors;
+    let colorsArray = Array.isArray(colors) ? colors : [colors];
+    req.body.colors = colorsArray.map((c) => {
+      try {
+        return typeof c === 'string' ? JSON.parse(c) : c;
+      } catch (err) {
+        return c;
+      }
+    });
   } else {
     req.body.colors = [];
   }
+
 
   let sizes = req.body.sizes;
   if (sizes) {
@@ -197,8 +206,16 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
   }
 
   // --- 🎨📏 COLORS & SIZES UPDATE HANDLING ---
+  // --- 🎨📏 COLORS & SIZES UPDATE HANDLING ---
   if (req.body.colors) {
-    product.colors = typeof req.body.colors === 'string' ? [req.body.colors] : req.body.colors;
+    let colorsArray = Array.isArray(req.body.colors) ? req.body.colors : [req.body.colors];
+    product.colors = colorsArray.map((c) => {
+      try {
+        return typeof c === 'string' ? JSON.parse(c) : c;
+      } catch (err) {
+        return c;
+      }
+    });
   }
 
   if (req.body.sizes) {
