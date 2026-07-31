@@ -289,83 +289,92 @@ const ProductDetails = () => {
                     </div>
                   </div>
 
-  
-{/* --- COLOR FAMILY SECTION --- */}
-{/* --- COLOR FAMILY SECTION --- */}
-<div className="mb-4">
-  <div className="flex items-center gap-4 mb-2">
-    <span className="text-gray-500 text-sm">Color Family</span>
-    <span className="text-black font-medium text-sm">
-      {typeof selectedColor === 'object' && selectedColor !== null 
-        ? selectedColor.name 
-        : selectedColor}
-    </span>
-  </div>
+                  {/* --- COLOR FAMILY SECTION --- */}
+                  {/* --- COLOR FAMILY SECTION --- */}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-4 mb-2">
+                      <span className="text-gray-500 text-sm">
+                        Color Family
+                      </span>
+                      <span className="text-black font-medium text-sm">
+                        {typeof selectedColor === "object" &&
+                        selectedColor !== null
+                          ? selectedColor.name
+                          : selectedColor}
+                      </span>
+                    </div>
 
-  <div className="flex items-center gap-2 flex-wrap">
-    {product.colors && product.colors.map((colorItem, i) => {
-      let colorName = "";
-      let colorImg = null;
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {product.colors &&
+                        product.colors.map((colorItem, i) => {
+                          let colorName = "";
+                          let colorImg = null;
 
-      try {
-        let parsed = colorItem;
-        while (typeof parsed === 'string') {
-          parsed = JSON.parse(parsed);
-        }
-        
-        if (typeof parsed === 'object' && parsed !== null) {
-          colorName = parsed.name || "";
-          colorImg = parsed.image || null;
-        } else {
-          colorName = colorItem;
-        }
-      } catch (error) {
-        colorName = colorItem;
-      }
+                          try {
+                            let parsed = colorItem;
+                            while (typeof parsed === "string") {
+                              parsed = JSON.parse(parsed);
+                            }
 
-      // Yahan hum object ya string dono ko safely match kar rahe hain
-      const currentName = typeof colorName === 'object' ? colorName.name : colorName;
-      const isSelected = typeof selectedColor === 'object' 
-        ? selectedColor?.name === currentName 
-        : selectedColor === currentName;
+                            if (typeof parsed === "object" && parsed !== null) {
+                              colorName = parsed.name || "";
+                              colorImg = parsed.image || null;
+                            } else {
+                              colorName = colorItem;
+                            }
+                          } catch (error) {
+                            colorName = colorItem;
+                          }
 
-      return (
-        <div
-          key={i}
-          onClick={() => {
-            // State mein poora object ya sirf name save karne ke liye
-            setSelectedColor(colorName);
-            if (colorImg) {
-              setMainImage(colorImg);
-            }
-          }}
-          className={`cursor-pointer p-0.5 bg-white border transition-all relative ${
-            isSelected ? "border-[#f57224] shadow-sm" : "border-gray-300 hover:border-gray-400"
-          }`}
-        >
-          {colorImg ? (
-            <img 
-              src={colorImg} 
-              alt={currentName} 
-              className="w-10 h-12 object-cover block" 
-            />
-          ) : (
-            <div className="w-10 h-12 bg-gray-100 flex items-center justify-center text-xs px-1 text-center">
-              {currentName || "Color"}
-            </div>
-          )}
+                          // Yahan hum object ya string dono ko safely match kar rahe hain
+                          const currentName =
+                            typeof colorName === "object"
+                              ? colorName.name
+                              : colorName;
+                          const isSelected =
+                            typeof selectedColor === "object"
+                              ? selectedColor?.name === currentName
+                              : selectedColor === currentName;
 
-          {isSelected && (
-            <div className="absolute bottom-0 right-0 bg-[#f57224] text-white text-[9px] px-1 leading-none py-0.5">
-              ✓
-            </div>
-          )}
-        </div>
-      );
-    })}
-  </div>
-</div>
-                    
+                          return (
+                            <div
+                              key={i}
+                              onClick={() => {
+                                // State mein poora object ya sirf name save karne ke liye
+                                setSelectedColor(colorName);
+                                if (colorImg) {
+                                  setMainImage(colorImg);
+                                }
+                              }}
+                              className={`cursor-pointer p-0.5 bg-white border transition-all relative ${
+                                isSelected
+                                  ? "border-[#f57224] shadow-sm"
+                                  : "border-gray-300 hover:border-gray-400"
+                              }`}
+                            >
+                              {colorImg ? (
+                                <img
+                                  src={colorImg}
+                                  alt={currentName}
+                                  className="w-10 h-12 object-cover block"
+                                />
+                              ) : (
+                                <div className="w-10 h-12 bg-gray-100 flex items-center justify-center text-xs px-1 text-center">
+                                  {currentName || "Color"}
+                                </div>
+                              )}
+
+                              {isSelected && (
+                                <div className="absolute bottom-0 right-0 bg-[#f57224] text-white text-[9px] px-1 leading-none py-0.5">
+                                  ✓
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+
                   {/* --- SIZES SELECTION --- */}
                   {product.sizes && product.sizes.length > 0 && (
                     <div className="mb-4">

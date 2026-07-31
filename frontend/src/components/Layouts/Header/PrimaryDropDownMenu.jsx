@@ -22,6 +22,11 @@ const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
     const { enqueueSnackbar } = useSnackbar();
 
     const { wishlistItems } = useSelector((state) => state.wishlist);
+    
+    // --- 📦 ORDERS & 🔔 NOTIFICATIONS REDUX STATE ---
+    // (Note: Apne Redux store ke reducer name ke mutabiq 'myOrders' aur 'notifications' check kar lijiyega)
+    const { orders } = useSelector((state) => state.myOrders || { orders: [] });
+    const { notifications } = useSelector((state) => state.notifications || { notifications: [] });
 
     const handleLogout = () => {
         dispatch(logoutUser());
@@ -37,7 +42,7 @@ const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
             redirect: "/",
         },
         {
-            title: "Flipkart Plus Zone",
+            title: "Ma-Cart Plus Zone",
             icon: <AddCircleIcon sx={{ fontSize: "18px" }} />,
             redirect: "/",
         },
@@ -155,6 +160,30 @@ const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
                                     <span className="flex-1">{title}</span>
                                     <span className="bg-emerald-800 text-[11px] font-bold px-2 py-0.5 text-emerald-200 rounded-full border border-emerald-700">
                                         {wishlistItems.length}
+                                    </span>
+                                </Link>
+                            ) : title === "Orders" ? (
+                                <Link 
+                                    onClick={() => setTogglePrimaryDropDown(false)}
+                                    className="px-3 py-2.5 rounded-xl flex gap-3 items-center hover:bg-emerald-800 hover:text-white transition-all font-medium text-emerald-200 group" 
+                                    to={redirect}
+                                >
+                                    <span className="text-emerald-400 group-hover:scale-110 transition-transform">{icon}</span>
+                                    <span className="flex-1">{title}</span>
+                                    <span className="bg-emerald-800 text-[11px] font-bold px-2 py-0.5 text-emerald-200 rounded-full border border-emerald-700">
+                                        {orders?.length || 0}
+                                    </span>
+                                </Link>
+                            ) : title === "Notifications" ? (
+                                <Link 
+                                    onClick={() => setTogglePrimaryDropDown(false)}
+                                    className="px-3 py-2.5 rounded-xl flex gap-3 items-center hover:bg-emerald-800 hover:text-white transition-all font-medium text-emerald-200 group" 
+                                    to={redirect}
+                                >
+                                    <span className="text-emerald-400 group-hover:scale-110 transition-transform">{icon}</span>
+                                    <span className="flex-1">{title}</span>
+                                    <span className="bg-emerald-800 text-[11px] font-bold px-2 py-0.5 text-emerald-200 rounded-full border border-emerald-700">
+                                        {notifications?.length || 0}
                                     </span>
                                 </Link>
                             ) : (
