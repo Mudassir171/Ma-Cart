@@ -48,7 +48,11 @@ const NewProduct = () => {
     const [colorName, setColorName] = useState("");
     const [colorImage, setColorImage] = useState("");
     const [colorImagePreview, setColorImagePreview] = useState("");
-    const [colors, setColors] = useState([]); // Array of { name, image }
+    const [colors, setColors] = useState([]);
+
+    // --- Size States (Added) ---
+    const [sizeInput, setSizeInput] = useState("");
+    const [sizes, setSizes] = useState([]);
 
     const [images, setImages] = useState([]);
     const [imagesPreview, setImagesPreview] = useState([]);
@@ -79,6 +83,21 @@ const NewProduct = () => {
     const deleteSpec = (index) => {
         setSpecs(specs.filter((s, i) => i !== index))
     }
+
+    // --- Size Handlers (Added) ---
+    const addSize = () => {
+        if (!sizeInput.trim()) return;
+        if (sizes.includes(sizeInput.trim())) {
+            enqueueSnackbar("Size already added", { variant: "warning" });
+            return;
+        }
+        setSizes([...sizes, sizeInput.trim()]);
+        setSizeInput("");
+    };
+
+    const deleteSize = (index) => {
+        setSizes(sizes.filter((s, i) => i !== index));
+    };
 
     // --- Color Image Handler ---
     const handleColorImageChange = (e) => {
@@ -186,6 +205,7 @@ const NewProduct = () => {
         highlights.forEach((h) => { formData.append("highlights", h); });
         specs.forEach((s) => { formData.append("specifications", JSON.stringify(s)); });
         colors.forEach((c) => { formData.append("colors", JSON.stringify(c)); });
+        sizes.forEach((s) => { formData.append("sizes", s); }); // Added sizes to formData
 
         dispatch(createProduct(formData));
     }
@@ -255,7 +275,35 @@ const NewProduct = () => {
                         />
                     </div>
 
-                    {/* --- Color Family Preview & Input Section (Daraz Style) --- */}
+                    {/* --- Size Variants Section (Added) --- */}
+                    <div className="border border-gray-200 p-3 rounded-lg bg-gray-50/50">
+                        <h2 className="font-bold text-gray-700 uppercase text-xs mb-2 tracking-widest">Size Variants (e.g. S, M, L, XL)</h2>
+                        <div className="flex gap-2 items-center mb-2">
+                            <TextField 
+                                value={sizeInput} 
+                                onChange={(e) => setSizeInput(e.target.value)} 
+                                label="Size Name" 
+                                variant="outlined" 
+                                size="small" 
+                                className="flex-1 bg-white"
+                            />
+                            <span onClick={addSize} className="py-2 px-4 bg-blue-600 text-white rounded cursor-pointer font-bold text-sm shadow">Add Size</span>
+                        </div>
+                        {sizes.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                                {sizes.map((sz, i) => (
+                                    <div key={i} className="flex items-center gap-1 bg-white border border-blue-400 px-2 py-1 rounded shadow-sm text-xs font-bold text-blue-800">
+                                        <span>{sz}</span>
+                                        <span onClick={() => deleteSize(i)} className="text-red-600 cursor-pointer hover:text-red-800">
+                                            <DeleteIcon style={{ fontSize: '14px' }} />
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* --- Color Family Preview & Input Section --- */}
                     <div className="border border-gray-200 p-3 rounded-lg bg-gray-50/50">
                         <h2 className="font-bold text-gray-700 uppercase text-xs mb-2 tracking-widest">Color Family Swatches</h2>
                         
@@ -278,7 +326,6 @@ const NewProduct = () => {
                             <span onClick={addColorSwatch} className="py-2 px-4 bg-blue-600 text-white rounded cursor-pointer font-bold text-sm shadow">Add</span>
                         </div>
 
-                        {/* Live Swatch Preview Box (Jaisa image mein hai) */}
                         {colors.length > 0 && (
                             <div className="mt-2 pt-2 border-t border-gray-200">
                                 <span className="text-xs font-semibold text-gray-500 block mb-1">Added Colors Preview:</span>

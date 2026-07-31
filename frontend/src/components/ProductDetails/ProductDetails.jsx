@@ -288,29 +288,49 @@ const ProductDetails = () => {
                       </span>
                     </div>
                   </div>
-                  {/* --- COLORS SELECTION --- */}
-                  {product.colors && product.colors.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-gray-500 text-[13px] font-bold uppercase mb-2">
-                        Color
-                      </p>
-                      <div className="flex gap-2">
-                        {product.colors.map((color, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setSelectedColor(color)}
-                            className={`px-3 py-1.5 text-xs border rounded transition-all ${
-                              selectedColor === color
-                                ? "border-[#f57224] text-[#f57224] font-bold bg-orange-50"
-                                : "border-gray-300 text-gray-700"
-                            }`}
-                          >
-                            {color}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  {product.colors &&
+                    product.colors.map((colorItem, i) => {
+                      // Check karein ke colorItem object hai ya string
+                      const colorName =
+                        typeof colorItem === "object"
+                          ? colorItem.name
+                          : colorItem;
+                      const colorImg =
+                        typeof colorItem === "object" ? colorItem.image : null;
+
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setSelectedColor(colorName);
+                            if (colorImg) {
+                              setMainImage(colorImg);
+                            }
+                          }}
+                          className={`flex items-center gap-2 px-3 py-1.5 text-xs border rounded transition-all ${
+                            selectedColor === colorName
+                              ? "border-[#f57224] text-[#f57224] font-bold bg-orange-50"
+                              : "border-gray-300 text-gray-700"
+                          }`}
+                        >
+                          {/* Agar image available hai toh image show karein, warna sirf naam */}
+                          {colorImg ? (
+                            <img
+                              src={colorImg}
+                              alt={colorName}
+                              className="w-5 h-5 object-cover rounded-full border"
+                            />
+                          ) : (
+                            <span
+                              className="w-4 h-4 rounded-full border inline-block"
+                              style={{ backgroundColor: colorName }}
+                            ></span>
+                          )}
+
+                          <span>{colorName}</span>
+                        </button>
+                      );
+                    })}
 
                   {/* --- SIZES SELECTION --- */}
                   {product.sizes && product.sizes.length > 0 && (
