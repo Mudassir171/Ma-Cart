@@ -288,16 +288,22 @@ const ProductDetails = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="mb-4">
-  <div className="flex items-center gap-2 mb-2">
+
+
+
+                  {/* /////////////////////////////////////////////////////// */}
+              <div className="mb-4">
+  {/* Color Family aur sath mein selected color ka naam */}
+  <div className="flex items-center gap-4 mb-2">
     <span className="text-gray-500 text-sm">Color Family</span>
-    <span className="text-black font-semibold text-sm">{selectedColor}</span>
+    <span className="text-black font-medium text-sm">{selectedColor}</span>
   </div>
 
-  <div className="flex items-center gap-3 flex-wrap">
+  {/* Color ki choti images ki list */}
+  <div className="flex items-center gap-2 flex-wrap">
     {product.colors && product.colors.map((colorItem, i) => {
-      const colorName = typeof colorItem === 'object' ? colorItem.name : colorItem;
-      const colorImg = typeof colorItem === 'object' ? colorItem.image : null;
+      const colorName = typeof colorItem === 'object' && colorItem !== null ? colorItem.name : colorItem;
+      const colorImg = typeof colorItem === 'object' && colorItem !== null ? colorItem.image : null;
       const isSelected = selectedColor === colorName;
 
       return (
@@ -309,8 +315,8 @@ const ProductDetails = () => {
               setMainImage(colorImg);
             }
           }}
-          className={`cursor-pointer p-1 border-2 transition-all relative ${
-            isSelected ? "border-[#f57224]" : "border-gray-200 hover:border-gray-400"
+          className={`cursor-pointer p-0.5 bg-white border transition-all relative ${
+            isSelected ? "border-[#f57224] shadow-sm" : "border-gray-300 hover:border-gray-400"
           }`}
         >
           {colorImg ? (
@@ -325,9 +331,9 @@ const ProductDetails = () => {
             </div>
           )}
 
-          {/* Selected hone par chota orange checkmark icon (Optional) */}
+          {/* Selected hone par bottom right par chota orange tick */}
           {isSelected && (
-            <div className="absolute bottom-0 right-0 bg-[#f57224] text-white text-[10px] px-1">
+            <div className="absolute bottom-0 right-0 bg-[#f57224] text-white text-[9px] px-1 leading-none py-0.5">
               ✓
             </div>
           )}
