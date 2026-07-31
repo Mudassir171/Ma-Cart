@@ -39,7 +39,7 @@ const UpdateProduct = () => {
     const [warranty, setWarranty] = useState(0);
     const [brand, setBrand] = useState("");
     
-    // --- Naye States: Discount aur Offer Timer ke liye ---
+    // --- Discount aur Offer Timer States ---
     const [discount, setDiscount] = useState(0);
     const [offerTimer, setOfferTimer] = useState(0);
 
@@ -87,7 +87,9 @@ const UpdateProduct = () => {
             }
         };
 
-        reader.readAsDataURL(e.target.files[0]);
+        if (e.target.files[0]) {
+            reader.readAsDataURL(e.target.files[0]);
+        }
     }
 
     const handleProductImageChange = (e) => {
@@ -95,7 +97,7 @@ const UpdateProduct = () => {
 
         setImages([]);
         setImagesPreview([]);
-        setOldImages([]);
+        setOldImages([]); // Purane images hata kar naye preview dikhane ke liye
 
         files.forEach((file) => {
             const reader = new FileReader();
@@ -110,16 +112,15 @@ const UpdateProduct = () => {
         });
     }
 
-    const newProductSubmitHandler = (e) => {
+    const updateProductSubmitHandler = (e) => {
         e.preventDefault();
 
-        // required field checks
         if (highlights.length <= 0) {
             enqueueSnackbar("Add Highlights", { variant: "warning" });
             return;
         }
-        if (specs.length <= 1) {
-            enqueueSnackbar("Add Minimum 2 Specifications", { variant: "warning" });
+        if (specs.length <= 0) {
+            enqueueSnackbar("Add Minimum 1 Specification", { variant: "warning" });
             return;
         }
 
@@ -133,9 +134,11 @@ const UpdateProduct = () => {
         formData.set("stock", stock);
         formData.set("warranty", warranty);
         formData.set("brandname", brand);
-        formData.set("logo", logo);
         
-        // --- FormData mein Discount aur Timer append kar diye hain ---
+        if (logo) {
+            formData.set("logo", logo);
+        }
+        
         formData.set("discount", discount);
         formData.set("offerTimer", offerTimer);
 
@@ -157,7 +160,6 @@ const UpdateProduct = () => {
     const productId = params.id;
 
     useEffect(() => {
-
         if (product && product._id !== productId) {
             dispatch(getProductDetails(productId));
         } else if (product) {
@@ -174,7 +176,6 @@ const UpdateProduct = () => {
             setOldImages(product.images || []);
             setLogoPreview(product.brand && product.brand.logo ? product.brand.logo.url : "");
             
-            // --- Existing Product se Discount aur Timer set karna ---
             setDiscount(product.discount || 0);
             setOfferTimer(product.offerTimer || 0);
         }
@@ -197,11 +198,11 @@ const UpdateProduct = () => {
 
     return (
         <>
-            <MetaData title="Admin: Update Product | Flipkart" />
+            <MetaData title="Admin: Update Product | E-Commerce" />
 
             {loading && <BackdropLoader />}
             {updateLoading && <BackdropLoader />}
-            <form onSubmit={newProductSubmitHandler} encType="multipart/form-data" className="flex flex-col sm:flex-row bg-white rounded-lg shadow p-4" id="mainform">
+            <form onSubmit={updateProductSubmitHandler} encType="multipart/form-data" className="flex flex-col sm:flex-row bg-white rounded-lg shadow p-4" id="mainform">
 
                 <div className="flex flex-col gap-3 m-2 sm:w-1/2">
                     <TextField
@@ -228,11 +229,7 @@ const UpdateProduct = () => {
                             type="number"
                             variant="outlined"
                             size="small"
-                            InputProps={{
-                                inputProps: {
-                                    min: 0
-                                }
-                            }}
+                            InputProps={{ inputProps: { min: 0 } }}
                             required
                             value={price}
                             onChange={(e) => setPrice(e.target.value)}
@@ -242,18 +239,13 @@ const UpdateProduct = () => {
                             type="number"
                             variant="outlined"
                             size="small"
-                            InputProps={{
-                                inputProps: {
-                                    min: 0
-                                }
-                            }}
+                            InputProps={{ inputProps: { min: 0 } }}
                             required
                             value={cuttedPrice}
                             onChange={(e) => setCuttedPrice(e.target.value)}
                         />
                     </div>
 
-                    {/* --- Naye Input Fields: Discount % aur Timer (Hours) --- */}
                     <div className="flex justify-between gap-4">
                         <TextField
                             label="Discount % (e.g. 25)"
@@ -295,11 +287,7 @@ const UpdateProduct = () => {
                             type="number"
                             variant="outlined"
                             size="small"
-                            InputProps={{
-                                inputProps: {
-                                    min: 0
-                                }
-                            }}
+                            InputProps={{ inputProps: { min: 0 } }}
                             required
                             value={stock}
                             onChange={(e) => setStock(e.target.value)}
@@ -309,11 +297,7 @@ const UpdateProduct = () => {
                             type="number"
                             variant="outlined"
                             size="small"
-                            InputProps={{
-                                inputProps: {
-                                    min: 0
-                                }
-                            }}
+                            InputProps={{ inputProps: { min: 0 } }}
                             required
                             value={warranty}
                             onChange={(e) => setWarranty(e.target.value)}
@@ -390,12 +374,12 @@ const UpdateProduct = () => {
                     </div>
 
                     <h2 className="font-medium">Product Images</h2>
-                    <div className="flex gap-2 overflow-x-auto h-32 border rounded">
+                    <div className="flex gap-2 overflow-x-auto h-32 border rounded p-2">
                         {oldImages && oldImages.map((image, i) => (
-                            <img draggable="false" src={image.url} alt="Product" key={i} className="w-full h-full object-contain" />
+                            <img draggable="false" src={image.url} alt="Product" key={i} className="w-28 h-full object-contain" />
                         ))}
                         {imagesPreview.map((image, i) => (
-                            <img draggable="false" src={image} alt="Product" key={i} className="w-full h-full object-contain" />
+                            <img draggable="false" src={image} alt="Product Preview" key={i} className="w-28 h-full object-contain" />
                         ))}
                     </div>
                     <label className="rounded font-medium bg-gray-400 text-center cursor-pointer text-white p-2 shadow hover:shadow-lg my-2">
@@ -410,8 +394,8 @@ const UpdateProduct = () => {
                         Choose Files
                     </label>
 
-                    <div className="flex justify-end">
-                        <input form="mainform" type="submit" className="bg-primary-orange uppercase w-1/3 p-3 text-white font-medium rounded shadow hover:shadow-lg cursor-pointer" value="Update" />
+                    <div className="flex justify-end mt-4">
+                        <input form="mainform" type="submit" className="bg-primary-orange uppercase w-1/3 p-3 text-white font-medium rounded shadow hover:shadow-lg cursor-pointer text-center" value="Update" />
                     </div>
 
                 </div>

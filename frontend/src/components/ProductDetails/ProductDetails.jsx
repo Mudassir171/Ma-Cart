@@ -55,6 +55,11 @@ const ProductDetails = () => {
   const [mainImage, setMainImage] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
+  // Baki states ke sath yeh add karein
+  const [userLocation, setUserLocation] = useState(
+    "Sindh, Karachi - Gulshan-e-Iqbal, Block 15",
+  );
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const { product, loading, error } = useSelector(
     (state) => state.productDetails,
   );
@@ -405,14 +410,17 @@ const ProductDetails = () => {
                     />
                     <div className="flex-1">
                       <p className="text-[13px] text-gray-800">
-                        Sindh, Karachi - Gulshan-e-Iqbal, Block 15
+                        {/* Yahan static text ki jagah state variable aagaya */}
+                        {userLocation}
                       </p>
                     </div>
-                    <button className="text-[#1a9cb7] text-[13px] font-medium uppercase">
+                    <button
+                      onClick={() => setIsLocationModalOpen(true)}
+                      className="text-[#1a9cb7] text-[13px] font-medium uppercase cursor-pointer"
+                    >
                       Change
                     </button>
                   </div>
-
                   <div className="flex items-start gap-3 border-t pt-3 mb-3">
                     <LocalShippingIcon
                       fontSize="small"
@@ -672,6 +680,36 @@ const ProductDetails = () => {
                 Submit
               </button>
             </DialogActions>
+          </Dialog>
+          <Dialog
+            open={isLocationModalOpen}
+            onClose={() => setIsLocationModalOpen(false)}
+          >
+            <div className="p-5 w-80">
+              <h3 className="text-md font-semibold mb-3">
+                Choose your location
+              </h3>
+              <div className="flex flex-col gap-2">
+                <button
+                  className="text-left p-2 hover:bg-gray-100 rounded text-sm cursor-pointer"
+                  onClick={() => {
+                    setUserLocation("Punjab, Lahore - Gulberg III");
+                    setIsLocationModalOpen(false);
+                  }}
+                >
+                  Punjab, Lahore - Gulberg III
+                </button>
+                <button
+                  className="text-left p-2 hover:bg-gray-100 rounded text-sm cursor-pointer"
+                  onClick={() => {
+                    setUserLocation("Sindh, Karachi - Clifton, Block 4");
+                    setIsLocationModalOpen(false);
+                  }}
+                >
+                  Sindh, Karachi - Clifton, Block 4
+                </button>
+              </div>
+            </div>
           </Dialog>
         </div>
       )}

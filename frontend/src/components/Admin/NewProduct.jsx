@@ -11,6 +11,8 @@ import { getCategories } from '../../actions/categoryAction';
 import ImageIcon from '@mui/icons-material/Image';
 import MetaData from '../Layouts/MetaData';
 import BackdropLoader from '../Layouts/BackdropLoader';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 
 const NewProduct = () => {
 
@@ -37,10 +39,16 @@ const NewProduct = () => {
     const [stock, setStock] = useState(0);
     const [warranty, setWarranty] = useState(0);
     const [brand, setBrand] = useState("");
-    
-    // --- Naye States: Discount aur Offer Timer ke liye ---
     const [discount, setDiscount] = useState(0);
-    const [offerTimer, setOfferTimer] = useState(""); // Misal ke taur par hours ya date (e.g. 48 hours)
+
+    const [isFlashSale, setIsFlashSale] = useState(false);
+    const [dealExpiry, setDealExpiry] = useState("");
+
+    // --- Color Family States ---
+    const [colorName, setColorName] = useState("");
+    const [colorImage, setColorImage] = useState("");
+    const [colorImagePreview, setColorImagePreview] = useState("");
+    const [colors, setColors] = useState([]); // Array of { name, image }
 
     const [images, setImages] = useState([]);
     const [imagesPreview, setImagesPreview] = useState([]);
@@ -71,6 +79,35 @@ const NewProduct = () => {
     const deleteSpec = (index) => {
         setSpecs(specs.filter((s, i) => i !== index))
     }
+
+    // --- Color Image Handler ---
+    const handleColorImageChange = (e) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (reader.readyState === 2) {
+                setColorImagePreview(reader.result);
+                setColorImage(reader.result);
+            }
+        };
+        if (e.target.files[0]) {
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    };
+
+    const addColorSwatch = () => {
+        if (!colorName.trim() || !colorImage) {
+            enqueueSnackbar("Enter Color Name and Select Color Image", { variant: "warning" });
+            return;
+        }
+        setColors([...colors, { name: colorName, image: colorImage }]);
+        setColorName("");
+        setColorImage("");
+        setColorImagePreview("");
+    };
+
+    const deleteColor = (index) => {
+        setColors(colors.filter((c, i) => i !== index));
+    };
 
     const handleLogoChange = (e) => {
         const reader = new FileReader();
@@ -126,7 +163,6 @@ const NewProduct = () => {
             enqueueSnackbar("Add Minimum 2 Specifications", { variant: "warning" });
             return;
         }
-        
         if (images.length < 1 || images.length > 5) {
             enqueueSnackbar("Upload between 1 to 5 images", { variant: "warning" });
             return;
@@ -142,14 +178,14 @@ const NewProduct = () => {
         formData.set("warranty", warranty);
         formData.set("brandname", brand);
         formData.set("logo", logo);
-        
-        // --- FormData mein Discount aur Timer append kar diye hain ---
         formData.set("discount", discount);
-        formData.set("offerTimer", offerTimer);
+        formData.set("isFlashSale", isFlashSale);
+        formData.set("dealExpiry", dealExpiry);
 
         images.forEach((image) => { formData.append("images", image); });
         highlights.forEach((h) => { formData.append("highlights", h); });
         specs.forEach((s) => { formData.append("specifications", JSON.stringify(s)); });
+        colors.forEach((c) => { formData.append("colors", JSON.stringify(c)); });
 
         dispatch(createProduct(formData));
     }
@@ -193,13 +229,75 @@ const NewProduct = () => {
                         <TextField label="Cutted Price" type="number" variant="outlined" size="small" required value={cuttedPrice} onChange={(e) => setCuttedPrice(e.target.value)} />
                     </div>
 
-                    {/* --- Naye Input Fields: Discount % aur Timer (Hours/Days) --- */}
                     <div className="flex justify-between gap-4">
                         <TextField label="Discount % (e.g. 25)" type="number" variant="outlined" size="small" value={discount} onChange={(e) => setDiscount(e.target.value)} />
-                        <TextField label="Offer Timer (Hours e.g. 48)" type="number" variant="outlined" size="small" value={offerTimer} onChange={(e) => setOfferTimer(e.target.value)} />
+                        <TextField 
+                            label="Flash Sale Expiry" 
+                            type="datetime-local" 
+                            variant="outlined" 
+                            size="small" 
+                            InputLabelProps={{ shrink: true }}
+                            value={dealExpiry} 
+                            onChange={(e) => setDealExpiry(e.target.value)} 
+                        />
                     </div>
 
-                    <div className="flex justify-between gap-4">
+                    <div className="px-2 py-1 bg-emerald-50 border border-emerald-200 rounded-lg">
+                        <FormControlLabel
+                            control={
+                                <Checkbox 
+                                    checked={isFlashSale} 
+                                    onChange={(e) => setIsFlashSale(e.target.checked)} 
+                                    color="success"
+                                />
+                            }
+                            label={<span className="text-xs font-bold text-emerald-900">Add this product to Flash Sale section</span>}
+                        />
+                    </div>
+
+                    {/* --- Color Family Preview & Input Section (Daraz Style) --- */}
+                    <div className="border border-gray-200 p-3 rounded-lg bg-gray-50/50">
+                        <h2 className="font-bold text-gray-700 uppercase text-xs mb-2 tracking-widest">Color Family Swatches</h2>
+                        
+                        <div className="flex gap-2 items-center mb-3">
+                            <TextField 
+                                value={colorName} 
+                                onChange={(e) => setColorName(e.target.value)} 
+                                label="Color Name (e.g. Black)" 
+                                variant="outlined" 
+                                size="small" 
+                                className="flex-1 bg-white"
+                            />
+                            <div className="w-12 h-10 flex items-center justify-center border rounded overflow-hidden bg-white shadow-sm">
+                                {!colorImagePreview ? <ImageIcon className="text-gray-300 text-sm" /> : <img src={colorImagePreview} alt="Color" className="w-full h-full object-cover" />}
+                            </div>
+                            <label className="rounded bg-gray-700 text-white py-2 px-3 text-xs font-bold uppercase cursor-pointer shadow hover:bg-black transition-all">
+                                <input type="file" accept="image/*" onChange={handleColorImageChange} className="hidden" />
+                                Image
+                            </label>
+                            <span onClick={addColorSwatch} className="py-2 px-4 bg-blue-600 text-white rounded cursor-pointer font-bold text-sm shadow">Add</span>
+                        </div>
+
+                        {/* Live Swatch Preview Box (Jaisa image mein hai) */}
+                        {colors.length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-gray-200">
+                                <span className="text-xs font-semibold text-gray-500 block mb-1">Added Colors Preview:</span>
+                                <div className="flex flex-wrap gap-2">
+                                    {colors.map((c, i) => (
+                                        <div key={i} className="relative group p-1 bg-white border-2 border-orange-500 rounded-md shadow-sm flex flex-col items-center w-14">
+                                            <img src={c.image} alt={c.name} className="w-10 h-10 object-cover rounded" />
+                                            <span className="text-[10px] font-bold text-gray-700 truncate w-full text-center mt-0.5">{c.name}</span>
+                                            <span onClick={() => deleteColor(i)} className="absolute -top-1.5 -right-1.5 bg-red-600 text-white rounded-full p-0.5 cursor-pointer shadow hover:bg-red-700">
+                                                <DeleteIcon style={{ fontSize: '12px' }} />
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex justify-between gap-4 mt-1">
                         <TextField
                             label="Category"
                             select
