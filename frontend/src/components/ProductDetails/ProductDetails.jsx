@@ -288,50 +288,54 @@ const ProductDetails = () => {
                       </span>
                     </div>
                   </div>
-                  {product.colors &&
-                    product.colors.map((colorItem, i) => {
-                      // Check karein ke colorItem object hai ya string
-                      const colorName =
-                        typeof colorItem === "object"
-                          ? colorItem.name
-                          : colorItem;
-                      const colorImg =
-                        typeof colorItem === "object" ? colorItem.image : null;
+                  <div className="mb-4">
+  <div className="flex items-center gap-2 mb-2">
+    <span className="text-gray-500 text-sm">Color Family</span>
+    <span className="text-black font-semibold text-sm">{selectedColor}</span>
+  </div>
 
-                      return (
-                        <button
-                          key={i}
-                          onClick={() => {
-                            setSelectedColor(colorName);
-                            if (colorImg) {
-                              setMainImage(colorImg);
-                            }
-                          }}
-                          className={`flex items-center gap-2 px-3 py-1.5 text-xs border rounded transition-all ${
-                            selectedColor === colorName
-                              ? "border-[#f57224] text-[#f57224] font-bold bg-orange-50"
-                              : "border-gray-300 text-gray-700"
-                          }`}
-                        >
-                          {/* Agar image available hai toh image show karein, warna sirf naam */}
-                          {colorImg ? (
-                            <img
-                              src={colorImg}
-                              alt={colorName}
-                              className="w-5 h-5 object-cover rounded-full border"
-                            />
-                          ) : (
-                            <span
-                              className="w-4 h-4 rounded-full border inline-block"
-                              style={{ backgroundColor: colorName }}
-                            ></span>
-                          )}
+  <div className="flex items-center gap-3 flex-wrap">
+    {product.colors && product.colors.map((colorItem, i) => {
+      const colorName = typeof colorItem === 'object' ? colorItem.name : colorItem;
+      const colorImg = typeof colorItem === 'object' ? colorItem.image : null;
+      const isSelected = selectedColor === colorName;
 
-                          <span>{colorName}</span>
-                        </button>
-                      );
-                    })}
+      return (
+        <div
+          key={i}
+          onClick={() => {
+            setSelectedColor(colorName);
+            if (colorImg) {
+              setMainImage(colorImg);
+            }
+          }}
+          className={`cursor-pointer p-1 border-2 transition-all relative ${
+            isSelected ? "border-[#f57224]" : "border-gray-200 hover:border-gray-400"
+          }`}
+        >
+          {colorImg ? (
+            <img 
+              src={colorImg} 
+              alt={colorName} 
+              className="w-10 h-12 object-cover block" 
+            />
+          ) : (
+            <div className="w-10 h-12 bg-gray-100 flex items-center justify-center text-xs">
+              {colorName}
+            </div>
+          )}
 
+          {/* Selected hone par chota orange checkmark icon (Optional) */}
+          {isSelected && (
+            <div className="absolute bottom-0 right-0 bg-[#f57224] text-white text-[10px] px-1">
+              ✓
+            </div>
+          )}
+        </div>
+      );
+    })}
+  </div>
+</div>
                   {/* --- SIZES SELECTION --- */}
                   {product.sizes && product.sizes.length > 0 && (
                     <div className="mb-4">
