@@ -10,7 +10,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Searchbar from "./Searchbar";
 import logo from "../../../assets/images/logo.png";
 import PrimaryDropDownMenu from "./PrimaryDropDownMenu";
-import MyChatsModal from "../Mychats/MyChats";
+import MyChatsModal from "../../Mychats/MyChats";
 const Header = () => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { cartItems } = useSelector((state) => state.cart);
