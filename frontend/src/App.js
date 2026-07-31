@@ -379,7 +379,6 @@ function App() {
                 <Route path="/password/forgot" element={<ForgotPassword />} />
                 <Route path="/password/reset/:token" element={<ResetPassword />} />
                 <Route path="/seller/store/:id" element={ <SellerStore /> } />
-                <Route path="/chats" element={<MyChats />} />
                 {/* App.js mein: */}
                 <Route path="/sellerstore/:id" element={<SellerStore />} />
                 {/* --- Protected User Routes --- */}
@@ -391,6 +390,7 @@ function App() {
                 <Route path="/shipping" element={<ProtectedRoute><Shipping /></ProtectedRoute>} />
                 <Route path="/order/confirm" element={<ProtectedRoute><OrderConfirm /></ProtectedRoute>} />
                 <Route path="/become-seller" element={<ProtectedRoute><BecomeSeller /></ProtectedRoute>} />
+                <Route path="/chats" element={<ProtectedRoute><MyChats /></ProtectedRoute>} />
                 
                 <Route path="/process/payment" element={
                     stripeApiKey && (
