@@ -36,7 +36,7 @@ const payment = require("./routes/paymentRoute");
 const category = require("./routes/categoryRoute");
 const withdrawal = require("./routes/withdrawalRoute");
 const payout = require("./routes/payoutRoute");
-
+const chat = require("./routes/chatRoute"); // Chat route import
 // Mount Routes
 app.use("/api/v1", user);
 app.use("/api/v1", product);
@@ -45,6 +45,7 @@ app.use("/api/v1", payment);
 app.use("/api/v1", category);
 app.use("/api/v1", withdrawal);
 app.use("/api/v1", payout);
+app.use("/api/v1", chat); // Mount chat route
 
 // Error Middleware
 app.use(errorMiddleware);

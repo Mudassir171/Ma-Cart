@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSnackbar } from 'notistack';
 import { logoutUser } from '../../../actions/userAction';
 
-const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
+const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user, setIsChatModalOpen }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
@@ -24,7 +24,6 @@ const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
     const { wishlistItems } = useSelector((state) => state.wishlist);
     
     // --- 📦 ORDERS & 🔔 NOTIFICATIONS REDUX STATE ---
-    // (Note: Apne Redux store ke reducer name ke mutabiq 'myOrders' aur 'notifications' check kar lijiyega)
     const { orders } = useSelector((state) => state.myOrders || { orders: [] });
     const { notifications } = useSelector((state) => state.notifications || { notifications: [] });
 
@@ -33,6 +32,14 @@ const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
         navigate("/login");
         enqueueSnackbar("Logout Successfully", { variant: "success" });
         setTogglePrimaryDropDown(false);
+    };
+
+    const handleChatClick = (e) => {
+        e.preventDefault();
+        setTogglePrimaryDropDown(false);
+        if (setIsChatModalOpen) {
+            setIsChatModalOpen(true);
+        }
     };
 
     const navs = [
@@ -59,7 +66,7 @@ const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
         {
             title: "My Chats",
             icon: <ChatIcon sx={{ fontSize: "18px" }} />,
-            redirect: "/chats",
+            onClick: handleChatClick,
         },
         {
             title: "Coupons",
@@ -146,7 +153,7 @@ const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
             {/* --- DYNAMIC NAVS --- */}
             <div className="max-h-60 overflow-y-auto space-y-0.5 px-2 custom-scrollbar">
                 {navs.map((item, i) => {
-                    const { title, icon, redirect } = item;
+                    const { title, icon, redirect, onClick } = item;
 
                     return (
                         <React.Fragment key={i}>
@@ -186,6 +193,14 @@ const PrimaryDropDownMenu = ({ setTogglePrimaryDropDown, user }) => {
                                         {notifications?.length || 0}
                                     </span>
                                 </Link>
+                            ) : title === "My Chats" ? (
+                                <div 
+                                    onClick={onClick}
+                                    className="px-3 py-2.5 rounded-xl flex gap-3 items-center hover:bg-emerald-800 hover:text-white transition-all font-medium text-emerald-200 group cursor-pointer"
+                                >
+                                    <span className="text-emerald-400 group-hover:text-white group-hover:scale-110 transition-transform">{icon}</span>
+                                    {title}
+                                </div>
                             ) : (
                                 <Link 
                                     onClick={() => setTogglePrimaryDropDown(false)}
