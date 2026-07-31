@@ -291,6 +291,7 @@ const ProductDetails = () => {
 
   
 {/* --- COLOR FAMILY SECTION --- */}
+{/* --- COLOR FAMILY SECTION --- */}
 <div className="mb-4">
   {/* Color Family aur sath mein selected color ka naam */}
   <div className="flex items-center gap-4 mb-2">
@@ -348,7 +349,6 @@ const ProductDetails = () => {
     })}
   </div>
 </div>
-
 
 
                     
