@@ -293,23 +293,33 @@ const ProductDetails = () => {
 {/* --- COLOR FAMILY SECTION --- */}
 {/* --- COLOR FAMILY SECTION --- */}
 <div className="mb-4">
-  {/* Color Family aur sath mein selected color ka naam */}
   <div className="flex items-center gap-4 mb-2">
     <span className="text-gray-500 text-sm">Color Family</span>
     <span className="text-black font-medium text-sm">{selectedColor}</span>
   </div>
 
-  {/* Color ki choti images ki list */}
   <div className="flex items-center gap-2 flex-wrap">
     {product.colors && product.colors.map((colorItem, i) => {
-      // Backend ya database se data string ya object format mein aa sakta hai, usko safely handle karne ke liye:
-      const colorName = typeof colorItem === 'string' 
-        ? (() => { try { const parsed = JSON.parse(colorItem); return parsed.name; } catch { return colorItem; } })()
-        : colorItem?.name;
-        
-      const colorImg = typeof colorItem === 'string' 
-        ? (() => { try { const parsed = JSON.parse(colorItem); return parsed.image; } catch { return null; } })()
-        : colorItem?.image;
+      // Helper function to safely parse nested/stringified JSON data
+      const getParsedColor = (item) => {
+        let current = item;
+        // Loop to handle double or single stringified JSON
+        for (let step = 0; step < 2; step++) {
+          if (typeof current === 'string') {
+            try {
+              current = JSON.parse(current);
+            } catch (e) {
+              break;
+            }
+          }
+        }
+        return current;
+      };
+
+      const parsedObj = getParsedColor(colorItem);
+      
+      const colorName = typeof parsedObj === 'object' && parsedObj !== null ? parsedObj.name : colorItem;
+      const colorImg = typeof parsedObj === 'object' && parsedObj !== null ? parsedObj.image : null;
 
       const isSelected = selectedColor === colorName;
 
@@ -333,12 +343,11 @@ const ProductDetails = () => {
               className="w-10 h-12 object-cover block" 
             />
           ) : (
-            <div className="w-10 h-12 bg-gray-100 flex items-center justify-center text-xs">
-              {colorName}
+            <div className="w-10 h-12 bg-gray-100 flex items-center justify-center text-xs px-1 text-center">
+              {colorName || "Color"}
             </div>
           )}
 
-          {/* Selected hone par bottom right par chota orange tick mark */}
           {isSelected && (
             <div className="absolute bottom-0 right-0 bg-[#f57224] text-white text-[9px] px-1 leading-none py-0.5">
               ✓
@@ -349,7 +358,6 @@ const ProductDetails = () => {
     })}
   </div>
 </div>
-
 
                     
                   {/* --- SIZES SELECTION --- */}
