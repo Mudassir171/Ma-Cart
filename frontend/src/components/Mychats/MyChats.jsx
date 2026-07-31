@@ -124,4 +124,4 @@ const MyChats = ({ isOpen, onClose }) => {
   );
 };
 
-exports.default = MyChats;
+export default MyChats;
