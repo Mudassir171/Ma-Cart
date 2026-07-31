@@ -4,7 +4,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
 
-const MyChatsModal = ({ isOpen, onClose }) => {
+const MyChats = ({ isOpen, onClose }) => {
   const { user } = useSelector((state) => state.user);
   const [messages, setMessages] = useState([
     { sender: 'seller', text: 'Hello! Welcome to MA-CART. How can I help you today?' },
@@ -97,4 +97,4 @@ const MyChatsModal = ({ isOpen, onClose }) => {
   );
 };
 
-export default MyChatsModal;
+export default MyChats;

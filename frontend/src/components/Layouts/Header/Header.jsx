@@ -10,7 +10,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Searchbar from "./Searchbar";
 import logo from "../../../assets/images/logo.png";
 import PrimaryDropDownMenu from "./PrimaryDropDownMenu";
-import MyChatsModal from "../Chat/MyChatsModal"; // Import your chat modal component
+import MyChats from "../Mychats/MyChats"; // Import your chat modal component
 
 const Header = () => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
