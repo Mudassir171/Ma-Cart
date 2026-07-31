@@ -3,23 +3,42 @@ import { useSelector } from 'react-redux';
 import ChatIcon from '@mui/icons-material/Chat';
 import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
+import axios from 'axios';
 
 const MyChats = ({ isOpen, onClose }) => {
   const { user } = useSelector((state) => state.user);
   const [messages, setMessages] = useState([
     { sender: 'seller', text: 'Hello! Welcome to MA-CART. How can I help you today?' },
-    { sender: 'user', text: 'Hi, is this available in a larger size?' }
   ]);
   const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || loading) return;
 
-    setMessages([...messages, { sender: 'user', text: newMessage }]);
+    const userText = newMessage;
+    // 1. User ka message UI par foran show kar dein
+    setMessages((prev) => [...prev, { sender: 'user', text: userText }]);
     setNewMessage("");
+    setLoading(true);
+
+    try {
+      // 2. Apne backend API ko request bhejein (jahan Gemini AI configured hai)
+      const { data } = await axios.post("/api/v1/chat", { message: userText });
+      
+      // 3. AI ka response UI par show kar dein
+      const aiReply = data.reply || data.aiChat?.message || "I am here to help you with MA-CART!";
+      setMessages((prev) => [...prev, { sender: 'seller', text: aiReply }]);
+    } catch (error) {
+      console.error("AI Chat Error:", error);
+      // Agar backend ready nahi hai toh fallback ke tor par yeh message dikh jayega
+      setMessages((prev) => [...prev, { sender: 'seller', text: "Sorry, I'm having trouble connecting right now." }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,8 +53,8 @@ const MyChats = ({ isOpen, onClose }) => {
               <ChatIcon sx={{ fontSize: "20px" }} />
             </div>
             <div>
-              <h2 className="text-base font-bold tracking-wide">My Chats & Support</h2>
-              <p className="text-[11px] text-green-200">Chat with sellers instantly</p>
+              <h2 className="text-base font-bold tracking-wide">MA-CART AI Assistant</h2>
+              <p className="text-[11px] text-green-200">Ask anything about products & orders</p>
             </div>
           </div>
           <button 
@@ -72,6 +91,13 @@ const MyChats = ({ isOpen, onClose }) => {
                 </div>
               ))
             )}
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-gray-400 px-4 py-2.5 rounded-2xl text-xs italic">
+                  AI is typing...
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Input Form */}
@@ -80,14 +106,15 @@ const MyChats = ({ isOpen, onClose }) => {
               type="text" 
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type your message here..."
+              placeholder="Ask something about MA-CART..."
               className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-700 transition"
             />
             <button 
               type="submit" 
-              className="bg-green-700 hover:bg-green-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition shadow-sm cursor-pointer"
+              disabled={loading}
+              className="bg-green-700 hover:bg-green-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition shadow-sm cursor-pointer disabled:opacity-50"
             >
-              <span>Send</span>
+              <span>{loading ? "Sending..." : "Send"}</span>
               <SendIcon sx={{ fontSize: "16px" }} />
             </button>
           </form>
@@ -97,4 +124,4 @@ const MyChats = ({ isOpen, onClose }) => {
   );
 };
 
-export default MyChats;
+exports.default = MyChats;
