@@ -289,10 +289,9 @@ const ProductDetails = () => {
                     </div>
                   </div>
 
-
-
-                  {/* /////////////////////////////////////////////////////// */}
-              <div className="mb-4">
+  
+{/* --- COLOR FAMILY SECTION --- */}
+<div className="mb-4">
   {/* Color Family aur sath mein selected color ka naam */}
   <div className="flex items-center gap-4 mb-2">
     <span className="text-gray-500 text-sm">Color Family</span>
@@ -302,8 +301,15 @@ const ProductDetails = () => {
   {/* Color ki choti images ki list */}
   <div className="flex items-center gap-2 flex-wrap">
     {product.colors && product.colors.map((colorItem, i) => {
-      const colorName = typeof colorItem === 'object' && colorItem !== null ? colorItem.name : colorItem;
-      const colorImg = typeof colorItem === 'object' && colorItem !== null ? colorItem.image : null;
+      // Backend ya database se data string ya object format mein aa sakta hai, usko safely handle karne ke liye:
+      const colorName = typeof colorItem === 'string' 
+        ? (() => { try { const parsed = JSON.parse(colorItem); return parsed.name; } catch { return colorItem; } })()
+        : colorItem?.name;
+        
+      const colorImg = typeof colorItem === 'string' 
+        ? (() => { try { const parsed = JSON.parse(colorItem); return parsed.image; } catch { return null; } })()
+        : colorItem?.image;
+
       const isSelected = selectedColor === colorName;
 
       return (
@@ -331,7 +337,7 @@ const ProductDetails = () => {
             </div>
           )}
 
-          {/* Selected hone par bottom right par chota orange tick */}
+          {/* Selected hone par bottom right par chota orange tick mark */}
           {isSelected && (
             <div className="absolute bottom-0 right-0 bg-[#f57224] text-white text-[9px] px-1 leading-none py-0.5">
               ✓
@@ -342,6 +348,10 @@ const ProductDetails = () => {
     })}
   </div>
 </div>
+
+
+
+                    
                   {/* --- SIZES SELECTION --- */}
                   {product.sizes && product.sizes.length > 0 && (
                     <div className="mb-4">
