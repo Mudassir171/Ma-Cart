@@ -3,122 +3,149 @@ const Product = require("../models/productModel");
 const User = require("../models/userModel");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middlewares/asyncErrorHandler");
+const sendEmail = require("../utils/sendEmail");
 const cloudinary = require("cloudinary");
 
 // ============================================================
 // 1. NAYA ORDER CREATE KARNA (Customer Side)
 // ============================================================
 exports.newOrder = catchAsyncErrors(async (req, res, next) => {
-    const { shippingInfo, orderItems, paymentInfo, totalPrice } = req.body;
+  const { shippingInfo, orderItems, paymentInfo, totalPrice } = req.body;
 
-    // 1. Payment Screenshot Handling
-    if (paymentInfo.screenshot && typeof paymentInfo.screenshot === 'string') {
-        const myCloud = await cloudinary.v2.uploader.upload(paymentInfo.screenshot, {
-            folder: "payment_receipts",
-        });
-        paymentInfo.screenshot = { public_id: myCloud.public_id, url: myCloud.secure_url };
+  // 1. Payment Screenshot Handling
+  if (paymentInfo.screenshot && typeof paymentInfo.screenshot === "string") {
+    const myCloud = await cloudinary.v2.uploader.upload(
+      paymentInfo.screenshot,
+      {
+        folder: "payment_receipts",
+      },
+    );
+    paymentInfo.screenshot = {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
+  }
+
+  const validatedOrderItems = [];
+
+  // Commission Rate (Aap ise database se bhi fetch kar sakte hain)
+  const COMMISSION_RATE = 0.1; // 10%
+
+  // 2. Logic: Item validation, Stock update aur Commission calculate karna
+  for (const item of orderItems) {
+    const liveProduct = await Product.findById(item.product);
+
+    if (!liveProduct) {
+      return next(
+        new ErrorHandler(`Product not found with ID: ${item.product}`, 404),
+      );
     }
 
-    const validatedOrderItems = [];
-    
-    // Commission Rate (Aap ise database se bhi fetch kar sakte hain)
-    const COMMISSION_RATE = 0.10; // 10%
-
-    // 2. Logic: Item validation, Stock update aur Commission calculate karna
-    for (const item of orderItems) {
-        const liveProduct = await Product.findById(item.product);
-        
-        if (!liveProduct) {
-            return next(new ErrorHandler(`Product not found with ID: ${item.product}`, 404));
-        }
-
-        if (liveProduct.stock < item.quantity) {
-            return next(new ErrorHandler(`Insufficient stock for ${liveProduct.name}`, 400));
-        }
-
-        liveProduct.stock -= item.quantity;
-        await liveProduct.save({ validateBeforeSave: false });
-
-        // Commission Logic
-        const itemTotal = item.price * item.quantity;
-        const adminCommission = itemTotal * COMMISSION_RATE;
-        const sellerShare = itemTotal - adminCommission;
-
-        validatedOrderItems.push({
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image,
-            product: item.product,
-            seller: liveProduct.user, // Seller ID (Product owner)
-            adminCommission: adminCommission,
-            sellerShare: sellerShare, // Yeh zaroori hai payout ke liye
-            status: "Processing"
-        });
+    if (liveProduct.stock < item.quantity) {
+      return next(
+        new ErrorHandler(`Insufficient stock for ${liveProduct.name}`, 400),
+      );
     }
 
-    // 3. Order Create karna
-    const order = await Order.create({
-        shippingInfo,
-        orderItems: validatedOrderItems,
-        paymentInfo,
-        totalPrice,
-        paidAt: Date.now(),
-        user: req.user._id,
-    });
+    liveProduct.stock -= item.quantity;
+    await liveProduct.save({ validateBeforeSave: false });
 
-    res.status(201).json({
-        success: true,
-        order,
+    // Commission Logic
+    const itemTotal = item.price * item.quantity;
+    const adminCommission = itemTotal * COMMISSION_RATE;
+    const sellerShare = itemTotal - adminCommission;
+
+    validatedOrderItems.push({
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      image: item.image,
+      product: item.product,
+      seller: liveProduct.user, // Seller ID (Product owner)
+      adminCommission: adminCommission,
+      sellerShare: sellerShare, // Yeh zaroori hai payout ke liye
+      status: "Processing",
     });
+  }
+
+  // 3. Order Create karna
+  const order = await Order.create({
+    shippingInfo,
+    orderItems: validatedOrderItems,
+    paymentInfo,
+    totalPrice,
+    paidAt: Date.now(),
+    user: req.user._id,
+  });
+
+  try {
+    await sendEmail({
+      email: req.user.email,
+      subject: "Order Confirmation - MA-CART",
+      message: `Hi ${req.user.name},\n\nAapka order successfully place ho gaya hai. Order ID: ${order._id}. Hum jald hi aapko shipping details bhej denge.\n\nThank you for shopping with MA-CART!`,
+    });
+  } catch (error) {
+    console.log(
+      "Order confirmation email send failed:",
+      error.message || error,
+    );
+  }
+
+  res.status(201).json({
+    success: true,
+    order,
+  });
 });
 // ============================================================
 // 2. SINGLE ORDER DETAILS
 // ============================================================
 exports.getSingleOrder = catchAsyncErrors(async (req, res, next) => {
-    let order = await Order.findById(req.params.id)
-        .populate("user", "name email role")
-        .populate("orderItems.seller", "name email shopName");
+  let order = await Order.findById(req.params.id)
+    .populate("user", "name email role")
+    .populate("orderItems.seller", "name email shopName");
 
-    if (!order) {
-        return next(new ErrorHandler("Order not found with this Id", 404));
+  if (!order) {
+    return next(new ErrorHandler("Order not found with this Id", 404));
+  }
+
+  // MULTI-VENDOR FILTER: Seller ko dusre ke items na dikhein
+  if (req.user.role === "seller") {
+    const filteredItems = order.orderItems.filter(
+      (item) =>
+        item.seller && item.seller._id.toString() === req.user._id.toString(),
+    );
+
+    if (filteredItems.length === 0) {
+      return next(
+        new ErrorHandler("Aapko yeh order dekhne ki ijazat nahi hai", 403),
+      );
     }
 
-    // MULTI-VENDOR FILTER: Seller ko dusre ke items na dikhein
-    if (req.user.role === "seller") {
-        const filteredItems = order.orderItems.filter(
-            (item) => item.seller && item.seller._id.toString() === req.user._id.toString()
-        );
+    const sellerOrderData = order.toObject();
+    sellerOrderData.orderItems = filteredItems;
 
-        if (filteredItems.length === 0) {
-            return next(new ErrorHandler("Aapko yeh order dekhne ki ijazat nahi hai", 403));
-        }
-
-        const sellerOrderData = order.toObject();
-        sellerOrderData.orderItems = filteredItems;
-
-        return res.status(200).json({
-            success: true,
-            order: sellerOrderData,
-        });
-    }
-
-    res.status(200).json({
-        success: true,
-        order,
+    return res.status(200).json({
+      success: true,
+      order: sellerOrderData,
     });
+  }
+
+  res.status(200).json({
+    success: true,
+    order,
+  });
 });
 
 // ============================================================
 // 3. USER KE APNE ORDERS
 // ============================================================
 exports.myOrders = catchAsyncErrors(async (req, res, next) => {
-    const orders = await Order.find({ user: req.user._id });
+  const orders = await Order.find({ user: req.user._id });
 
-    res.status(200).json({
-        success: true,
-        orders,
-    });
+  res.status(200).json({
+    success: true,
+    orders,
+  });
 });
 
 // ============================================================
@@ -171,177 +198,223 @@ exports.myOrders = catchAsyncErrors(async (req, res, next) => {
 //         });
 //     }
 
-//     res.status(200).json({ 
-//         success: true, 
+//     res.status(200).json({
+//         success: true,
 //         totalAmount: totalAmount || 0, // Fallback to 0 if undefined
 //         totalCommission: totalCommission || 0, // Fallback to 0 if undefined
-//         orders 
+//         orders
 //     });
 // });
 exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
-    let orders;
-    let totalAmount = 0;
-    let totalCommission = 0;
-    console.log("Fetching orders for role:", req.user.role);
-    console.log("User ID:", req.user._id);
-    if (req.user.role === "admin") {
-        orders = await Order.find().populate("user", "name email");
-        console.log("Total orders in DB:", orders.length);
-        orders.forEach(order => {
-            totalAmount += order.totalPrice;
-            order.orderItems.forEach(item => {
-                totalCommission += (item.adminCommission || (item.price * item.quantity * 0.10));
-            });
-        });
-    } else if (req.user.role === "seller") {
-        const rawOrders = await Order.find({ "orderItems.seller": req.user._id })
-                                     .populate("user", "name email");
-        orders = rawOrders.map(order => {
-            const orderObj = order.toObject();
-            orderObj.orderItems = orderObj.orderItems.filter(
-                item => item.seller && item.seller.toString() === req.user._id.toString()
-            );
-            return orderObj;
-        });
-        orders.forEach(order => {
-            order.orderItems.forEach(item => {
-                totalAmount += (item.price * item.quantity);
-                totalCommission += (item.price * item.quantity * 0.90);
-            });
-        });
-    }
-    console.log("Sending to frontend:", { totalAmount, totalCommission, orderCount: orders.length });
-    res.status(200).json({
-        success: true,
-        totalAmount,
-        totalCommission,
-        orders
+  let orders;
+  let totalAmount = 0;
+  let totalCommission = 0;
+  console.log("Fetching orders for role:", req.user.role);
+  console.log("User ID:", req.user._id);
+  if (req.user.role === "admin") {
+    orders = await Order.find().populate("user", "name email");
+    console.log("Total orders in DB:", orders.length);
+    orders.forEach((order) => {
+      totalAmount += order.totalPrice;
+      order.orderItems.forEach((item) => {
+        totalCommission +=
+          item.adminCommission || item.price * item.quantity * 0.1;
+      });
     });
+  } else if (req.user.role === "seller") {
+    const rawOrders = await Order.find({
+      "orderItems.seller": req.user._id,
+    }).populate("user", "name email");
+    orders = rawOrders.map((order) => {
+      const orderObj = order.toObject();
+      orderObj.orderItems = orderObj.orderItems.filter(
+        (item) =>
+          item.seller && item.seller.toString() === req.user._id.toString(),
+      );
+      return orderObj;
+    });
+    orders.forEach((order) => {
+      order.orderItems.forEach((item) => {
+        totalAmount += item.price * item.quantity;
+        totalCommission += item.price * item.quantity * 0.9;
+      });
+    });
+  }
+  console.log("Sending to frontend:", {
+    totalAmount,
+    totalCommission,
+    orderCount: orders.length,
+  });
+  res.status(200).json({
+    success: true,
+    totalAmount,
+    totalCommission,
+    orders,
+  });
 });
 // ==========================================================
 // 5. UPDATE STATUS (Dono names exports kardiye crash rokne ke liye)
 // ============================================================
 // orderController.js mein isay update karein:
 const updateItemStatus = catchAsyncErrors(async (req, res, next) => {
-    const order = await Order.findById(req.params.id);
-    if (!order) {
-        return next(new ErrorHandler("Order not found", 404));
+  const order = await Order.findById(req.params.id);
+  if (!order) {
+    return next(new ErrorHandler("Order not found", 404));
+  }
+
+  const { status, itemId } = req.body;
+
+  // 1. Agar specific item ka status update karna hai (Seller ya Admin)
+  if (itemId) {
+    const item = order.orderItems.find((i) => i._id.toString() === itemId);
+    if (!item) {
+      return next(new ErrorHandler("Item not found in this order", 404));
     }
 
-    const { status, itemId } = req.body;
-
-    // 1. Agar specific item ka status update karna hai (Seller ya Admin)
-    if (itemId) {
-        const item = order.orderItems.find((i) => i._id.toString() === itemId);
-        if (!item) {
-            return next(new ErrorHandler("Item not found in this order", 404));
-        }
-
-        // Security: Agar seller hai, toh check karein ki kya ye item usi ka hai?
-        if (req.user.role === "seller" && item.seller.toString() !== req.user._id.toString()) {
-            return next(new ErrorHandler("Aapko is item ka status update karne ki ijazat nahi hai", 403));
-        }
-
-        // Status Change: Agar 'Delivered' ho, toh paisa wallet mein bhejein
-        if (status === "Delivered" && item.status !== "Delivered") {
-            item.adminCommission = (item.price * item.quantity) * 0.10;
-            const seller = await User.findById(item.seller);
-            if (seller) {
-                // Seller ko 90% mil jayega
-                seller.walletBalance = (seller.walletBalance || 0) + ((item.price * item.quantity) * 0.90);
-                await seller.save({ validateBeforeSave: false });
-            }
-        }
-
-        item.status = status;
-    } 
-    // 2. Agar poore order ka status update karna hai (Admin Only)
-    else {
-        if (req.user.role !== "admin") {
-            return next(new ErrorHandler("Sirf Admin poore order ka status change kar sakta hai", 403));
-        }
-        order.orderStatus = status;
-        if (status === "Shipped") order.shippedAt = Date.now();
-        if (status === "Delivered") order.deliveredAt = Date.now();
+    // Security: Agar seller hai, toh check karein ki kya ye item usi ka hai?
+    if (
+      req.user.role === "seller" &&
+      item.seller.toString() !== req.user._id.toString()
+    ) {
+      return next(
+        new ErrorHandler(
+          "Aapko is item ka status update karne ki ijazat nahi hai",
+          403,
+        ),
+      );
     }
 
-    await order.save({ validateBeforeSave: false });
+    // Status Change: Agar 'Delivered' ho, toh paisa wallet mein bhejein
+    if (status === "Delivered" && item.status !== "Delivered") {
+      item.adminCommission = item.price * item.quantity * 0.1;
+      const seller = await User.findById(item.seller);
+      if (seller) {
+        // Seller ko 90% mil jayega
+        seller.walletBalance =
+          (seller.walletBalance || 0) + item.price * item.quantity * 0.9;
+        await seller.save({ validateBeforeSave: false });
+      }
+    }
 
-    res.status(200).json({
-        success: true,
-        message: "Status updated successfully",
-    });
+    item.status = status;
+  }
+  // 2. Agar poore order ka status update karna hai (Admin Only)
+  else {
+    if (req.user.role !== "admin") {
+      return next(
+        new ErrorHandler(
+          "Sirf Admin poore order ka status change kar sakta hai",
+          403,
+        ),
+      );
+    }
+    order.orderStatus = status;
+    if (status === "Shipped") order.shippedAt = Date.now();
+    if (status === "Delivered") order.deliveredAt = Date.now();
+  }
+
+  await order.save({ validateBeforeSave: false });
+
+  try {
+    const user = await User.findById(order.user);
+    if (user && user.email) {
+      let emailSubject = "Order Update - MA-CART";
+      let emailMessage = `Hi ${user.name},\n\nAapke order ki status ab ${status} ho gayi hai.`;
+
+      if (status === "Delivered") {
+        emailSubject = "Order Delivered - MA-CART";
+        emailMessage = `Hi ${user.name},\n\nAapka order (ID: ${order._id}) deliver kar diya gaya hai. Hum aapki shopping ko appreciate karte hain!\n\nThank you for choosing MA-CART.`;
+      } else if (status === "Shipped") {
+        emailSubject = "Order Shipped - MA-CART";
+        emailMessage = `Hi ${user.name},\n\nAapka order (ID: ${order._id}) ab ship ho chuka hai. Jaldi hi aapko delivery details mil jaayenge.`;
+      }
+
+      await sendEmail({
+        email: user.email,
+        subject: emailSubject,
+        message: emailMessage,
+      });
+    }
+  } catch (error) {
+    console.log("Order status email send failed:", error.message || error);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Status updated successfully",
+  });
 });
 
 // ============================================================
 // 6. SELLER CUSTOMERS FETCH KARNA
 // ============================================================
 exports.getSellerCustomers = catchAsyncErrors(async (req, res, next) => {
-    // Seller ke products ke orders nikal kar unique customers find karna
-    const orders = await Order.find({ "orderItems.seller": req.user._id }).populate("user", "name email createdAt");
-    
-    // Unique customers ki list nikalne ke liye Map ka use
-    const customersMap = new Map();
-    orders.forEach(order => {
-        if (order.user) {
-            customersMap.set(order.user._id.toString(), order.user);
-        }
-    });
-    const customers = Array.from(customersMap.values());
+  // Seller ke products ke orders nikal kar unique customers find karna
+  const orders = await Order.find({
+    "orderItems.seller": req.user._id,
+  }).populate("user", "name email createdAt");
 
-    res.status(200).json({
-        success: true,
-        customers,
-    });
+  // Unique customers ki list nikalne ke liye Map ka use
+  const customersMap = new Map();
+  orders.forEach((order) => {
+    if (order.user) {
+      customersMap.set(order.user._id.toString(), order.user);
+    }
+  });
+  const customers = Array.from(customersMap.values());
+
+  res.status(200).json({
+    success: true,
+    customers,
+  });
 });
 // ============================================================
 // 7. SELLER ANALYTICS & STATS FETCH KARNA
 // ============================================================
 exports.getSellerAnalytics = catchAsyncErrors(async (req, res, next) => {
-    const orders = await Order.find({ "orderItems.seller": req.user._id });
+  const orders = await Order.find({ "orderItems.seller": req.user._id });
 
-    let totalRevenue = 0;
-    orders.forEach(order => {
-        order.orderItems.forEach(item => {
-            if (item.seller.toString() === req.user._id.toString()) {
-                totalRevenue += item.price * item.quantity;
-            }
-        });
+  let totalRevenue = 0;
+  orders.forEach((order) => {
+    order.orderItems.forEach((item) => {
+      if (item.seller.toString() === req.user._id.toString()) {
+        totalRevenue += item.price * item.quantity;
+      }
     });
+  });
 
-    const totalOrders = orders.length;
-    const productsCount = await Product.countDocuments({ user: req.user._id });
+  const totalOrders = orders.length;
+  const productsCount = await Product.countDocuments({ user: req.user._id });
 
-    res.status(200).json({
-        success: true,
-        totalRevenue,
-        totalOrders,
-        productsCount,
-    });
+  res.status(200).json({
+    success: true,
+    totalRevenue,
+    totalOrders,
+    productsCount,
+  });
 });
 // Helper function (check karein ke ye file mein majood hai)
 async function updateStock(id, quantity) {
-    console.log("DEBUG: Updating stock for ID:", id, "Reduction:", quantity); // Yeh line add karein
-    const product = await Product.findById(id);
-    if (product) {
-        product.stock -= quantity;
-        await product.save({ validateBeforeSave: false });
-        console.log("DEBUG: New stock saved:", product.stock); // Yeh line add karein
-    } else {
-        console.log("DEBUG: Product not found for stock update!");
-    }
+  console.log("DEBUG: Updating stock for ID:", id, "Reduction:", quantity); // Yeh line add karein
+  const product = await Product.findById(id);
+  if (product) {
+    product.stock -= quantity;
+    await product.save({ validateBeforeSave: false });
+    console.log("DEBUG: New stock saved:", product.stock); // Yeh line add karein
+  } else {
+    console.log("DEBUG: Product not found for stock update!");
+  }
 }
 
 // 2. DELETE ORDER
 const deleteOrder = catchAsyncErrors(async (req, res, next) => {
-    const order = await Order.findById(req.params.id);
-    if (!order) return next(new ErrorHandler("Order not found", 404));
-    await order.deleteOne();
-    res.status(200).json({ success: true });
+  const order = await Order.findById(req.params.id);
+  if (!order) return next(new ErrorHandler("Order not found", 404));
+  await order.deleteOne();
+  res.status(200).json({ success: true });
 });
 
 // 3. EXPORTS (Yahan ghalti hoti hai, ise dhyan se likhein)
 exports.updateItemStatus = updateItemStatus;
 exports.updateOrder = updateItemStatus; // Yeh route ke liye zaroori hai
 exports.deleteOrder = deleteOrder;
-

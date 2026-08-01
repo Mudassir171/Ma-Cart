@@ -109,11 +109,33 @@ exports.loginUser = asyncErrorHandler(async (req, res, next) => {
     return next(new ErrorHandler("Invalid Email or Password", 401));
   }
 
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Login Successful - MA-CART",
+      message: `Hi ${user.name},\n\nAap successfully login ho gaye hain. Agar yeh aapki activity nahi hai toh turant apna password change karein.\n\nRegards,\nMA-CART Team`,
+    });
+  } catch (error) {
+    console.log("Login email send failed:", error.message);
+  }
+
   sendToken(user, 201, res);
 });
 
 // Logout User
 exports.logoutUser = asyncErrorHandler(async (req, res, next) => {
+  if (req.user) {
+    try {
+      await sendEmail({
+        email: req.user.email,
+        subject: "Logout Successful - MA-CART",
+        message: `Hi ${req.user.name},\n\nAap successfully logout ho chuke hain. Agar yeh action aapne nahi kiya toh apna account secure karein.\n\nRegards,\nMA-CART Team`,
+      });
+    } catch (error) {
+      console.log("Logout email send failed:", error.message);
+    }
+  }
+
   res.cookie("token", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
@@ -380,13 +402,11 @@ exports.approveSeller = asyncErrorHandler(async (req, res, next) => {
 
     await sendEmail({
       email: seller.email,
-      subject: "Your Shop Approval - Flipkart",
+      subject: "Your Shop Approval - MA-CART",
       message,
     });
   } catch (error) {
-    // Email fail hone par bhi hum process ko continue rakhenge
-    // kyunki user approve ho chuka hai.
-    console.log("Email could not be sent: ", error);
+    console.log("Email could not be sent: ", error.message || error);
   }
 
   res.status(200).json({
