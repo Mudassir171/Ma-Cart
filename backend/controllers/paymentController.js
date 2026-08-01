@@ -191,7 +191,7 @@ exports.processPayment = asyncErrorHandler(async (req, res, next) => {
         amount: req.body.amount, // Paise (In smallest unit, e.g., 1000 = 10.00)
         currency: "inr",
         metadata: {
-            company: "Flipkart",
+            company: "Ma-Cart",
         },
     });
 
