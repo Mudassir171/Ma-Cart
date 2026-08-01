@@ -31,6 +31,7 @@ exports.getMessages = asyncErrorHandler(async (req, res, next) => {
 // Send a New Message & Get Auto AI Response
 exports.sendMessage = asyncErrorHandler(async (req, res, next) => {
   const { message, receiverId } = req.body;
+  const aiReceiverId = receiverId || process.env.AI_RECEIVER_ID || req.user._id;
 
   if (!message) {
     return res
@@ -40,7 +41,7 @@ exports.sendMessage = asyncErrorHandler(async (req, res, next) => {
 
   // 1. User ka message database mein save karein
   const userChat = await Chat.create({
-    users: [req.user._id, receiverId], // Yahan receiverId AI ki ID ho sakti hai ya generic ID
+    users: [req.user._id, aiReceiverId],
     sender: req.user._id,
     message,
   });
@@ -68,15 +69,16 @@ exports.sendMessage = asyncErrorHandler(async (req, res, next) => {
     console.warn("AI client unavailable; skipping Gemini request.");
   }
 
-  // 3. AI ka jawab bhi database mein save karein (sender as receiverId ya AI ki ID)
+  // 3. AI ka jawab bhi database mein save karein (sender as AI receiver ID)
   const aiChat = await Chat.create({
-    users: [req.user._id, receiverId],
-    sender: receiverId, // AI ko sender dikhane ke liye
+    users: [req.user._id, aiReceiverId],
+    sender: aiReceiverId,
     message: aiReplyText,
   });
 
   res.status(201).json({
     success: true,
+    reply: aiReplyText,
     userChat,
     aiChat,
   });
