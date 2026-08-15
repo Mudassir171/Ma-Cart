@@ -10,146 +10,20 @@ import { Link } from "react-router-dom";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
-// --- Sub-component for individual product timers in Discounted/Deals Section ---
-const CategoryItem = ({ category }) => {
-  return (
-    <Link
-      to={`/products?category=${category._id}`}
-      className="flex flex-col items-center gap-3 p-3 group cursor-pointer"
-    >
-      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg flex items-center justify-center overflow-hidden group-hover:shadow-md transition-all duration-300 border border-emerald-100">
-        {category.icon ? (
-          <img
-            src={category.icon}
-            alt={category.name}
-            className="w-12 h-12 sm:w-14 sm:h-14 object-contain group-hover:scale-110 transition-transform duration-300"
-          />
-        ) : (
-          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-200 rounded flex items-center justify-center text-emerald-700 font-bold text-lg">
-            {category.name?.charAt(0)}
-          </div>
-        )}
-      </div>
-      <p className="text-xs sm:text-sm font-semibold text-gray-800 text-center line-clamp-2 max-w-[80px] group-hover:text-emerald-600 transition-colors">
-        {category.name}
-      </p>
-    </Link>
-  );
-};
-
-const DealProductItem = ({ item }) => {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
-
-  useEffect(() => {
-    const targetTime = item.dealExpiry
-      ? new Date(item.dealExpiry).getTime()
-      : new Date().getTime() + 86400000 * 3;
-
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const difference = targetTime - now;
-
-      if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-        );
-        const minutes = Math.floor(
-          (difference % (1000 * 60 * 60)) / (1000 * 60),
-        );
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-        setTimeLeft({ days, hours, minutes, seconds });
-      } else {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [item.dealExpiry]);
-
-  const discountPercentage =
-    item.discount ||
-    (item.cuttedPrice && item.price
-      ? Math.round(((item.cuttedPrice - item.price) / item.cuttedPrice) * 100)
-      : 0);
-
-  return (
-    <div className="min-w-[50%] sm:min-w-[210px] border-r border-gray-200 p-2 sm:p-3 flex flex-col justify-between relative bg-white flex-shrink-0 group hover:shadow-md transition-all">
-      {discountPercentage > 0 && (
-        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 bg-pink-100 text-rose-600 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
-          -{discountPercentage}%
-        </div>
-      )}
-      <Product {...item} />
-
-      <div className="mt-2 pt-2 border-t border-gray-100">
-        <p className="text-[10px] text-gray-500 text-center mb-1 font-medium">
-          Offers ends in:
-        </p>
-        <div className="flex items-center justify-center gap-1 text-[10px] font-bold text-gray-800 bg-gray-50 py-1 rounded">
-          <span>{String(timeLeft.days).padStart(2, "0")}d</span>:
-          <span>{String(timeLeft.hours).padStart(2, "0")}h</span>:
-          <span>{String(timeLeft.minutes).padStart(2, "0")}m</span>:
-          <span>{String(timeLeft.seconds).padStart(2, "0")}s</span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const Home = () => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { error, loading, products } = useSelector((state) => state.products);
-  const { categories } = useSelector((state) => state.categories || {});
 
-  // --- Scroll References ---
-  const latestScrollRef = useRef(null);
-  const dealsScrollRef = useRef(null);
-  const categoriesScrollRef = useRef(null);
+  const featuredScrollRef = useRef(null);
+  const newScrollRef = useRef(null);
 
-  const scrollLatest = (direction) => {
-    if (latestScrollRef.current) {
-      const { scrollLeft, clientWidth } = latestScrollRef.current;
+  const scrollContainer = (ref, direction) => {
+    if (ref.current) {
+      const { scrollLeft, clientWidth } = ref.current;
       const scrollAmount = clientWidth * 0.75;
-      latestScrollRef.current.scrollTo({
-        left:
-          direction === "left"
-            ? scrollLeft - scrollAmount
-            : scrollLeft + scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const scrollCategories = (direction) => {
-    if (categoriesScrollRef.current) {
-      const { scrollLeft, clientWidth } = categoriesScrollRef.current;
-      const scrollAmount = clientWidth * 0.75;
-      categoriesScrollRef.current.scrollTo({
-        left:
-          direction === "left"
-            ? scrollLeft - scrollAmount
-            : scrollLeft + scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const scrollDeals = (direction) => {
-    if (dealsScrollRef.current) {
-      const { scrollLeft, clientWidth } = dealsScrollRef.current;
-      const scrollAmount = clientWidth * 0.75;
-      dealsScrollRef.current.scrollTo({
-        left:
-          direction === "left"
-            ? scrollLeft - scrollAmount
-            : scrollLeft + scrollAmount,
+      ref.current.scrollTo({
+        left: direction === "left" ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
         behavior: "smooth",
       });
     }
@@ -163,375 +37,273 @@ const Home = () => {
     dispatch(getSliderProducts());
   }, [dispatch, error, enqueueSnackbar]);
 
-  // --- 1. Latest Products (Sorted by newest first) ---
-  const latestProducts = products
-    ? [...products].sort(
-        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
-      )
-    : [];
-
-  // --- 2. Discounted / Deal Products ---
-  // --- 2. Discounted / Deal Products ---
-  const discountedProducts = products?.filter((item) => {
+  // Featured / Discounted products
+  const featuredProducts = products?.filter((item) => {
     const disc =
       item.discount ||
       (item.cuttedPrice && item.price
         ? Math.round(((item.cuttedPrice - item.price) / item.cuttedPrice) * 100)
         : 0);
     return disc > 0;
-  });
+  }) || [];
 
-  // Yahan check karein ke data aa raha hai ya nahi
-  console.log("All Products:", products);
-  console.log("Discounted Products:", discountedProducts);
+  // New products sorted by latest date
+  const newProducts = products
+    ? [...products].sort(
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+      )
+    : [];
 
   return (
     <>
       <MetaData title="Ma-Cart | Online Shopping Site" />
 
-      <main className="w-full bg-[#f4f4f4] min-h-screen pb-10 overflow-x-hidden mt-5">
-        <div className="w-full mt-12 bg-white shadow-sm">
-          <Banner />
-        </div>
+      <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4">
+        <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-8">
+          
+          {/* 1. TOP MAIN BANNER */}
+          <div className="w-full bg-white rounded-xl shadow-sm overflow-hidden">
+            <Banner />
+          </div>
 
-        <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
-          {/* --- FEATURED CATEGORIES SECTION --- */}
-          {categories && categories.length > 0 && (
-            <section className="bg-gradient-to-b from-white to-gray-50/50 my-6 w-full shadow-md rounded-2xl overflow-hidden border border-emerald-100/60 p-4 md:p-6">
-              {/* --- Header Section --- */}
-              <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-6 w-1.5 bg-emerald-600 rounded-full"></div>
-                  <h2 className="text-lg md:text-xl font-extrabold text-emerald-900 tracking-tight">
-                    Featured Categories
-                  </h2>
+          {/* 2. FEATURED CATEGORIES SECTION */}
+          <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+              FEATURED CATEGORIES
+            </h3>
+            <Categories />
+          </section>
+
+          {/* MAIN CONTENT GRID (Left Banners + Right Products Layout) */}
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
+            
+            {/* LEFT COLUMN: Promo Side Banners & Mini Info */}
+            <div className="w-full lg:w-[280px] flex-shrink-0 flex flex-col gap-5">
+              {/* Top Side Banner */}
+              <div className="relative rounded-xl overflow-hidden h-[340px] shadow-sm group">
+                <img
+                  src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80"
+                  alt="Fresh Products"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-5 flex flex-col justify-between text-white">
+                  <div>
+                    <span className="text-xs uppercase font-medium text-emerald-300">
+                      Best Bakery Products
+                    </span>
+                    <h4 className="text-xl font-bold mt-1 leading-tight">
+                      Freshest Products every hour.
+                    </h4>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-200">Only from</p>
+                    <p className="text-2xl font-black text-rose-400 mb-3">$24.99</p>
+                    <Link
+                      to="/products"
+                      className="inline-block bg-sky-400 hover:bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-md transition-colors"
+                    >
+                      Shop Now
+                    </Link>
+                  </div>
                 </div>
-
-                <Link
-                  to="/products"
-                  className="group relative inline-flex items-center gap-2 px-5 py-2 text-xs md:text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-300 shadow-sm"
-                >
-                  <span>View All</span>
-                  <svg
-                    className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </Link>
               </div>
 
-              {/* --- Main Container: Left Banner + Right Scrollable Categories --- */}
-              <div className="flex flex-col lg:flex-row gap-4 items-stretch">
-                {/* Left Side: Banner */}
-                <div className="w-full lg:w-[260px] flex-shrink-0">
+              {/* Bottom Side Banner */}
+              <div className="relative rounded-xl overflow-hidden h-[240px] bg-amber-400 p-5 flex flex-col justify-between shadow-sm">
+                <div>
+                  <span className="text-xs uppercase font-bold text-amber-900/70">
+                    Baco's Natural Foods
+                  </span>
+                  <h4 className="text-lg font-black text-amber-950 mt-1">
+                    Special Organic Roats Burger
+                  </h4>
+                </div>
+                <div>
+                  <p className="text-xs text-amber-900">Only from</p>
+                  <p className="text-2xl font-extrabold text-rose-600">$14.99</p>
+                </div>
+              </div>
+
+              {/* Side Info Features */}
+              <div className="bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-4 text-xs text-gray-600 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">📱</span>
+                  <p>Download the App for your Phone.</p>
+                </div>
+                <hr className="border-gray-100" />
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">🚚</span>
+                  <p>Order now so you don't miss the opportunities.</p>
+                </div>
+                <hr className="border-gray-100" />
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">⏰</span>
+                  <p>Your order will arrive at your door in 15 minutes.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: Featured Products, Category Cards & New Products */}
+            <div className="flex-grow w-full flex flex-col gap-6 overflow-hidden">
+              
+              {/* 3. FEATURED PRODUCTS SECTION */}
+              <section className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 relative">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-lg font-black uppercase text-gray-800 tracking-tight">
+                      FEATURED PRODUCTS
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      Do not miss the current offers until the end of March.
+                    </p>
+                  </div>
                   <Link
                     to="/products"
-                    className="group relative h-full min-h-[300px] rounded-xl overflow-hidden shadow-sm border border-emerald-100 flex flex-col justify-end p-5 block"
+                    className="text-xs font-semibold text-gray-500 border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50 transition-colors"
                   >
-                    <img
-                      src="https://images.unsplash.com/photo-1555939594-58d7cb561681?auto=format&fit=crop&w=600&q=80"
-                      alt="Categories Banner"
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-
-                    <div className="relative z-10 text-white">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-950/70 px-2.5 py-1 rounded-md backdrop-blur-md">
-                        Shop by Category
-                      </span>
-                      <h3 className="text-lg font-extrabold mt-2 leading-snug">
-                        Explore All Varieties
-                      </h3>
-                      <span className="inline-flex items-center gap-1 mt-2 text-xs font-bold text-white bg-emerald-600 px-3 py-1.5 rounded-lg group-hover:bg-emerald-500 transition-colors">
-                        Browse &rarr;
-                      </span>
-                    </div>
+                    View All &rarr;
                   </Link>
                 </div>
 
-                {/* Right Side: Scrollable Container with Categories */}
-                <div className="flex-grow relative overflow-hidden flex items-center">
-                  {/* Floating Left Arrow */}
-                  {categories.length >= 6 && (
-                    <button
-                      onClick={() => scrollCategories("left")}
-                      aria-label="Scroll Left"
-                      className="absolute left-1 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-emerald-600 hover:text-white text-emerald-900 shadow-lg border border-emerald-100 p-2 rounded-full hidden sm:flex items-center justify-center cursor-pointer transition-all duration-300 backdrop-blur-md"
-                    >
-                      <ChevronLeftIcon fontSize="small" />
-                    </button>
-                  )}
-
-                  {/* Floating Right Arrow */}
-                  {categories.length >= 6 && (
-                    <button
-                      onClick={() => scrollCategories("right")}
-                      aria-label="Scroll Right"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-emerald-600 hover:text-white text-emerald-900 shadow-lg border border-emerald-100 p-2 rounded-full hidden sm:flex items-center justify-center cursor-pointer transition-all duration-300 backdrop-blur-md"
-                    >
-                      <ChevronRightIcon fontSize="small" />
-                    </button>
-                  )}
-
-                  {/* Categories Horizontal Scroll Track */}
-                  <div
-                    ref={categoriesScrollRef}
-                    className="flex items-center overflow-x-auto scroll-smooth scrollbar-none gap-4 py-2 w-full px-2"
-                    style={{
-                      scrollbarWidth: "none",
-                      msOverflowStyle: "none",
-                    }}
+                {/* Featured Products Scroll Track */}
+                <div className="relative group">
+                  <button
+                    onClick={() => scrollContainer(featuredScrollRef, "left")}
+                    className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 bg-white border shadow-md p-1.5 rounded-full text-gray-700 hover:bg-gray-100 hidden group-hover:flex"
                   >
-                    {categories &&
-                      categories.map((category) => (
+                    <ChevronLeftIcon fontSize="small" />
+                  </button>
+                  <button
+                    onClick={() => scrollContainer(featuredScrollRef, "right")}
+                    className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 bg-white border shadow-md p-1.5 rounded-full text-gray-700 hover:bg-gray-100 hidden group-hover:flex"
+                  >
+                    <ChevronRightIcon fontSize="small" />
+                  </button>
+
+                  <div
+                    ref={featuredScrollRef}
+                    className="flex gap-4 overflow-x-auto scroll-smooth py-2 scrollbar-none"
+                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                  >
+                    {!loading &&
+                      (featuredProducts.length > 0 ? featuredProducts : products)
+                        ?.slice(0, 10)
+                        .map((item) => (
+                          <div
+                            key={item._id}
+                            className="w-[200px] flex-shrink-0 bg-white border border-gray-100 rounded-lg p-2 hover:shadow-md transition-shadow"
+                          >
+                            <Product {...item} />
+                          </div>
+                        ))}
+                  </div>
+                </div>
+
+                {/* Promotional Category Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                  <div className="bg-sky-50 rounded-xl p-4 flex items-center justify-between border border-sky-100">
+                    <div>
+                      <span className="text-[10px] font-bold text-sky-600 bg-sky-200/60 px-2 py-0.5 rounded">
+                        WEEKEND DISCOUNT 40%
+                      </span>
+                      <h4 className="font-extrabold text-gray-800 text-base mt-2">
+                        Dairy & Eggs
+                      </h4>
+                      <p className="text-xs text-gray-500 mb-3">A different kind of grocery store</p>
+                      <Link
+                        to="/products"
+                        className="text-xs bg-sky-200 text-sky-900 font-bold px-3 py-1.5 rounded-md hover:bg-sky-300 transition-colors"
+                      >
+                        Shop Now
+                      </Link>
+                    </div>
+                    <img
+                      src="https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=200&q=80"
+                      alt="Dairy & Eggs"
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
+                  </div>
+
+                  <div className="bg-emerald-50 rounded-xl p-4 flex items-center justify-between border border-emerald-100">
+                    <div>
+                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-200/60 px-2 py-0.5 rounded">
+                        WEEKEND DISCOUNT 40%
+                      </span>
+                      <h4 className="font-extrabold text-gray-800 text-base mt-2">
+                        Legumes & Cereals
+                      </h4>
+                      <p className="text-xs text-gray-500 mb-3">Feed your family the best</p>
+                      <Link
+                        to="/products"
+                        className="text-xs bg-emerald-200 text-emerald-900 font-bold px-3 py-1.5 rounded-md hover:bg-emerald-300 transition-colors"
+                      >
+                        Shop Now
+                      </Link>
+                    </div>
+                    <img
+                      src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=200&q=80"
+                      alt="Legumes & Cereals"
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* 4. NEW PRODUCTS SECTION */}
+              <section className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 relative">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-lg font-black uppercase text-gray-800 tracking-tight">
+                      NEW PRODUCTS
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      New products with updated stocks.
+                    </p>
+                  </div>
+                  <Link
+                    to="/products"
+                    className="text-xs font-semibold text-gray-500 border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50 transition-colors"
+                  >
+                    View All &rarr;
+                  </Link>
+                </div>
+
+                {/* New Products Scroll Track */}
+                <div className="relative group">
+                  <button
+                    onClick={() => scrollContainer(newScrollRef, "left")}
+                    className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 bg-white border shadow-md p-1.5 rounded-full text-gray-700 hover:bg-gray-100 hidden group-hover:flex"
+                  >
+                    <ChevronLeftIcon fontSize="small" />
+                  </button>
+                  <button
+                    onClick={() => scrollContainer(newScrollRef, "right")}
+                    className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 bg-white border shadow-md p-1.5 rounded-full text-gray-700 hover:bg-gray-100 hidden group-hover:flex"
+                  >
+                    <ChevronRightIcon fontSize="small" />
+                  </button>
+
+                  <div
+                    ref={newScrollRef}
+                    className="flex gap-4 overflow-x-auto scroll-smooth py-2 scrollbar-none"
+                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                  >
+                    {!loading &&
+                      newProducts?.slice(0, 10).map((item) => (
                         <div
-                          key={category._id}
-                          style={{ width: "120px" }}
-                          className="flex-shrink-0 bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-emerald-200 transition-all duration-300 shadow-sm"
+                          key={item._id}
+                          className="w-[200px] flex-shrink-0 bg-white border border-gray-100 rounded-lg p-2 hover:shadow-md transition-shadow"
                         >
-                          <CategoryItem category={category} />
+                          <Product {...item} />
                         </div>
                       ))}
                   </div>
                 </div>
-              </div>
-            </section>
-          )}
+              </section>
 
-          {/* --- LATEST PRODUCTS SECTION (Banner Left + 4 Products Right in a Single Line) --- */}
-          {latestProducts && latestProducts.length > 0 && (
-            <section className="bg-gradient-to-b from-white to-gray-50/50 my-6 w-full shadow-md rounded-2xl overflow-hidden border border-emerald-100/60 p-4 md:p-6">
-              {/* --- Header Section --- */}
-              <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-6 w-1.5 bg-emerald-600 rounded-full"></div>
-                  <h2 className="text-lg md:text-xl font-extrabold text-emerald-900 tracking-tight">
-                    Latest Products
-                  </h2>
-                </div>
-
-                <Link
-                  to="/products"
-                  className="group relative inline-flex items-center gap-2 px-5 py-2 text-xs md:text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-300 shadow-sm"
-                >
-                  <span>View All</span>
-                  <svg
-                    className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </Link>
-              </div>
-
-              {/* --- Main Container: Left Banner + Right 4 Products --- */}
-              <div className="flex flex-col lg:flex-row gap-4 items-stretch">
-                {/* Left Side: Banner */}
-                <div className="w-full lg:w-[260px] flex-shrink-0">
-                  <Link
-                    to="/products"
-                    className="group relative h-full min-h-[300px] rounded-xl overflow-hidden shadow-sm border border-emerald-100 flex flex-col justify-end p-5 block"
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=600&q=80"
-                      alt="Latest Collection Banner"
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-
-                    <div className="relative z-10 text-white">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-950/70 px-2.5 py-1 rounded-md backdrop-blur-md">
-                        Special Offer
-                      </span>
-                      <h3 className="text-lg font-extrabold mt-2 leading-snug">
-                        Hot New Arrivals & Deals
-                      </h3>
-                      <span className="inline-flex items-center gap-1 mt-2 text-xs font-bold text-white bg-emerald-600 px-3 py-1.5 rounded-lg group-hover:bg-emerald-500 transition-colors">
-                        Shop Now &rarr;
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-
-                {/* Right Side: 4 Products in a Single Line (Fixed Width 200px, Height 300px) */}
-                <div className="flex-grow overflow-x-auto pb-2">
-                  <div className="flex gap-4 items-center justify-start lg:justify-between">
-                    {!loading &&
-                      latestProducts.slice(0, 4).map((item) => {
-                        return (
-                          <div
-                            key={item._id}
-                            style={{ width: "200px", height: "300px" }}
-                            className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-emerald-200 transition-all duration-300 flex-shrink-0 flex flex-col shadow-sm"
-                          >
-                            <Product {...item} />
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* --- FLASH SALE / SPECIAL DISCOUNTS SECTION (Hidden if no valid timed deals) --- */}
-          {(() => {
-            const validFlashSaleProducts =
-              discountedProducts && discountedProducts.length > 0
-                ? discountedProducts.filter(
-                    (item) => item.cuttedPrice > item.price,
-                  )
-                : [];
-
-            return (
-              validFlashSaleProducts.length > 0 && (
-                <section className="bg-gradient-to-b from-white to-gray-50/50 my-6 w-full shadow-md rounded-2xl overflow-hidden relative border border-emerald-100/60 p-4 md:p-6">
-                  {/* --- Header Section --- */}
-                  <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-6 w-1.5 bg-emerald-600 rounded-full"></div>
-                      <h2 className="text-lg md:text-xl font-extrabold text-emerald-950 tracking-tight">
-                        Flash Sale & Special Discounts
-                      </h2>
-                    </div>
-
-                    <Link
-                      to="/products"
-                      className="group relative inline-flex items-center gap-2 px-5 py-2 text-xs md:text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-300 shadow-sm"
-                    >
-                      <span>View All</span>
-                      <svg
-                        className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </Link>
-                  </div>
-
-                  {/* --- Main Content Container: Left Banner + Right Scrollable Products --- */}
-                  <div className="flex flex-col lg:flex-row gap-4 items-stretch relative">
-                    {/* Left Side: Flash Sale Promotional Banner */}
-                    <div className="w-full lg:w-[260px] flex-shrink-0">
-                      <Link
-                        to="/products"
-                        className="group relative h-full min-h-[300px] rounded-xl overflow-hidden shadow-sm border border-emerald-100 flex flex-col justify-end p-5 block"
-                      >
-                        <img
-                          src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=600&q=80"
-                          alt="Flash Sale Banner"
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-
-                        <div className="relative z-10 text-white">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-950/70 px-2.5 py-1 rounded-md backdrop-blur-md">
-                            Limited Time
-                          </span>
-                          <h3 className="text-lg font-extrabold mt-2 leading-snug">
-                            Flash Deals Up to 70% Off
-                          </h3>
-                          <span className="inline-flex items-center gap-1 mt-2 text-xs font-bold text-white bg-emerald-600 px-3 py-1.5 rounded-lg group-hover:bg-emerald-500 transition-colors">
-                            Shop Sale &rarr;
-                          </span>
-                        </div>
-                      </Link>
-                    </div>
-
-                    {/* Right Side: Scrollable Container with Fixed Product Dimensions (200px x 300px) */}
-                    <div className="flex-grow relative overflow-hidden flex items-center">
-                      {/* Floating Left Arrow */}
-                      {validFlashSaleProducts.length >= 4 && (
-                        <button
-                          onClick={() => scrollDeals("left")}
-                          aria-label="Scroll Left"
-                          className="absolute left-1 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-emerald-600 hover:text-white text-emerald-900 shadow-lg border border-emerald-100 p-2 rounded-full hidden sm:flex items-center justify-center cursor-pointer transition-all duration-300 backdrop-blur-md"
-                        >
-                          <ChevronLeftIcon fontSize="small" />
-                        </button>
-                      )}
-
-                      {/* Floating Right Arrow */}
-                      {validFlashSaleProducts.length >= 4 && (
-                        <button
-                          onClick={() => scrollDeals("right")}
-                          aria-label="Scroll Right"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-emerald-600 hover:text-white text-emerald-900 shadow-lg border border-emerald-100 p-2 rounded-full hidden sm:flex items-center justify-center cursor-pointer transition-all duration-300 backdrop-blur-md"
-                        >
-                          <ChevronRightIcon fontSize="small" />
-                        </button>
-                      )}
-
-                      {/* Product Horizontal Scroll Track */}
-                      <div
-                        ref={dealsScrollRef}
-                        className="flex items-center overflow-x-auto scroll-smooth scrollbar-none gap-4 py-2 w-full"
-                        style={{
-                          scrollbarWidth: "none",
-                          msOverflowStyle: "none",
-                        }}
-                      >
-                        {!loading &&
-                          validFlashSaleProducts.slice(0, 30).map((item) => (
-                            <div
-                              key={item._id}
-                              style={{ width: "200px", height: "300px" }}
-                              className="flex-shrink-0 bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-emerald-200 transition-all duration-300 shadow-sm flex flex-col"
-                            >
-                              <DealProductItem item={item} />
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              )
-            );
-          })()}
-
-          {/* --- JUST FOR YOU SECTION --- */}
-          <section className="bg-white rounded-md shadow-sm overflow-hidden border border-gray-100 mt-2">
-            <div className="flex justify-between items-center px-4 py-3 border-b border-gray-50 mb-2">
-              <h2 className="text-lg font-bold text-green-800 uppercase tracking-tight">
-                Just For You
-              </h2>
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4 p-2 sm:p-4">
-              {!loading &&
-                products &&
-                products.map((item) => (
-                  <div
-                    key={item._id}
-                    className="h-full bg-white p-2 rounded border border-gray-100 shadow-sm hover:shadow-md transition-all"
-                  >
-                    <Product {...item} />
-                  </div>
-                ))}
-            </div>
-          </section>
         </div>
       </main>
     </>
