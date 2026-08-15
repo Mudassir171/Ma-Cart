@@ -11,6 +11,32 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 // --- Sub-component for individual product timers in Discounted/Deals Section ---
+const CategoryItem = ({ category }) => {
+  return (
+    <Link
+      to={`/products?category=${category._id}`}
+      className="flex flex-col items-center gap-3 p-3 group cursor-pointer"
+    >
+      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg flex items-center justify-center overflow-hidden group-hover:shadow-md transition-all duration-300 border border-emerald-100">
+        {category.icon ? (
+          <img
+            src={category.icon}
+            alt={category.name}
+            className="w-12 h-12 sm:w-14 sm:h-14 object-contain group-hover:scale-110 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-200 rounded flex items-center justify-center text-emerald-700 font-bold text-lg">
+            {category.name?.charAt(0)}
+          </div>
+        )}
+      </div>
+      <p className="text-xs sm:text-sm font-semibold text-gray-800 text-center line-clamp-2 max-w-[80px] group-hover:text-emerald-600 transition-colors">
+        {category.name}
+      </p>
+    </Link>
+  );
+};
+
 const DealProductItem = ({ item }) => {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -80,16 +106,32 @@ const Home = () => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { error, loading, products } = useSelector((state) => state.products);
+  const { categories } = useSelector((state) => state.categories || {});
 
   // --- Scroll References ---
   const latestScrollRef = useRef(null);
   const dealsScrollRef = useRef(null);
+  const categoriesScrollRef = useRef(null);
 
   const scrollLatest = (direction) => {
     if (latestScrollRef.current) {
       const { scrollLeft, clientWidth } = latestScrollRef.current;
       const scrollAmount = clientWidth * 0.75;
       latestScrollRef.current.scrollTo({
+        left:
+          direction === "left"
+            ? scrollLeft - scrollAmount
+            : scrollLeft + scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollCategories = (direction) => {
+    if (categoriesScrollRef.current) {
+      const { scrollLeft, clientWidth } = categoriesScrollRef.current;
+      const scrollAmount = clientWidth * 0.75;
+      categoriesScrollRef.current.scrollTo({
         left:
           direction === "left"
             ? scrollLeft - scrollAmount
@@ -154,18 +196,115 @@ const Home = () => {
 
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
           {/* --- FEATURED CATEGORIES SECTION --- */}
-          <section className="bg-white mt-2 mb-2 w-full shadow-sm rounded-sm overflow-hidden border border-gray-100">
-            <div className="p-2">
-              <Categories />
-            </div>
-          </section>
+          {categories && categories.length > 0 && (
+            <section className="bg-gradient-to-b from-white to-gray-50/50 my-6 w-full shadow-md rounded-2xl overflow-hidden border border-emerald-100/60 p-4 md:p-6">
+              {/* --- Header Section --- */}
+              <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-6 w-1.5 bg-emerald-600 rounded-full"></div>
+                  <h2 className="text-lg md:text-xl font-extrabold text-emerald-900 tracking-tight">
+                    Featured Categories
+                  </h2>
+                </div>
 
-          {/* --- CATEGORIES SECTION --- */}
-          <section className="bg-white mt-2 mb-2 w-full shadow-sm rounded-sm overflow-hidden border border-gray-100">
-            <div className="p-2">
-              <Categories />
-            </div>
-          </section>
+                <Link
+                  to="/products"
+                  className="group relative inline-flex items-center gap-2 px-5 py-2 text-xs md:text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-300 shadow-sm"
+                >
+                  <span>View All</span>
+                  <svg
+                    className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+              </div>
+
+              {/* --- Main Container: Left Banner + Right Scrollable Categories --- */}
+              <div className="flex flex-col lg:flex-row gap-4 items-stretch">
+                {/* Left Side: Banner */}
+                <div className="w-full lg:w-[260px] flex-shrink-0">
+                  <Link
+                    to="/products"
+                    className="group relative h-full min-h-[300px] rounded-xl overflow-hidden shadow-sm border border-emerald-100 flex flex-col justify-end p-5 block"
+                  >
+                    <img
+                      src="https://images.unsplash.com/photo-1555939594-58d7cb561681?auto=format&fit=crop&w=600&q=80"
+                      alt="Categories Banner"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+                    <div className="relative z-10 text-white">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-950/70 px-2.5 py-1 rounded-md backdrop-blur-md">
+                        Shop by Category
+                      </span>
+                      <h3 className="text-lg font-extrabold mt-2 leading-snug">
+                        Explore All Varieties
+                      </h3>
+                      <span className="inline-flex items-center gap-1 mt-2 text-xs font-bold text-white bg-emerald-600 px-3 py-1.5 rounded-lg group-hover:bg-emerald-500 transition-colors">
+                        Browse &rarr;
+                      </span>
+                    </div>
+                  </Link>
+                </div>
+
+                {/* Right Side: Scrollable Container with Categories */}
+                <div className="flex-grow relative overflow-hidden flex items-center">
+                  {/* Floating Left Arrow */}
+                  {categories.length >= 6 && (
+                    <button
+                      onClick={() => scrollCategories("left")}
+                      aria-label="Scroll Left"
+                      className="absolute left-1 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-emerald-600 hover:text-white text-emerald-900 shadow-lg border border-emerald-100 p-2 rounded-full hidden sm:flex items-center justify-center cursor-pointer transition-all duration-300 backdrop-blur-md"
+                    >
+                      <ChevronLeftIcon fontSize="small" />
+                    </button>
+                  )}
+
+                  {/* Floating Right Arrow */}
+                  {categories.length >= 6 && (
+                    <button
+                      onClick={() => scrollCategories("right")}
+                      aria-label="Scroll Right"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-emerald-600 hover:text-white text-emerald-900 shadow-lg border border-emerald-100 p-2 rounded-full hidden sm:flex items-center justify-center cursor-pointer transition-all duration-300 backdrop-blur-md"
+                    >
+                      <ChevronRightIcon fontSize="small" />
+                    </button>
+                  )}
+
+                  {/* Categories Horizontal Scroll Track */}
+                  <div
+                    ref={categoriesScrollRef}
+                    className="flex items-center overflow-x-auto scroll-smooth scrollbar-none gap-4 py-2 w-full px-2"
+                    style={{
+                      scrollbarWidth: "none",
+                      msOverflowStyle: "none",
+                    }}
+                  >
+                    {categories &&
+                      categories.map((category) => (
+                        <div
+                          key={category._id}
+                          style={{ width: "120px" }}
+                          className="flex-shrink-0 bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-emerald-200 transition-all duration-300 shadow-sm"
+                        >
+                          <CategoryItem category={category} />
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* --- LATEST PRODUCTS SECTION (Banner Left + 4 Products Right in a Single Line) --- */}
           {latestProducts && latestProducts.length > 0 && (
