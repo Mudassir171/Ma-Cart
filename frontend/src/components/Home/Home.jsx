@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearErrors, getSliderProducts } from "../../actions/productAction";
 import { getCategories } from "../../actions/categoryAction";
+import { addWishlistItems } from "../../actions/wishlistAction"; // Wishlist Action
 import { useSnackbar } from "notistack";
 import MetaData from "../Layouts/MetaData";
 import { Link } from "react-router-dom";
@@ -11,9 +12,32 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import StarIcon from "@mui/icons-material/Star";
 
-// --- 1. ISOLATED PRODUCT CARD (Hover issue fixed) ---
-const ProductCard = ({ item }) => {
+// --- 1. ISOLATED PRODUCT CARD WITH HANDLERS ---
+const ProductCard = ({ item, onQuickView }) => {
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
   const [isHovered, setIsHovered] = useState(false);
+
+  // Wishlist Click Handler
+  const handleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (dispatch && addWishlistItems) {
+      dispatch(addWishlistItems(item._id));
+    }
+    enqueueSnackbar("Added to Wishlist!", { variant: "success" });
+  };
+
+  // Quick View Click Handler
+  const handleQuickViewClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onQuickView) {
+      onQuickView(item);
+    } else {
+      enqueueSnackbar(`Quick View: ${item.name}`, { variant: "info" });
+    }
+  };
 
   const discountPercentage =
     item.discount ||
@@ -34,7 +58,7 @@ const ProductCard = ({ item }) => {
         </span>
       )}
 
-      {/* Floating Action Buttons */}
+      {/* Action Buttons on Hover */}
       <div
         className={`absolute top-2 right-2 z-10 flex flex-col gap-1.5 transition-opacity duration-200 ${
           isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -42,21 +66,23 @@ const ProductCard = ({ item }) => {
       >
         <button
           type="button"
-          className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:bg-sky-50 hover:text-sky-500 transition-colors"
+          onClick={handleQuickViewClick}
+          className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:bg-sky-50 hover:text-sky-500 transition-colors cursor-pointer"
           title="Quick View"
         >
           <OpenInFullIcon className="!text-sm" />
         </button>
         <button
           type="button"
-          className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+          onClick={handleWishlist}
+          className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:bg-rose-50 hover:text-rose-500 transition-colors cursor-pointer"
           title="Add to Wishlist"
         >
           <FavoriteBorderIcon className="!text-sm" />
         </button>
       </div>
 
-      {/* Product Image */}
+      {/* Image */}
       <div className="w-full h-36 flex items-center justify-center p-2 overflow-hidden my-1">
         <img
           src={item.images?.[0]?.url || item.image || "https://via.placeholder.com/150"}
@@ -67,7 +93,7 @@ const ProductCard = ({ item }) => {
         />
       </div>
 
-      {/* Product Information */}
+      {/* Details */}
       <div className="flex flex-col gap-1 mt-2">
         <h4 className="text-xs font-semibold text-gray-800 line-clamp-2 h-8 leading-snug">
           {item.name}
@@ -77,7 +103,7 @@ const ProductCard = ({ item }) => {
           {item.stock > 0 || item.Stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
         </span>
 
-        {/* Stars Rating */}
+        {/* Rating */}
         <div className="flex items-center text-amber-400 my-0.5">
           {[...Array(5)].map((_, i) => (
             <StarIcon
@@ -89,7 +115,7 @@ const ProductCard = ({ item }) => {
           ))}
         </div>
 
-        {/* Pricing */}
+        {/* Price */}
         <div className="flex items-center gap-2 mt-1">
           {item.cuttedPrice && (
             <span className="text-xs text-gray-400 line-through font-semibold">
@@ -100,7 +126,6 @@ const ProductCard = ({ item }) => {
         </div>
       </div>
 
-      {/* View Product Button */}
       <Link
         to={`/product/${item._id}`}
         className="mt-3 w-full text-center py-1.5 bg-[#2bbef9] hover:bg-sky-500 text-white text-xs font-bold rounded-full transition-colors block"
@@ -111,7 +136,7 @@ const ProductCard = ({ item }) => {
   );
 };
 
-// --- 2. DYNAMIC FEATURED CATEGORIES SECTION (Connected to Redux) ---
+// --- 2. DYNAMIC CATEGORIES SLIDER ---
 const FeaturedCategoriesSection = () => {
   const { categories, loading } = useSelector((state) => state.allCategories);
   const catRef = useRef(null);
@@ -154,7 +179,6 @@ const FeaturedCategoriesSection = () => {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {loading ? (
-            // Skeleton Loader while fetching Categories
             [...Array(6)].map((_, i) => (
               <div key={i} className="min-w-[160px] flex-1 p-4 flex flex-col items-center animate-pulse">
                 <div className="w-16 h-16 bg-gray-200 rounded-full mb-2"></div>
@@ -187,11 +211,12 @@ const FeaturedCategoriesSection = () => {
   );
 };
 
-// --- 3. MAIN HOME PAGE COMPONENT ---
+// --- 3. MAIN HOME COMPONENT ---
 const Home = () => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { error, loading, products } = useSelector((state) => state.products);
+  const [selectedQuickViewProduct, setSelectedQuickViewProduct] = useState(null);
 
   const featuredScrollRef = useRef(null);
   const newScrollRef = useRef(null);
@@ -212,7 +237,7 @@ const Home = () => {
       dispatch(clearErrors());
     }
     dispatch(getSliderProducts());
-    dispatch(getCategories()); // Redux Categories Action Called
+    dispatch(getCategories());
   }, [dispatch, error, enqueueSnackbar]);
 
   const featuredProducts =
@@ -238,7 +263,7 @@ const Home = () => {
       <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4">
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
 
-          {/* MAIN TOP BANNER */}
+          {/* BANNER 1: MAIN TOP HERO BANNER */}
           <div className="w-full relative h-[320px] rounded-xl overflow-hidden bg-emerald-900 shadow-sm flex items-center justify-between px-8 text-white">
             <div className="max-w-md z-10">
               <span className="text-xs uppercase bg-emerald-700/60 px-2 py-1 rounded font-semibold text-emerald-200">
@@ -265,15 +290,17 @@ const Home = () => {
             />
           </div>
 
-          {/* REDUX CONNECTED FEATURED CATEGORIES SECTION */}
+          {/* DYNAMIC CATEGORIES SECTION */}
           <FeaturedCategoriesSection />
 
           {/* MAIN GRID LAYOUT */}
           <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-            {/* LEFT SIDE BANNERS */}
+            {/* LEFT SIDE BANNERS (CONTAINING 5 BANNERS IN TOTAL) */}
             <div className="w-full lg:w-[270px] flex-shrink-0 flex flex-col gap-5">
-              <div className="relative rounded-xl overflow-hidden h-[340px] shadow-sm group">
+
+              {/* BANNER 2: SIDE BAKERY BANNER */}
+              <div className="relative rounded-xl overflow-hidden h-[300px] shadow-sm group">
                 <img
                   src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80"
                   alt="Fresh Products"
@@ -301,13 +328,14 @@ const Home = () => {
                 </div>
               </div>
 
-              <div className="relative rounded-xl overflow-hidden h-[220px] bg-amber-400 p-5 flex flex-col justify-between shadow-sm">
+              {/* BANNER 3: SIDE ORGANIC BURGER BANNER */}
+              <div className="relative rounded-xl overflow-hidden h-[200px] bg-amber-400 p-5 flex flex-col justify-between shadow-sm">
                 <div>
                   <span className="text-xs uppercase font-bold text-amber-900/70">
                     Baco's Natural Foods
                   </span>
                   <h4 className="text-lg font-black text-amber-950 mt-1">
-                    Special Organic Roats Burger
+                    Special Organic Roast Burger
                   </h4>
                 </div>
                 <div>
@@ -316,6 +344,42 @@ const Home = () => {
                 </div>
               </div>
 
+              {/* BANNER 4: SIDE FRESH BEVERAGES BANNER */}
+              <div className="relative rounded-xl overflow-hidden h-[200px] bg-sky-500 p-5 flex flex-col justify-between text-white shadow-sm">
+                <div>
+                  <span className="text-xs uppercase font-bold text-sky-100">
+                    100% Pure Juices
+                  </span>
+                  <h4 className="text-lg font-black mt-1 leading-tight">
+                    Cold Pressed Fresh Juices
+                  </h4>
+                </div>
+                <div>
+                  <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded">
+                    30% OFF THIS WEEK
+                  </span>
+                </div>
+              </div>
+
+              {/* BANNER 5: SIDE SNACK DISCOUNTS BANNER */}
+              <div className="relative rounded-xl overflow-hidden h-[180px] bg-rose-500 p-5 flex flex-col justify-between text-white shadow-sm">
+                <div>
+                  <span className="text-xs uppercase font-bold text-rose-100">
+                    Snack Time Special
+                  </span>
+                  <h4 className="text-lg font-extrabold mt-1">
+                    Chocolates & Biscuits
+                  </h4>
+                </div>
+                <Link
+                  to="/products"
+                  className="inline-block bg-white text-rose-600 text-xs font-bold px-3 py-1.5 rounded-full self-start hover:bg-rose-50 transition-colors"
+                >
+                  Buy Now
+                </Link>
+              </div>
+
+              {/* Side Info Features */}
               <div className="bg-white rounded-xl p-4 border border-gray-200 flex flex-col gap-3 text-xs text-gray-600 shadow-sm">
                 <div className="flex items-center gap-3">
                   <span className="text-base">📱</span>
@@ -334,7 +398,7 @@ const Home = () => {
               </div>
             </div>
 
-            {/* RIGHT MAIN CONTENT SECTION */}
+            {/* RIGHT MAIN CONTENT AREA */}
             <div className="flex-grow w-full flex flex-col gap-6 overflow-hidden">
 
               {/* FEATURED PRODUCTS SECTION */}
@@ -382,13 +446,16 @@ const Home = () => {
                         ?.slice(0, 10)
                         .map((item) => (
                           <div key={item._id} className="w-[190px] flex-shrink-0">
-                            <ProductCard item={item} />
+                            <ProductCard
+                              item={item}
+                              onQuickView={(prod) => setSelectedQuickViewProduct(prod)}
+                            />
                           </div>
                         ))}
                   </div>
                 </div>
 
-                {/* PROMO CARDS */}
+                {/* MID GRID PROMO CARDS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                   <div className="bg-sky-50/70 rounded-xl p-4 flex items-center justify-between border border-sky-100">
                     <div>
@@ -483,7 +550,10 @@ const Home = () => {
                     {!loading &&
                       newProducts?.slice(0, 10).map((item) => (
                         <div key={item._id} className="w-[190px] flex-shrink-0">
-                          <ProductCard item={item} />
+                          <ProductCard
+                            item={item}
+                            onQuickView={(prod) => setSelectedQuickViewProduct(prod)}
+                          />
                         </div>
                       ))}
                   </div>
@@ -495,6 +565,52 @@ const Home = () => {
 
         </div>
       </main>
+
+      {/* QUICK VIEW POPUP MODAL */}
+      {selectedQuickViewProduct && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 relative flex flex-col gap-4 shadow-2xl">
+            <button
+              onClick={() => setSelectedQuickViewProduct(null)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-lg font-bold"
+            >
+              ✕
+            </button>
+            <div className="w-full h-48 flex items-center justify-center border-b pb-4">
+              <img
+                src={selectedQuickViewProduct.images?.[0]?.url || selectedQuickViewProduct.image}
+                alt={selectedQuickViewProduct.name}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-gray-800">
+                {selectedQuickViewProduct.name}
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                {selectedQuickViewProduct.description || "High quality product from our store."}
+              </p>
+              <div className="flex items-center gap-3 mt-3">
+                <span className="text-xl font-black text-rose-500">
+                  ${selectedQuickViewProduct.price}
+                </span>
+                {selectedQuickViewProduct.cuttedPrice && (
+                  <span className="text-xs text-gray-400 line-through">
+                    ${selectedQuickViewProduct.cuttedPrice}
+                  </span>
+                )}
+              </div>
+            </div>
+            <Link
+              to={`/product/${selectedQuickViewProduct._id}`}
+              onClick={() => setSelectedQuickViewProduct(null)}
+              className="w-full text-center py-2 bg-[#2bbef9] text-white font-bold rounded-lg text-xs hover:bg-sky-500"
+            >
+              Full Details & Purchase
+            </Link>
+          </div>
+        </div>
+      )}
     </>
   );
 };
