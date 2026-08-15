@@ -153,6 +153,13 @@ const Home = () => {
         </div>
 
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
+          {/* --- FEATURED CATEGORIES SECTION --- */}
+          <section className="bg-white mt-2 mb-2 w-full shadow-sm rounded-sm overflow-hidden border border-gray-100">
+            <div className="p-2">
+              <Categories />
+            </div>
+          </section>
+
           {/* --- CATEGORIES SECTION --- */}
           <section className="bg-white mt-2 mb-2 w-full shadow-sm rounded-sm overflow-hidden border border-gray-100">
             <div className="p-2">
