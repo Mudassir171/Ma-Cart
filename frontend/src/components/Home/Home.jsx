@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearErrors, getSliderProducts } from "../../actions/productAction";
+import { getCategories } from "../../actions/categoryAction";
 import { useSnackbar } from "notistack";
 import MetaData from "../Layouts/MetaData";
 import { Link } from "react-router-dom";
@@ -10,8 +11,10 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import StarIcon from "@mui/icons-material/Star";
 
-// --- CUSTOM PRODUCT CARD WITH EXACT HOVER BUTTONS & BADGE ---
+// --- 1. ISOLATED PRODUCT CARD (Hover issue fixed) ---
 const ProductCard = ({ item }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   const discountPercentage =
     item.discount ||
     (item.cuttedPrice && item.price
@@ -19,20 +22,36 @@ const ProductCard = ({ item }) => {
       : 0);
 
   return (
-    <div className="group relative bg-white border border-gray-200 rounded-md p-3 flex flex-col justify-between h-full hover:shadow-lg transition-all duration-300">
-      {/* Top Discount Badge */}
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="group relative bg-white border border-gray-200 rounded-md p-3 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-lg"
+    >
+      {/* Discount Badge */}
       {discountPercentage > 0 && (
         <span className="absolute top-2 left-2 z-10 bg-[#2bbef9] text-white text-[11px] font-bold px-2 py-0.5 rounded-sm">
           {discountPercentage}% OFF
         </span>
       )}
 
-      {/* Floating Right Action Icons (Expand & Wishlist) */}
-      <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <button className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:bg-sky-50 hover:text-sky-500 transition-colors">
+      {/* Floating Action Buttons */}
+      <div
+        className={`absolute top-2 right-2 z-10 flex flex-col gap-1.5 transition-opacity duration-200 ${
+          isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <button
+          type="button"
+          className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:bg-sky-50 hover:text-sky-500 transition-colors"
+          title="Quick View"
+        >
           <OpenInFullIcon className="!text-sm" />
         </button>
-        <button className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:bg-rose-50 hover:text-rose-500 transition-colors">
+        <button
+          type="button"
+          className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+          title="Add to Wishlist"
+        >
           <FavoriteBorderIcon className="!text-sm" />
         </button>
       </div>
@@ -42,21 +61,23 @@ const ProductCard = ({ item }) => {
         <img
           src={item.images?.[0]?.url || item.image || "https://via.placeholder.com/150"}
           alt={item.name}
-          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+          className={`max-h-full max-w-full object-contain transition-transform duration-300 ${
+            isHovered ? "scale-105" : "scale-100"
+          }`}
         />
       </div>
 
-      {/* Product Details */}
+      {/* Product Information */}
       <div className="flex flex-col gap-1 mt-2">
         <h4 className="text-xs font-semibold text-gray-800 line-clamp-2 h-8 leading-snug">
           {item.name}
         </h4>
-        
+
         <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wide">
-          {item.stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
+          {item.stock > 0 || item.Stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
         </span>
 
-        {/* Rating Stars */}
+        {/* Stars Rating */}
         <div className="flex items-center text-amber-400 my-0.5">
           {[...Array(5)].map((_, i) => (
             <StarIcon
@@ -75,16 +96,14 @@ const ProductCard = ({ item }) => {
               ${item.cuttedPrice}
             </span>
           )}
-          <span className="text-sm font-black text-rose-500">
-            ${item.price}
-          </span>
+          <span className="text-sm font-black text-rose-500">${item.price}</span>
         </div>
       </div>
 
-      {/* Bottom Full-Width Action Button */}
+      {/* View Product Button */}
       <Link
         to={`/product/${item._id}`}
-        className="mt-3 w-full text-center py-1.5 bg-[#2bbef9] hover:bg-sky-500 text-white text-xs font-bold rounded-full transition-colors"
+        className="mt-3 w-full text-center py-1.5 bg-[#2bbef9] hover:bg-sky-500 text-white text-xs font-bold rounded-full transition-colors block"
       >
         View Product
       </Link>
@@ -92,17 +111,9 @@ const ProductCard = ({ item }) => {
   );
 };
 
-// --- FEATURED CATEGORIES SECTION ---
+// --- 2. DYNAMIC FEATURED CATEGORIES SECTION (Connected to Redux) ---
 const FeaturedCategoriesSection = () => {
-  const categories = [
-    { name: "Household Needs", count: "1 Item", img: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?auto=format&fit=crop&w=150&q=80" },
-    { name: "Biscuits & Snacks", count: "5 Items", img: "https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?auto=format&fit=crop&w=150&q=80" },
-    { name: "Breads & Bakery", count: "6 Items", img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=150&q=80" },
-    { name: "Breakfast & Dairy", count: "5 Items", img: "https://images.unsplash.com/photo-1528751014936-863e6e7a319c?auto=format&fit=crop&w=150&q=80" },
-    { name: "Beverages", count: "6 Items", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=150&q=80" },
-    { name: "Frozen Foods", count: "5 Items", img: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=150&q=80" },
-  ];
-
+  const { categories, loading } = useSelector((state) => state.allCategories);
   const catRef = useRef(null);
 
   const scroll = (direction) => {
@@ -123,12 +134,14 @@ const FeaturedCategoriesSection = () => {
 
       <div className="relative group">
         <button
+          type="button"
           onClick={() => scroll("left")}
           className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50"
         >
           <ChevronLeftIcon fontSize="small" />
         </button>
         <button
+          type="button"
           onClick={() => scroll("right")}
           className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50"
         >
@@ -140,23 +153,41 @@ const FeaturedCategoriesSection = () => {
           className="flex overflow-x-auto scroll-smooth divide-x divide-gray-200 border-y border-gray-200 scrollbar-none"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {categories.map((cat, idx) => (
-            <div
-              key={idx}
-              className="min-w-[160px] flex-1 flex flex-col items-center justify-center p-4 bg-white text-center hover:shadow-sm transition-shadow cursor-pointer"
-            >
-              <img src={cat.img} alt={cat.name} className="w-16 h-16 object-contain mb-2" />
-              <h5 className="text-xs font-bold text-gray-800 leading-tight mb-0.5">{cat.name}</h5>
-              <span className="text-[10px] text-gray-400 font-medium">{cat.count}</span>
-            </div>
-          ))}
+          {loading ? (
+            // Skeleton Loader while fetching Categories
+            [...Array(6)].map((_, i) => (
+              <div key={i} className="min-w-[160px] flex-1 p-4 flex flex-col items-center animate-pulse">
+                <div className="w-16 h-16 bg-gray-200 rounded-full mb-2"></div>
+                <div className="h-3 w-20 bg-gray-200 rounded"></div>
+              </div>
+            ))
+          ) : (
+            categories &&
+            categories.map((cat) => (
+              <Link
+                key={cat._id}
+                to={`/products?category=${encodeURIComponent(cat.name)}`}
+                className="min-w-[160px] flex-1 flex flex-col items-center justify-center p-4 bg-white text-center hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <img
+                  src={cat.image?.url || "https://via.placeholder.com/150"}
+                  alt={cat.name}
+                  className="w-16 h-16 object-contain mb-2"
+                />
+                <h5 className="text-xs font-bold text-gray-800 leading-tight mb-0.5">{cat.name}</h5>
+                <span className="text-[10px] text-gray-400 font-medium">
+                  {cat.numOfProducts ? `${cat.numOfProducts} Items` : "Explore"}
+                </span>
+              </Link>
+            ))
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-// --- MAIN HOME COMPONENT ---
+// --- 3. MAIN HOME PAGE COMPONENT ---
 const Home = () => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
@@ -181,16 +212,18 @@ const Home = () => {
       dispatch(clearErrors());
     }
     dispatch(getSliderProducts());
+    dispatch(getCategories()); // Redux Categories Action Called
   }, [dispatch, error, enqueueSnackbar]);
 
-  const featuredProducts = products?.filter((item) => {
-    const disc =
-      item.discount ||
-      (item.cuttedPrice && item.price
-        ? Math.round(((item.cuttedPrice - item.price) / item.cuttedPrice) * 100)
-        : 0);
-    return disc > 0;
-  }) || [];
+  const featuredProducts =
+    products?.filter((item) => {
+      const disc =
+        item.discount ||
+        (item.cuttedPrice && item.price
+          ? Math.round(((item.cuttedPrice - item.price) / item.cuttedPrice) * 100)
+          : 0);
+      return disc > 0;
+    }) || [];
 
   const newProducts = products
     ? [...products].sort(
@@ -205,7 +238,7 @@ const Home = () => {
       <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4">
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
 
-          {/* 1. TOP MAIN BANNER */}
+          {/* MAIN TOP BANNER */}
           <div className="w-full relative h-[320px] rounded-xl overflow-hidden bg-emerald-900 shadow-sm flex items-center justify-between px-8 text-white">
             <div className="max-w-md z-10">
               <span className="text-xs uppercase bg-emerald-700/60 px-2 py-1 rounded font-semibold text-emerald-200">
@@ -232,15 +265,14 @@ const Home = () => {
             />
           </div>
 
-          {/* 2. FEATURED CATEGORIES SECTION */}
+          {/* REDUX CONNECTED FEATURED CATEGORIES SECTION */}
           <FeaturedCategoriesSection />
 
           {/* MAIN GRID LAYOUT */}
           <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-            {/* LEFT COLUMN: Promos & Info */}
+            {/* LEFT SIDE BANNERS */}
             <div className="w-full lg:w-[270px] flex-shrink-0 flex flex-col gap-5">
-              {/* Promo Banner 1 */}
               <div className="relative rounded-xl overflow-hidden h-[340px] shadow-sm group">
                 <img
                   src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80"
@@ -269,7 +301,6 @@ const Home = () => {
                 </div>
               </div>
 
-              {/* Promo Banner 2 */}
               <div className="relative rounded-xl overflow-hidden h-[220px] bg-amber-400 p-5 flex flex-col justify-between shadow-sm">
                 <div>
                   <span className="text-xs uppercase font-bold text-amber-900/70">
@@ -285,7 +316,6 @@ const Home = () => {
                 </div>
               </div>
 
-              {/* Side Info Features */}
               <div className="bg-white rounded-xl p-4 border border-gray-200 flex flex-col gap-3 text-xs text-gray-600 shadow-sm">
                 <div className="flex items-center gap-3">
                   <span className="text-base">📱</span>
@@ -304,10 +334,10 @@ const Home = () => {
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Featured Products, Category Cards, New Products */}
+            {/* RIGHT MAIN CONTENT SECTION */}
             <div className="flex-grow w-full flex flex-col gap-6 overflow-hidden">
 
-              {/* 3. FEATURED PRODUCTS SECTION */}
+              {/* FEATURED PRODUCTS SECTION */}
               <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative">
                 <div className="flex justify-between items-center mb-4">
                   <div>
@@ -328,12 +358,14 @@ const Home = () => {
 
                 <div className="relative group">
                   <button
+                    type="button"
                     onClick={() => scrollContainer(featuredScrollRef, "left")}
                     className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hidden group-hover:flex"
                   >
                     <ChevronLeftIcon fontSize="small" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => scrollContainer(featuredScrollRef, "right")}
                     className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hidden group-hover:flex"
                   >
@@ -356,7 +388,7 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* Promotional Category Cards */}
+                {/* PROMO CARDS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                   <div className="bg-sky-50/70 rounded-xl p-4 flex items-center justify-between border border-sky-100">
                     <div>
@@ -366,7 +398,9 @@ const Home = () => {
                       <h4 className="font-extrabold text-gray-800 text-base mt-2">
                         Dairy & Eggs
                       </h4>
-                      <p className="text-xs text-gray-500 mb-3">A different kind of grocery store</p>
+                      <p className="text-xs text-gray-500 mb-3">
+                        A different kind of grocery store
+                      </p>
                       <Link
                         to="/products"
                         className="text-xs bg-sky-200 text-sky-900 font-bold px-3 py-1.5 rounded-md hover:bg-sky-300"
@@ -406,7 +440,7 @@ const Home = () => {
                 </div>
               </section>
 
-              {/* 4. NEW PRODUCTS SECTION */}
+              {/* NEW PRODUCTS SECTION */}
               <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative">
                 <div className="flex justify-between items-center mb-4">
                   <div>
@@ -427,12 +461,14 @@ const Home = () => {
 
                 <div className="relative group">
                   <button
+                    type="button"
                     onClick={() => scrollContainer(newScrollRef, "left")}
                     className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hidden group-hover:flex"
                   >
                     <ChevronLeftIcon fontSize="small" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => scrollContainer(newScrollRef, "right")}
                     className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hidden group-hover:flex"
                   >
