@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearErrors, getSliderProducts } from "../../actions/productAction";
 import { getCategories } from "../../actions/categoryAction";
-import { addWishlistItems } from "../../actions/wishlistAction"; // Wishlist Action
+import { addToWishlist } from "../../actions/wishlistAction"; // ✅ FIX: Correct function name imported
 import { useSnackbar } from "notistack";
 import MetaData from "../Layouts/MetaData";
 import { Link } from "react-router-dom";
@@ -22,9 +22,7 @@ const ProductCard = ({ item, onQuickView }) => {
   const handleWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (dispatch && addWishlistItems) {
-      dispatch(addWishlistItems(item._id));
-    }
+    dispatch(addToWishlist(item._id)); // ✅ FIX: Using correct action function
     enqueueSnackbar("Added to Wishlist!", { variant: "success" });
   };
 
