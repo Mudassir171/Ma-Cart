@@ -283,7 +283,7 @@ const Home = () => {
       <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4 mt-4">
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
           {/* BANNER 1: MAIN TOP HERO BANNER */}
-          <div className="w-full relative h-[320px] rounded-xl overflow-hidden bg-emerald-900 shadow-sm flex items-center justify-between px-8 text-white">
+          <div className="w-full relative h-[600px] rounded-xl overflow-hidden bg-emerald-900 shadow-sm flex items-center justify-between px-8 text-white">
           <Banner/> 
           </div>
 
