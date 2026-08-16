@@ -18,7 +18,7 @@ const Banner = () => {
 
   // 12 Daraz-style e-commerce banner image links
   const banners = [
-    "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=80", // Mega Sale
+    "https://graphicsfamily.com/wp-content/uploads/edd/2022/06/Free-E-commerce-Product-Banner-Design-with-Green-Colors-scaled.jpg",
     "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=1200&q=80", // Gadgets
     "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80", // Fashion Sale
     "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80", // Kitchen & Home
@@ -40,7 +40,7 @@ const Banner = () => {
             <div key={i}>
               <img 
                 draggable="false" 
-                className="h-44 sm:h-72 w-full object-cover" 
+                className="h-[500px] sm:h-72 w-full object-cover" 
                 src={el} 
                 alt={`banner-${i + 1}`} 
               />
