@@ -11,7 +11,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import StarIcon from "@mui/icons-material/Star";
-
+import Banner from "./Banner/Banner"; // ✅ FIX: Correct import path for Banner component
 // --- 1. ISOLATED PRODUCT CARD WITH HANDLERS ---
 const ProductCard = ({ item, onQuickView }) => {
   const dispatch = useDispatch();
@@ -284,32 +284,7 @@ const Home = () => {
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
           {/* BANNER 1: MAIN TOP HERO BANNER */}
           <div className="w-full relative h-[320px] rounded-xl overflow-hidden bg-emerald-900 shadow-sm flex items-center justify-between px-8 text-white">
-            <div className="max-w-md z-10">
-              <span className="text-xs uppercase bg-emerald-700/60 px-2 py-1 rounded font-semibold text-emerald-200">
-                EXCLUSIVE OFFER -20% OFF
-              </span>
-              <h1 className="text-3xl font-extrabold mt-3 leading-tight">
-                Having the best quality products
-              </h1>
-              <p className="text-xs text-emerald-100 mt-2">
-                Only this week. Don't miss...
-              </p>
-              <p className="text-xs mt-3">
-                from{" "}
-                <span className="text-xl font-black text-rose-300">$5.45</span>
-              </p>
-              <Link
-                to="/products"
-                className="mt-4 inline-block bg-[#2bbef9] hover:bg-sky-500 text-white font-bold text-xs px-5 py-2.5 rounded-full transition-colors"
-              >
-                Shop Now &rarr;
-              </Link>
-            </div>
-            <img
-              src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80"
-              alt="Main Banner"
-              className="absolute right-0 top-0 h-full w-2/3 object-cover opacity-80 pointer-events-none"
-            />
+          <Banner/> 
           </div>
 
           {/* DYNAMIC CATEGORIES SECTION */}
