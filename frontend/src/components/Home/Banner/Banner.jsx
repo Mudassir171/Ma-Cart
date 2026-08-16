@@ -20,9 +20,9 @@ const Banner = () => {
   const banners = [
     "https://graphicsfamily.com/wp-content/uploads/edd/2022/06/Free-E-commerce-Product-Banner-Design-with-Green-Colors-scaled.jpg",
     "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=1200&q=80", // Gadgets
-    "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80", // Fashion Sale
-    "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80", // Kitchen & Home
-    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=80", // Smartphones
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjijGQHUvfmjnGjKnc_lwrd0pFkgbbJGeApfnDHan0ybcm7_NXJfwPcVY&s=10", // Fashion Sale
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4rzayl0tr8iV67KWiSTbpcbmIlkDG2EDZiH4K1B1Mvw&s=10", // Kitchen & Home
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3vcc8YhWmY370IttVO0THnuxxNUNhPhNt3yXSZmLrwg&s=10", // Smartphones
     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80", // Electronics
     "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80", // Shopping Store
     "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80", // Watch Sale
