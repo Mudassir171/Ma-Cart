@@ -83,7 +83,11 @@ const ProductCard = ({ item, onQuickView }) => {
       {/* Image */}
       <div className="w-full h-36 flex items-center justify-center p-2 overflow-hidden my-1">
         <img
-          src={item.images?.[0]?.url || item.image || "https://via.placeholder.com/150"}
+          src={
+            item.images?.[0]?.url ||
+            item.image ||
+            "https://via.placeholder.com/150"
+          }
           alt={item.name}
           className={`max-h-full max-w-full object-contain transition-transform duration-300 ${
             isHovered ? "scale-105" : "scale-100"
@@ -107,7 +111,9 @@ const ProductCard = ({ item, onQuickView }) => {
             <StarIcon
               key={i}
               className={`!text-xs ${
-                i < Math.floor(item.ratings || 4) ? "text-amber-400" : "text-gray-300"
+                i < Math.floor(item.ratings || 4)
+                  ? "text-amber-400"
+                  : "text-gray-300"
               }`}
             />
           ))}
@@ -120,7 +126,9 @@ const ProductCard = ({ item, onQuickView }) => {
               ${item.cuttedPrice}
             </span>
           )}
-          <span className="text-sm font-black text-rose-500">${item.price}</span>
+          <span className="text-sm font-black text-rose-500">
+            ${item.price}
+          </span>
         </div>
       </div>
 
@@ -143,7 +151,10 @@ const FeaturedCategoriesSection = () => {
     if (catRef.current) {
       const { scrollLeft, clientWidth } = catRef.current;
       catRef.current.scrollTo({
-        left: direction === "left" ? scrollLeft - clientWidth * 0.5 : scrollLeft + clientWidth * 0.5,
+        left:
+          direction === "left"
+            ? scrollLeft - clientWidth * 0.5
+            : scrollLeft + clientWidth * 0.5,
         behavior: "smooth",
       });
     }
@@ -176,33 +187,38 @@ const FeaturedCategoriesSection = () => {
           className="flex overflow-x-auto scroll-smooth divide-x divide-gray-200 border-y border-gray-200 scrollbar-none"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {loading ? (
-            [...Array(6)].map((_, i) => (
-              <div key={i} className="min-w-[160px] flex-1 p-4 flex flex-col items-center animate-pulse">
-                <div className="w-16 h-16 bg-gray-200 rounded-full mb-2"></div>
-                <div className="h-3 w-20 bg-gray-200 rounded"></div>
-              </div>
-            ))
-          ) : (
-            categories &&
-            categories.map((cat) => (
-              <Link
-                key={cat._id}
-                to={`/products?category=${encodeURIComponent(cat.name)}`}
-                className="min-w-[160px] flex-1 flex flex-col items-center justify-center p-4 bg-white text-center hover:bg-gray-50 transition-colors cursor-pointer"
-              >
-                <img
-                  src={cat.image?.url || "https://via.placeholder.com/150"}
-                  alt={cat.name}
-                  className="w-16 h-16 object-contain mb-2"
-                />
-                <h5 className="text-xs font-bold text-gray-800 leading-tight mb-0.5">{cat.name}</h5>
-                <span className="text-[10px] text-gray-400 font-medium">
-                  {cat.numOfProducts ? `${cat.numOfProducts} Items` : "Explore"}
-                </span>
-              </Link>
-            ))
-          )}
+          {loading
+            ? [...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="min-w-[160px] flex-1 p-4 flex flex-col items-center animate-pulse"
+                >
+                  <div className="w-16 h-16 bg-gray-200 rounded-full mb-2"></div>
+                  <div className="h-3 w-20 bg-gray-200 rounded"></div>
+                </div>
+              ))
+            : categories &&
+              categories.map((cat) => (
+                <Link
+                  key={cat._id}
+                  to={`/products?category=${encodeURIComponent(cat.name)}`}
+                  className="min-w-[160px] flex-1 flex flex-col items-center justify-center p-4 bg-white text-center hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <img
+                    src={cat.image?.url || "https://via.placeholder.com/150"}
+                    alt={cat.name}
+                    className="w-16 h-16 object-contain mb-2"
+                  />
+                  <h5 className="text-xs font-bold text-gray-800 leading-tight mb-0.5">
+                    {cat.name}
+                  </h5>
+                  <span className="text-[10px] text-gray-400 font-medium">
+                    {cat.numOfProducts
+                      ? `${cat.numOfProducts} Items`
+                      : "Explore"}
+                  </span>
+                </Link>
+              ))}
         </div>
       </div>
     </div>
@@ -214,7 +230,8 @@ const Home = () => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { error, loading, products } = useSelector((state) => state.products);
-  const [selectedQuickViewProduct, setSelectedQuickViewProduct] = useState(null);
+  const [selectedQuickViewProduct, setSelectedQuickViewProduct] =
+    useState(null);
 
   const featuredScrollRef = useRef(null);
   const newScrollRef = useRef(null);
@@ -223,7 +240,10 @@ const Home = () => {
     if (ref.current) {
       const { scrollLeft, clientWidth } = ref.current;
       ref.current.scrollTo({
-        left: direction === "left" ? scrollLeft - clientWidth * 0.75 : scrollLeft + clientWidth * 0.75,
+        left:
+          direction === "left"
+            ? scrollLeft - clientWidth * 0.75
+            : scrollLeft + clientWidth * 0.75,
         behavior: "smooth",
       });
     }
@@ -243,14 +263,16 @@ const Home = () => {
       const disc =
         item.discount ||
         (item.cuttedPrice && item.price
-          ? Math.round(((item.cuttedPrice - item.price) / item.cuttedPrice) * 100)
+          ? Math.round(
+              ((item.cuttedPrice - item.price) / item.cuttedPrice) * 100,
+            )
           : 0);
       return disc > 0;
     }) || [];
 
   const newProducts = products
     ? [...products].sort(
-        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
       )
     : [];
 
@@ -260,7 +282,6 @@ const Home = () => {
 
       <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4">
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
-
           {/* BANNER 1: MAIN TOP HERO BANNER */}
           <div className="w-full relative h-[320px] rounded-xl overflow-hidden bg-emerald-900 shadow-sm flex items-center justify-between px-8 text-white">
             <div className="max-w-md z-10">
@@ -270,9 +291,12 @@ const Home = () => {
               <h1 className="text-3xl font-extrabold mt-3 leading-tight">
                 Having the best quality products
               </h1>
-              <p className="text-xs text-emerald-100 mt-2">Only this week. Don't miss...</p>
+              <p className="text-xs text-emerald-100 mt-2">
+                Only this week. Don't miss...
+              </p>
               <p className="text-xs mt-3">
-                from <span className="text-xl font-black text-rose-300">$5.45</span>
+                from{" "}
+                <span className="text-xl font-black text-rose-300">$5.45</span>
               </p>
               <Link
                 to="/products"
@@ -293,10 +317,8 @@ const Home = () => {
 
           {/* MAIN GRID LAYOUT */}
           <div className="flex flex-col lg:flex-row gap-6 items-start">
-
             {/* LEFT SIDE BANNERS (CONTAINING 5 BANNERS IN TOTAL) */}
             <div className="w-full lg:w-[270px] flex-shrink-0 flex flex-col gap-5">
-
               {/* BANNER 2: SIDE BAKERY BANNER */}
               <div className="relative rounded-xl overflow-hidden h-[300px] shadow-sm group">
                 <img
@@ -315,7 +337,9 @@ const Home = () => {
                   </div>
                   <div>
                     <p className="text-xs text-gray-200">Only from</p>
-                    <p className="text-2xl font-black text-rose-400 mb-3">$24.99</p>
+                    <p className="text-2xl font-black text-rose-400 mb-3">
+                      $24.99
+                    </p>
                     <Link
                       to="/products"
                       className="inline-block bg-[#2bbef9] hover:bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-md transition-colors"
@@ -327,54 +351,77 @@ const Home = () => {
               </div>
 
               {/* BANNER 3: SIDE ORGANIC BURGER BANNER */}
-              <div className="relative rounded-xl overflow-hidden h-[200px] bg-amber-400 p-5 flex flex-col justify-between shadow-sm">
-                <div>
-                  <span className="text-xs uppercase font-bold text-amber-900/70">
-                    Baco's Natural Foods
-                  </span>
-                  <h4 className="text-lg font-black text-amber-950 mt-1">
-                    Special Organic Roast Burger
-                  </h4>
-                </div>
-                <div>
-                  <p className="text-xs text-amber-900">Only from</p>
-                  <p className="text-2xl font-extrabold text-rose-600">$14.99</p>
+              <div className="relative rounded-xl overflow-hidden h-[200px] shadow-sm group">
+                <img
+                  src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80"
+                  alt="Organic Burger"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-5 flex flex-col justify-between text-white">
+                  <div>
+                    <span className="text-xs uppercase font-bold text-amber-300">
+                      Baco's Natural Foods
+                    </span>
+                    <h4 className="text-lg font-black mt-1 leading-tight">
+                      Special Organic Roast Burger
+                    </h4>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-200">Only from</p>
+                    <p className="text-2xl font-extrabold text-rose-400">
+                      $14.99
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* BANNER 4: SIDE FRESH BEVERAGES BANNER */}
-              <div className="relative rounded-xl overflow-hidden h-[200px] bg-sky-500 p-5 flex flex-col justify-between text-white shadow-sm">
-                <div>
-                  <span className="text-xs uppercase font-bold text-sky-100">
-                    100% Pure Juices
-                  </span>
-                  <h4 className="text-lg font-black mt-1 leading-tight">
-                    Cold Pressed Fresh Juices
-                  </h4>
-                </div>
-                <div>
-                  <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded">
-                    30% OFF THIS WEEK
-                  </span>
+              <div className="relative rounded-xl overflow-hidden h-[200px] shadow-sm group">
+                <img
+                  src="https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80"
+                  alt="Fresh Juices"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-5 flex flex-col justify-between text-white">
+                  <div>
+                    <span className="text-xs uppercase font-bold text-sky-300">
+                      100% Pure Juices
+                    </span>
+                    <h4 className="text-lg font-black mt-1 leading-tight">
+                      Cold Pressed Fresh Juices
+                    </h4>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded">
+                      30% OFF THIS WEEK
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* BANNER 5: SIDE SNACK DISCOUNTS BANNER */}
-              <div className="relative rounded-xl overflow-hidden h-[180px] bg-rose-500 p-5 flex flex-col justify-between text-white shadow-sm">
-                <div>
-                  <span className="text-xs uppercase font-bold text-rose-100">
-                    Snack Time Special
-                  </span>
-                  <h4 className="text-lg font-extrabold mt-1">
-                    Chocolates & Biscuits
-                  </h4>
+              <div className="relative rounded-xl overflow-hidden h-[180px] shadow-sm group">
+                <img
+                  src="https://images.unsplash.com/photo-1599599810694-b5ac4dd4191d?auto=format&fit=crop&w=600&q=80"
+                  alt="Chocolates & Biscuits"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5 flex flex-col justify-between text-white">
+                  <div>
+                    <span className="text-xs uppercase font-bold text-rose-300">
+                      Snack Time Special
+                    </span>
+                    <h4 className="text-lg font-extrabold mt-1">
+                      Chocolates & Biscuits
+                    </h4>
+                  </div>
+                  <Link
+                    to="/products"
+                    className="inline-block bg-white text-rose-600 text-xs font-bold px-3 py-1.5 rounded-full self-start hover:bg-rose-50 transition-colors"
+                  >
+                    Buy Now
+                  </Link>
                 </div>
-                <Link
-                  to="/products"
-                  className="inline-block bg-white text-rose-600 text-xs font-bold px-3 py-1.5 rounded-full self-start hover:bg-rose-50 transition-colors"
-                >
-                  Buy Now
-                </Link>
               </div>
 
               {/* Side Info Features */}
@@ -398,7 +445,6 @@ const Home = () => {
 
             {/* RIGHT MAIN CONTENT AREA */}
             <div className="flex-grow w-full flex flex-col gap-6 overflow-hidden">
-
               {/* FEATURED PRODUCTS SECTION */}
               <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative">
                 <div className="flex justify-between items-center mb-4">
@@ -440,13 +486,21 @@ const Home = () => {
                     style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                   >
                     {!loading &&
-                      (featuredProducts.length > 0 ? featuredProducts : products)
+                      (featuredProducts.length > 0
+                        ? featuredProducts
+                        : products
+                      )
                         ?.slice(0, 10)
                         .map((item) => (
-                          <div key={item._id} className="w-[190px] flex-shrink-0">
+                          <div
+                            key={item._id}
+                            className="w-[190px] flex-shrink-0"
+                          >
                             <ProductCard
                               item={item}
-                              onQuickView={(prod) => setSelectedQuickViewProduct(prod)}
+                              onQuickView={(prod) =>
+                                setSelectedQuickViewProduct(prod)
+                              }
                             />
                           </div>
                         ))}
@@ -488,7 +542,9 @@ const Home = () => {
                       <h4 className="font-extrabold text-gray-800 text-base mt-2">
                         Legumes & Cereals
                       </h4>
-                      <p className="text-xs text-gray-500 mb-3">Feed your family the best</p>
+                      <p className="text-xs text-gray-500 mb-3">
+                        Feed your family the best
+                      </p>
                       <Link
                         to="/products"
                         className="text-xs bg-emerald-200 text-emerald-900 font-bold px-3 py-1.5 rounded-md hover:bg-emerald-300"
@@ -550,17 +606,17 @@ const Home = () => {
                         <div key={item._id} className="w-[190px] flex-shrink-0">
                           <ProductCard
                             item={item}
-                            onQuickView={(prod) => setSelectedQuickViewProduct(prod)}
+                            onQuickView={(prod) =>
+                              setSelectedQuickViewProduct(prod)
+                            }
                           />
                         </div>
                       ))}
                   </div>
                 </div>
               </section>
-
             </div>
           </div>
-
         </div>
       </main>
 
@@ -576,7 +632,10 @@ const Home = () => {
             </button>
             <div className="w-full h-48 flex items-center justify-center border-b pb-4">
               <img
-                src={selectedQuickViewProduct.images?.[0]?.url || selectedQuickViewProduct.image}
+                src={
+                  selectedQuickViewProduct.images?.[0]?.url ||
+                  selectedQuickViewProduct.image
+                }
                 alt={selectedQuickViewProduct.name}
                 className="max-h-full max-w-full object-contain"
               />
@@ -586,7 +645,8 @@ const Home = () => {
                 {selectedQuickViewProduct.name}
               </h3>
               <p className="text-xs text-gray-500 mt-1">
-                {selectedQuickViewProduct.description || "High quality product from our store."}
+                {selectedQuickViewProduct.description ||
+                  "High quality product from our store."}
               </p>
               <div className="flex items-center gap-3 mt-3">
                 <span className="text-xl font-black text-rose-500">
