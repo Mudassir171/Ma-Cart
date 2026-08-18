@@ -42,7 +42,7 @@ const ProductCard = ({ item, onQuickView }) => {
       : 0);
 
   return (
-    <div className="group relative bg-white border border-gray-200 rounded-md p-3 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:border-emerald-500 overflow-hidden">
+    <div className="group relative bg-white border border-gray-200 rounded-md p-3 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:border-green-500 overflow-hidden">
       {/* Discount Badge */}
       {discountPercentage > 0 && (
         <span className="absolute top-2 left-2 z-10 bg-[#2bbef9] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm">
@@ -55,7 +55,7 @@ const ProductCard = ({ item, onQuickView }) => {
         <button
           type="button"
           onClick={handleQuickViewClick}
-          className="w-7 h-7 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
+          className="w-[40px] h-[40px] rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-white-500 hover:bg-green-600 hover:text-white transition-colors cursor-pointer"
           title="Quick View"
         >
           <OpenInFullIcon className="!text-xs" />
@@ -63,7 +63,7 @@ const ProductCard = ({ item, onQuickView }) => {
         <button
           type="button"
           onClick={handleWishlist}
-          className="w-7 h-7 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
+          className="w-[40px] h-[40px] rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-600 hover:text-white transition-colors cursor-pointer"
           title="Add to Wishlist"
         >
           <FavoriteBorderIcon className="!text-xs" />
@@ -71,7 +71,7 @@ const ProductCard = ({ item, onQuickView }) => {
       </div>
 
       {/* Product Image */}
-      <div className="w-full h-36 flex items-center justify-center p-2 overflow-hidden my-1">
+      <div className="w-[300px] h-[400px] flex items-center justify-center p-2 overflow-hidden my-1">
         <img
           src={
             item.images?.[0]?.url ||
@@ -89,12 +89,12 @@ const ProductCard = ({ item, onQuickView }) => {
           {item.name}
         </h4>
 
-        <span className="text-[9px] font-extrabold text-emerald-500 uppercase tracking-wider">
+        <span className="text-[9px] font-extrabold text-green-500 uppercase tracking-wider">
           {item.stock > 0 || item.Stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
         </span>
 
         {/* Rating */}
-        <div className="flex items-center text-amber-400 my-0.5">
+        <div className="flex items-center text-yellow-600 my-0.5">
           {[...Array(5)].map((_, i) => (
             <StarIcon
               key={i}
@@ -114,7 +114,7 @@ const ProductCard = ({ item, onQuickView }) => {
               Rs:{item.cuttedPrice}
             </span>
           )}
-          <span className="text-xs font-black text-rose-500">
+          <span className="text-xs font-red text-red-800">
             Rs:{item.price}
           </span>
         </div>
@@ -123,7 +123,7 @@ const ProductCard = ({ item, onQuickView }) => {
       {/* View Product Button (Hover Background Green 600) */}
       <Link
         to={`/product/${item._id}`}
-        className="mt-3 w-full text-center py-1.5 border border-[#2bbef9] text-[#2bbef9] hover:bg-emerald-600 hover:border-emerald-600 hover:text-white text-[11px] font-bold rounded-full transition-all duration-300 block"
+        className="mt-3 w-full text-center py-1.5 border border-[#2bbef9] text-[#2bbef9] hover:bg-green-600 hover:border-green-600 hover:text-white text-[11px] font-bold rounded-full transition-all duration-300 block"
       >
         View Product
       </Link>
