@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearErrors, getSliderProducts } from "../../actions/productAction";
 import { getCategories } from "../../actions/categoryAction";
-import { addToWishlist } from "../../actions/wishlistAction"; // ✅ FIX: Correct function name imported
+import { addToWishlist } from "../../actions/wishlistAction";
 import { useSnackbar } from "notistack";
 import MetaData from "../Layouts/MetaData";
 import { Link } from "react-router-dom";
@@ -11,22 +11,20 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import StarIcon from "@mui/icons-material/Star";
-import Banner from "./Banner/Banner"; // ✅ FIX: Correct import path for Banner component
-// --- 1. ISOLATED PRODUCT CARD WITH HANDLERS ---
+import Banner from "./Banner/Banner";
+
+// --- 1. PRODUCT CARD (Bottom-to-Top Hover Effect & Matching UI) ---
 const ProductCard = ({ item, onQuickView }) => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const [isHovered, setIsHovered] = useState(false);
 
-  // Wishlist Click Handler
   const handleWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    dispatch(addToWishlist(item._id)); // ✅ FIX: Using correct action function
+    dispatch(addToWishlist(item._id));
     enqueueSnackbar("Added to Wishlist!", { variant: "success" });
   };
 
-  // Quick View Click Handler
   const handleQuickViewClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -44,43 +42,35 @@ const ProductCard = ({ item, onQuickView }) => {
       : 0);
 
   return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="group relative bg-white border border-gray-200 rounded-md p-3 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-lg"
-    >
+    <div className="group relative bg-white border border-gray-200 rounded-md p-3 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:border-emerald-500 overflow-hidden">
       {/* Discount Badge */}
       {discountPercentage > 0 && (
-        <span className="absolute top-2 left-2 z-10 bg-[#2bbef9] text-white text-[11px] font-bold px-2 py-0.5 rounded-sm">
+        <span className="absolute top-2 left-2 z-10 bg-[#2bbef9] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm">
           {discountPercentage}% OFF
         </span>
       )}
 
-      {/* Action Buttons on Hover */}
-      <div
-        className={`absolute top-2 right-2 z-10 flex flex-col gap-1.5 transition-opacity duration-200 ${
-          isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >
+      {/* Action Buttons: Nichay say uper slide hovering effect */}
+      <div className="absolute top-2 right-2 z-20 flex flex-col gap-1.5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
         <button
           type="button"
           onClick={handleQuickViewClick}
-          className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:bg-sky-50 hover:text-sky-500 transition-colors cursor-pointer"
+          className="w-7 h-7 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
           title="Quick View"
         >
-          <OpenInFullIcon className="!text-sm" />
+          <OpenInFullIcon className="!text-xs" />
         </button>
         <button
           type="button"
           onClick={handleWishlist}
-          className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:bg-rose-50 hover:text-rose-500 transition-colors cursor-pointer"
+          className="w-7 h-7 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
           title="Add to Wishlist"
         >
-          <FavoriteBorderIcon className="!text-sm" />
+          <FavoriteBorderIcon className="!text-xs" />
         </button>
       </div>
 
-      {/* Image */}
+      {/* Product Image */}
       <div className="w-full h-36 flex items-center justify-center p-2 overflow-hidden my-1">
         <img
           src={
@@ -89,19 +79,17 @@ const ProductCard = ({ item, onQuickView }) => {
             "https://via.placeholder.com/150"
           }
           alt={item.name}
-          className={`max-h-full max-w-full object-contain transition-transform duration-300 ${
-            isHovered ? "scale-105" : "scale-100"
-          }`}
+          className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
         />
       </div>
 
       {/* Details */}
-      <div className="flex flex-col gap-1 mt-2">
-        <h4 className="text-xs font-semibold text-gray-800 line-clamp-2 h-8 leading-snug">
+      <div className="flex flex-col gap-1 mt-1">
+        <h4 className="text-[11px] font-bold text-gray-700 line-clamp-2 h-7 leading-tight">
           {item.name}
         </h4>
 
-        <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wide">
+        <span className="text-[9px] font-extrabold text-emerald-500 uppercase tracking-wider">
           {item.stock > 0 || item.Stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
         </span>
 
@@ -110,7 +98,7 @@ const ProductCard = ({ item, onQuickView }) => {
           {[...Array(5)].map((_, i) => (
             <StarIcon
               key={i}
-              className={`!text-xs ${
+              className={`!text-[10px] ${
                 i < Math.floor(item.ratings || 4)
                   ? "text-amber-400"
                   : "text-gray-300"
@@ -120,21 +108,22 @@ const ProductCard = ({ item, onQuickView }) => {
         </div>
 
         {/* Price */}
-        <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-2 mt-0.5">
           {item.cuttedPrice && (
-            <span className="text-xs text-gray-400 line-through font-semibold">
+            <span className="text-[11px] text-gray-400 line-through font-medium">
               Rs:{item.cuttedPrice}
             </span>
           )}
-          <span className="text-sm font-black text-rose-500">
+          <span className="text-xs font-black text-rose-500">
             Rs:{item.price}
           </span>
         </div>
       </div>
 
+      {/* View Product Button (Hover Background Green 600) */}
       <Link
         to={`/product/${item._id}`}
-        className="mt-3 w-full text-center py-1.5 bg-[#2bbef9] hover:bg-sky-500 text-white text-xs font-bold rounded-full transition-colors block"
+        className="mt-3 w-full text-center py-1.5 border border-[#2bbef9] text-[#2bbef9] hover:bg-emerald-600 hover:border-emerald-600 hover:text-white text-[11px] font-bold rounded-full transition-all duration-300 block"
       >
         View Product
       </Link>
@@ -162,7 +151,7 @@ const FeaturedCategoriesSection = () => {
 
   return (
     <div className="w-full relative bg-white border border-gray-200 rounded-md p-4">
-      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-4">
+      <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-3">
         FEATURED CATEGORIES
       </h3>
 
@@ -170,14 +159,14 @@ const FeaturedCategoriesSection = () => {
         <button
           type="button"
           onClick={() => scroll("left")}
-          className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50"
+          className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-emerald-600 hover:text-white transition-colors"
         >
           <ChevronLeftIcon fontSize="small" />
         </button>
         <button
           type="button"
           onClick={() => scroll("right")}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50"
+          className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-emerald-600 hover:text-white transition-colors"
         >
           <ChevronRightIcon fontSize="small" />
         </button>
@@ -191,10 +180,10 @@ const FeaturedCategoriesSection = () => {
             ? [...Array(6)].map((_, i) => (
                 <div
                   key={i}
-                  className="min-w-[160px] flex-1 p-4 flex flex-col items-center animate-pulse"
+                  className="min-w-[150px] flex-1 p-4 flex flex-col items-center animate-pulse"
                 >
-                  <div className="w-16 h-16 bg-gray-200 rounded-full mb-2"></div>
-                  <div className="h-3 w-20 bg-gray-200 rounded"></div>
+                  <div className="w-14 h-14 bg-gray-200 rounded-full mb-2"></div>
+                  <div className="h-3 w-16 bg-gray-200 rounded"></div>
                 </div>
               ))
             : categories &&
@@ -202,14 +191,14 @@ const FeaturedCategoriesSection = () => {
                 <Link
                   key={cat._id}
                   to={`/products?category=${encodeURIComponent(cat.name)}`}
-                  className="min-w-[160px] flex-1 flex flex-col items-center justify-center p-4 bg-white text-center hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="min-w-[150px] flex-1 flex flex-col items-center justify-center p-3 bg-white text-center hover:bg-gray-50 transition-colors cursor-pointer group"
                 >
                   <img
                     src={cat.image?.url || "https://via.placeholder.com/150"}
                     alt={cat.name}
-                    className="w-16 h-16 object-contain mb-2"
+                    className="w-14 h-14 object-contain mb-2 group-hover:scale-105 transition-transform duration-300"
                   />
-                  <h5 className="text-xs font-bold text-gray-800 leading-tight mb-0.5">
+                  <h5 className="text-[11px] font-bold text-gray-800 leading-tight mb-0.5">
                     {cat.name}
                   </h5>
                   <span className="text-[10px] text-gray-400 font-medium">
@@ -264,7 +253,7 @@ const Home = () => {
         item.discount ||
         (item.cuttedPrice && item.price
           ? Math.round(
-              ((item.cuttedPrice - item.price) / item.cuttedPrice) * 100,
+              ((item.cuttedPrice - item.price) / item.cuttedPrice) * 100
             )
           : 0);
       return disc > 0;
@@ -272,7 +261,7 @@ const Home = () => {
 
   const newProducts = products
     ? [...products].sort(
-        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
       )
     : [];
 
@@ -280,11 +269,11 @@ const Home = () => {
     <>
       <MetaData title="Ma-Cart | Online Shopping Site" />
 
-      <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4 mt-4">
+      <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4">
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
-          {/* BANNER 1: MAIN TOP HERO BANNER */}
-          <div className="w-full relative h-[320px] rounded-xl overflow-hidden bg-emerald-900 shadow-sm flex items-center justify-between px-8 text-white">
-          <Banner/> 
+          {/* BANNER 1: HERO TOP BANNER */}
+          <div className="w-full relative h-[300px] rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-between">
+            <Banner />
           </div>
 
           {/* DYNAMIC CATEGORIES SECTION */}
@@ -292,10 +281,10 @@ const Home = () => {
 
           {/* MAIN GRID LAYOUT */}
           <div className="flex flex-col lg:flex-row gap-6 items-start">
-            {/* LEFT SIDE BANNERS (CONTAINING 5 BANNERS IN TOTAL) */}
-            <div className="w-full lg:w-[270px] flex-shrink-0 flex flex-col gap-5">
-              {/* BANNER 2: SIDE BAKERY BANNER */}
-              <div className="relative rounded-xl overflow-hidden h-[300px] shadow-sm group">
+            {/* LEFT SIDEBAR BANNERS */}
+            <div className="w-full lg:w-[260px] flex-shrink-0 flex flex-col gap-5">
+              {/* BANNER 2: BAKERY */}
+              <div className="relative rounded-xl overflow-hidden h-[290px] shadow-sm group">
                 <img
                   src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80"
                   alt="Fresh Products"
@@ -303,21 +292,21 @@ const Home = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5 flex flex-col justify-between text-white">
                   <div>
-                    <span className="text-xs uppercase font-medium text-emerald-300">
-                      Best Bakery Products
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-300">
+                      Baco Natural Foods
                     </span>
-                    <h4 className="text-xl font-bold mt-1 leading-tight">
+                    <h4 className="text-lg font-black mt-1 leading-tight">
                       Freshest Products every hour.
                     </h4>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-200">Only from</p>
-                    <p className="text-2xl font-black text-rose-400 mb-3">
+                    <p className="text-[10px] text-gray-300">Only from</p>
+                    <p className="text-xl font-black text-rose-500 mb-2">
                       $24.99
                     </p>
                     <Link
                       to="/products"
-                      className="inline-block bg-[#2bbef9] hover:bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-md transition-colors"
+                      className="inline-block bg-[#2bbef9] hover:bg-emerald-600 text-white text-[11px] font-bold px-4 py-1.5 rounded-full transition-colors"
                     >
                       Shop Now
                     </Link>
@@ -325,82 +314,33 @@ const Home = () => {
                 </div>
               </div>
 
-              {/* BANNER 3: SIDE ORGANIC BURGER BANNER */}
-              <div className="relative rounded-xl overflow-hidden h-[200px] shadow-sm group">
+              {/* BANNER 3: BURGER (YELLOW THEME) */}
+              <div className="relative rounded-xl overflow-hidden h-[210px] shadow-sm group bg-[#f5cb42]">
                 <img
                   src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80"
                   alt="Organic Burger"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-5 flex flex-col justify-between text-white">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent p-4 flex flex-col justify-between text-white">
                   <div>
-                    <span className="text-xs uppercase font-bold text-amber-300">
-                      Baco's Natural Foods
+                    <span className="text-[10px] uppercase font-bold text-amber-200">
+                      Baco Natural Foods
                     </span>
-                    <h4 className="text-lg font-black mt-1 leading-tight">
+                    <h4 className="text-base font-extrabold mt-0.5 leading-tight">
                       Special Organic Roast Burger
                     </h4>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-200">Only from</p>
-                    <p className="text-2xl font-extrabold text-rose-400">
+                    <p className="text-[10px] text-gray-200">Only from</p>
+                    <p className="text-lg font-black text-rose-500">
                       $14.99
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* BANNER 4: SIDE FRESH BEVERAGES BANNER */}
-              <div className="relative rounded-xl overflow-hidden h-[200px] shadow-sm group">
-                <img
-                  src="https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80"
-                  alt="Fresh Juices"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-5 flex flex-col justify-between text-white">
-                  <div>
-                    <span className="text-xs uppercase font-bold text-sky-300">
-                      100% Pure Juices
-                    </span>
-                    <h4 className="text-lg font-black mt-1 leading-tight">
-                      Cold Pressed Fresh Juices
-                    </h4>
-                  </div>
-                  <div>
-                    <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded">
-                      30% OFF THIS WEEK
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* BANNER 5: SIDE SNACK DISCOUNTS BANNER */}
-              <div className="relative rounded-xl overflow-hidden h-[180px] shadow-sm group">
-                <img
-                  src="https://images.unsplash.com/photo-1599599810694-b5ac4dd4191d?auto=format&fit=crop&w=600&q=80"
-                  alt="Chocolates & Biscuits"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5 flex flex-col justify-between text-white">
-                  <div>
-                    <span className="text-xs uppercase font-bold text-rose-300">
-                      Snack Time Special
-                    </span>
-                    <h4 className="text-lg font-extrabold mt-1">
-                      Chocolates & Biscuits
-                    </h4>
-                  </div>
-                  <Link
-                    to="/products"
-                    className="inline-block bg-white text-rose-600 text-xs font-bold px-3 py-1.5 rounded-full self-start hover:bg-rose-50 transition-colors"
-                  >
-                    Buy Now
-                  </Link>
-                </div>
-              </div>
-
-              {/* Side Info Features */}
-              <div className="bg-white rounded-xl p-4 border border-gray-200 flex flex-col gap-3 text-xs text-gray-600 shadow-sm">
+              {/* SIDE INFO FEATURES */}
+              <div className="bg-white rounded-xl p-4 border border-gray-200 flex flex-col gap-3 text-[11px] text-gray-600 shadow-sm">
                 <div className="flex items-center gap-3">
                   <span className="text-base">📱</span>
                   <p>Download the App for your Phone.</p>
@@ -418,22 +358,22 @@ const Home = () => {
               </div>
             </div>
 
-            {/* RIGHT MAIN CONTENT AREA */}
+            {/* RIGHT CONTENT AREA */}
             <div className="flex-grow w-full flex flex-col gap-6 overflow-hidden">
               {/* FEATURED PRODUCTS SECTION */}
               <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative">
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <h3 className="text-xs font-bold uppercase text-gray-800 tracking-wider">
+                    <h3 className="text-xs font-extrabold uppercase text-gray-800 tracking-wider">
                       FEATURED PRODUCTS
                     </h3>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-[10px] text-gray-400 mt-0.5">
                       Do not miss the current offers until the end of March.
                     </p>
                   </div>
                   <Link
                     to="/products"
-                    className="text-xs font-semibold text-gray-500 border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50"
+                    className="text-[11px] font-semibold text-gray-500 border border-gray-200 px-3 py-1 rounded-full hover:bg-emerald-600 hover:text-white transition-colors"
                   >
                     View All &rarr;
                   </Link>
@@ -443,21 +383,21 @@ const Home = () => {
                   <button
                     type="button"
                     onClick={() => scrollContainer(featuredScrollRef, "left")}
-                    className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hidden group-hover:flex"
+                    className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-emerald-600 hover:text-white transition-colors hidden group-hover:flex"
                   >
                     <ChevronLeftIcon fontSize="small" />
                   </button>
                   <button
                     type="button"
                     onClick={() => scrollContainer(featuredScrollRef, "right")}
-                    className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hidden group-hover:flex"
+                    className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-emerald-600 hover:text-white transition-colors hidden group-hover:flex"
                   >
                     <ChevronRightIcon fontSize="small" />
                   </button>
 
                   <div
                     ref={featuredScrollRef}
-                    className="flex gap-4 overflow-x-auto scroll-smooth py-2 scrollbar-none"
+                    className="flex gap-3 overflow-x-auto scroll-smooth py-2 scrollbar-none"
                     style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                   >
                     {!loading &&
@@ -469,7 +409,7 @@ const Home = () => {
                         .map((item) => (
                           <div
                             key={item._id}
-                            className="w-[190px] flex-shrink-0"
+                            className="w-[185px] flex-shrink-0"
                           >
                             <ProductCard
                               item={item}
@@ -482,22 +422,22 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* MID GRID PROMO CARDS */}
+                {/* PROMO CARDS (MIDDLE BANNERS) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                  <div className="bg-sky-50/70 rounded-xl p-4 flex items-center justify-between border border-sky-100">
+                  <div className="bg-[#f0f3f8] rounded-xl p-4 flex items-center justify-between border border-gray-200">
                     <div>
-                      <span className="text-[10px] font-bold text-sky-600 bg-sky-200/60 px-2 py-0.5 rounded">
+                      <span className="text-[9px] font-extrabold text-sky-600 bg-sky-100 px-2 py-0.5 rounded">
                         WEEKEND DISCOUNT 40%
                       </span>
-                      <h4 className="font-extrabold text-gray-800 text-base mt-2">
+                      <h4 className="font-black text-gray-800 text-sm mt-2">
                         Dairy & Eggs
                       </h4>
-                      <p className="text-xs text-gray-500 mb-3">
+                      <p className="text-[10px] text-gray-500 mb-3">
                         A different kind of grocery store
                       </p>
                       <Link
                         to="/products"
-                        className="text-xs bg-sky-200 text-sky-900 font-bold px-3 py-1.5 rounded-md hover:bg-sky-300"
+                        className="text-[10px] bg-gray-300 hover:bg-emerald-600 hover:text-white text-gray-700 font-bold px-3 py-1.5 rounded-full transition-colors"
                       >
                         Shop Now
                       </Link>
@@ -509,20 +449,20 @@ const Home = () => {
                     />
                   </div>
 
-                  <div className="bg-emerald-50/70 rounded-xl p-4 flex items-center justify-between border border-emerald-100">
+                  <div className="bg-[#f0f3f8] rounded-xl p-4 flex items-center justify-between border border-gray-200">
                     <div>
-                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-200/60 px-2 py-0.5 rounded">
+                      <span className="text-[9px] font-extrabold text-sky-600 bg-sky-100 px-2 py-0.5 rounded">
                         WEEKEND DISCOUNT 40%
                       </span>
-                      <h4 className="font-extrabold text-gray-800 text-base mt-2">
+                      <h4 className="font-black text-gray-800 text-sm mt-2">
                         Legumes & Cereals
                       </h4>
-                      <p className="text-xs text-gray-500 mb-3">
+                      <p className="text-[10px] text-gray-500 mb-3">
                         Feed your family the best
                       </p>
                       <Link
                         to="/products"
-                        className="text-xs bg-emerald-200 text-emerald-900 font-bold px-3 py-1.5 rounded-md hover:bg-emerald-300"
+                        className="text-[10px] bg-gray-300 hover:bg-emerald-600 hover:text-white text-gray-700 font-bold px-3 py-1.5 rounded-full transition-colors"
                       >
                         Shop Now
                       </Link>
@@ -536,60 +476,111 @@ const Home = () => {
                 </div>
               </section>
 
-              {/* NEW PRODUCTS SECTION */}
+              {/* NEW PRODUCTS SECTION (2-ROW GRID) */}
               <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative">
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <h3 className="text-xs font-bold uppercase text-gray-800 tracking-wider">
+                    <h3 className="text-xs font-extrabold uppercase text-gray-800 tracking-wider">
                       NEW PRODUCTS
                     </h3>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-[10px] text-gray-400 mt-0.5">
                       New products with updated stocks.
                     </p>
                   </div>
                   <Link
                     to="/products"
-                    className="text-xs font-semibold text-gray-500 border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50"
+                    className="text-[11px] font-semibold text-gray-500 border border-gray-200 px-3 py-1 rounded-full hover:bg-emerald-600 hover:text-white transition-colors"
                   >
                     View All &rarr;
                   </Link>
                 </div>
 
-                <div className="relative group">
-                  <button
-                    type="button"
-                    onClick={() => scrollContainer(newScrollRef, "left")}
-                    className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hidden group-hover:flex"
-                  >
-                    <ChevronLeftIcon fontSize="small" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => scrollContainer(newScrollRef, "right")}
-                    className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hidden group-hover:flex"
-                  >
-                    <ChevronRightIcon fontSize="small" />
-                  </button>
-
-                  <div
-                    ref={newScrollRef}
-                    className="flex gap-4 overflow-x-auto scroll-smooth py-2 scrollbar-none"
-                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-                  >
-                    {!loading &&
-                      newProducts?.slice(0, 10).map((item) => (
-                        <div key={item._id} className="w-[190px] flex-shrink-0">
-                          <ProductCard
-                            item={item}
-                            onQuickView={(prod) =>
-                              setSelectedQuickViewProduct(prod)
-                            }
-                          />
-                        </div>
-                      ))}
-                  </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {!loading &&
+                    newProducts?.slice(0, 8).map((item) => (
+                      <div key={item._id} className="w-full">
+                        <ProductCard
+                          item={item}
+                          onQuickView={(prod) =>
+                            setSelectedQuickViewProduct(prod)
+                          }
+                        />
+                      </div>
+                    ))}
                 </div>
               </section>
+            </div>
+          </div>
+
+          {/* BOTTOM BANNERS ROW */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+            {/* BOTTOM BANNER 1 */}
+            <div className="relative rounded-xl overflow-hidden h-[160px] bg-[#00a862] p-5 flex items-center justify-between text-white shadow-sm group">
+              <div>
+                <h4 className="text-lg font-black leading-tight">
+                  Organic <br /> Breakfasts
+                </h4>
+                <p className="text-[10px] text-emerald-100 mt-1 mb-3">
+                  Baco Natural Discount
+                </p>
+                <Link
+                  to="/products"
+                  className="bg-blue-900 hover:bg-emerald-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-full inline-block transition-colors"
+                >
+                  Shop Now
+                </Link>
+              </div>
+              <img
+                src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=200&q=80"
+                alt="Organic Breakfast"
+                className="w-24 h-24 object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+
+            {/* BOTTOM BANNER 2 */}
+            <div className="relative rounded-xl overflow-hidden h-[160px] bg-[#fce0c5] p-5 flex items-center justify-between text-gray-800 shadow-sm group">
+              <div>
+                <h4 className="text-lg font-black leading-tight">
+                  Organic <br /> Baby Food
+                </h4>
+                <p className="text-[10px] text-gray-500 mt-1 mb-3">
+                  Baco Natural Discount
+                </p>
+                <Link
+                  to="/products"
+                  className="bg-rose-500 hover:bg-emerald-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full inline-block transition-colors"
+                >
+                  Shop Now
+                </Link>
+              </div>
+              <img
+                src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=200&q=80"
+                alt="Baby Food"
+                className="w-24 h-24 object-contain group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+
+            {/* BOTTOM BANNER 3 */}
+            <div className="relative rounded-xl overflow-hidden h-[160px] bg-[#f0e7d8] p-5 flex items-center justify-between text-gray-800 shadow-sm group">
+              <div>
+                <h4 className="text-lg font-black leading-tight">
+                  Organic <br /> Breakfast
+                </h4>
+                <p className="text-[10px] text-gray-500 mt-1 mb-3">
+                  Baco Natural Discount
+                </p>
+                <Link
+                  to="/products"
+                  className="bg-rose-500 hover:bg-emerald-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full inline-block transition-colors"
+                >
+                  Shop Now
+                </Link>
+              </div>
+              <img
+                src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=200&q=80"
+                alt="Organic Breakfast"
+                className="w-24 h-24 object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
+              />
             </div>
           </div>
         </div>
@@ -625,11 +616,11 @@ const Home = () => {
               </p>
               <div className="flex items-center gap-3 mt-3">
                 <span className="text-xl font-black text-rose-500">
-                  Rs{selectedQuickViewProduct.price}
+                  Rs:{selectedQuickViewProduct.price}
                 </span>
                 {selectedQuickViewProduct.cuttedPrice && (
                   <span className="text-xs text-gray-400 line-through">
-                    Rs{selectedQuickViewProduct.cuttedPrice}
+                    Rs:{selectedQuickViewProduct.cuttedPrice}
                   </span>
                 )}
               </div>
@@ -637,7 +628,7 @@ const Home = () => {
             <Link
               to={`/product/${selectedQuickViewProduct._id}`}
               onClick={() => setSelectedQuickViewProduct(null)}
-              className="w-full text-center py-2 bg-[#2bbef9] text-white font-bold rounded-lg text-xs hover:bg-sky-500"
+              className="w-full text-center py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs transition-colors"
             >
               Full Details & Purchase
             </Link>

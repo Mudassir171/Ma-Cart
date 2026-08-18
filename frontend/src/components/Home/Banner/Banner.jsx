@@ -88,7 +88,7 @@ const Banner = () => {
   };
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto px-2 sm:px-4 py-4">
+    <div className="w-full max-w-[1400px] mx-auto  px-2 sm:px-4 py-4">
       {/* Grid Container: Desktop view mein Main Slider 3/4 space leta hai aur Right Banner 1/4 space */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-stretch">
         
