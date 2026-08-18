@@ -79,26 +79,26 @@ const ProductCard = ({ item, onQuickView }) => {
             "https://via.placeholder.com/150"
           }
           alt={item.name}
-          className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+          className="max-h-[150px] max-w-[150px] object-contain transition-transform duration-300 group-hover:scale-105"
         />
       </div>
 
       {/* Details */}
       <div className="flex flex-col gap-1 mt-1">
-        <h4 className="text-[11px] font-bold text-gray-700 line-clamp-2 h-7 leading-tight">
+        <h4 className="text-[20px] font-bold text-gray-700 line-clamp-2 h-7 leading-tight hover:text-green-400 transition-colors">
           {item.name}
         </h4>
 
-        <span className="text-[9px] font-extrabold text-green-500 uppercase tracking-wider">
+        <span className="text-[15px] font-extrabold text-green-500 uppercase tracking-wider">
           {item.stock > 0 || item.Stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
         </span>
 
         {/* Rating */}
-        <div className="flex items-center text-yellow-600 my-0.5">
+        <div className="flex items-center text-yellow-400 my-0.5">
           {[...Array(5)].map((_, i) => (
             <StarIcon
               key={i}
-              className={`!text-[10px] ${
+              className={`!text-[20px] ${
                 i < Math.floor(item.ratings || 4)
                   ? "text-amber-400"
                   : "text-gray-300"
@@ -114,7 +114,7 @@ const ProductCard = ({ item, onQuickView }) => {
               Rs:{item.cuttedPrice}
             </span>
           )}
-          <span className="text-xs font-red text-red-800">
+          <span className="text-[15px] font-bold text-red-500">
             Rs:{item.price}
           </span>
         </div>
@@ -191,14 +191,14 @@ const FeaturedCategoriesSection = () => {
                 <Link
                   key={cat._id}
                   to={`/products?category=${encodeURIComponent(cat.name)}`}
-                  className="min-w-[150px] flex-1 flex flex-col items-center justify-center p-3 bg-white text-center hover:bg-gray-50 transition-colors cursor-pointer group"
+                  className="min-w-[150px] h-[200px] flex-1 flex flex-col items-center justify-center p-3 bg-white text-center hover:bg-gray-50 transition-colors cursor-pointer group"
                 >
                   <img
                     src={cat.image?.url || "https://via.placeholder.com/150"}
                     alt={cat.name}
-                    className="w-14 h-14 object-contain mb-2 group-hover:scale-105 transition-transform duration-300"
+                    className="w-[80px] h-[80px] object-contain mb-2 group-hover:scale-105 transition-transform duration-300"
                   />
-                  <h5 className="text-[11px] font-bold text-gray-800 leading-tight mb-0.5">
+                  <h5 className="text-[20px] font-bold text-gray-800 leading-tight mb-0.5">
                     {cat.name}
                   </h5>
                   <span className="text-[10px] text-gray-400 font-medium">
