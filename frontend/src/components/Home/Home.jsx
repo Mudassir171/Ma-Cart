@@ -42,7 +42,7 @@ const ProductCard = ({ item, onQuickView }) => {
       : 0);
 
   return (
-    <div className="group relative bg-white border border-gray-200 rounded-md p-3 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:border-green-500 overflow-hidden">
+    <div className="group/product relative bg-white border border-gray-200 rounded-md p-3 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:border-green-500 overflow-hidden">
       {/* Discount Badge */}
       {discountPercentage > 0 && (
         <span className="absolute top-2 left-2 z-10 bg-[#2bbef9] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm">
@@ -51,7 +51,7 @@ const ProductCard = ({ item, onQuickView }) => {
       )}
 
       {/* Action Buttons: Nichay say uper slide hovering effect */}
-      <div className="absolute top-2 right-2 z-20 flex flex-col gap-1.5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+      <div className="absolute top-2 right-2 z-20 flex flex-col gap-1.5 translate-y-4 opacity-0 group-hover/product:translate-y-0 group-hover/product:opacity-100 transition-all duration-300">
         <button
           type="button"
           onClick={handleQuickViewClick}
@@ -71,17 +71,17 @@ const ProductCard = ({ item, onQuickView }) => {
       </div>
 
       {/* Product Image */}
-    <div className="w-[200px] h-[200px] flex items-center justify-center mx-auto overflow-hidden my-1">
-  <img
-    src={
-      item.images?.[0]?.url ||
-      item.image ||
-      "https://via.placeholder.com/150"
-    }
-    alt={item.name}
-    className="w-[200px] h-[200px] object-contain transition-transform duration-300 group-hover:scale-105"
-  />
-</div>
+      <div className="w-[200px] h-[200px] flex items-center justify-center mx-auto overflow-hidden my-1">
+        <img
+          src={
+            item.images?.[0]?.url ||
+            item.image ||
+            "https://via.placeholder.com/150"
+          }
+          alt={item.name}
+          className="w-[200px] h-[200px] object-contain transition-transform duration-300 group-hover/product:scale-105"
+        />
+      </div>
 
       {/* Details */}
       <div className="flex flex-col gap-1 mt-1">
@@ -93,19 +93,21 @@ const ProductCard = ({ item, onQuickView }) => {
           {item.stock > 0 || item.Stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
         </span>
 
-        {/* Rating */}
-        <div className="flex items-center text-yellow-400 my-0.5">
-          {[...Array(5)].map((_, i) => (
-            <StarIcon
-              key={i}
-              className={`!text-[20px] ${
-                i < Math.floor(item.ratings || 4)
-                  ? "text-amber-400"
-                  : "text-gray-300"
-              }`}
-            />
-          ))}
-        </div>
+        {/* Rating: Sirf tabhi show hoga jab product ko rating mili ho */}
+        {item.ratings > 0 && (
+          <div className="flex items-center text-yellow-400 my-0.5">
+            {[...Array(5)].map((_, i) => (
+              <StarIcon
+                key={i}
+                className={`!text-[20px] ${
+                  i < Math.floor(item.ratings)
+                    ? "text-amber-400"
+                    : "text-gray-300"
+                }`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Price */}
         <div className="flex items-center gap-2 mt-0.5">
@@ -253,7 +255,7 @@ const Home = () => {
         item.discount ||
         (item.cuttedPrice && item.price
           ? Math.round(
-              ((item.cuttedPrice - item.price) / item.cuttedPrice) * 100
+              ((item.cuttedPrice - item.price) / item.cuttedPrice) * 100,
             )
           : 0);
       return disc > 0;
@@ -261,7 +263,7 @@ const Home = () => {
 
   const newProducts = products
     ? [...products].sort(
-        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
       )
     : [];
 
@@ -332,9 +334,7 @@ const Home = () => {
                   </div>
                   <div>
                     <p className="text-[10px] text-gray-200">Only from</p>
-                    <p className="text-lg font-black text-rose-500">
-                      $14.99
-                    </p>
+                    <p className="text-lg font-black text-rose-500">$14.99</p>
                   </div>
                 </div>
               </div>
@@ -409,7 +409,7 @@ const Home = () => {
                         .map((item) => (
                           <div
                             key={item._id}
-                            className="w-[185px] flex-shrink-0"
+                            className="w-[250px] flex-shrink-0"
                           >
                             <ProductCard
                               item={item}
