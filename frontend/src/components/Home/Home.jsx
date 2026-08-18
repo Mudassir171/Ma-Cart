@@ -123,11 +123,11 @@ const ProductCard = ({ item, onQuickView }) => {
         <div className="flex items-center gap-2 mt-1">
           {item.cuttedPrice && (
             <span className="text-xs text-gray-400 line-through font-semibold">
-              ${item.cuttedPrice}
+              Rs:{item.cuttedPrice}
             </span>
           )}
           <span className="text-sm font-black text-rose-500">
-            ${item.price}
+            Rs:{item.price}
           </span>
         </div>
       </div>
@@ -625,11 +625,11 @@ const Home = () => {
               </p>
               <div className="flex items-center gap-3 mt-3">
                 <span className="text-xl font-black text-rose-500">
-                  ${selectedQuickViewProduct.price}
+                  Rs{selectedQuickViewProduct.price}
                 </span>
                 {selectedQuickViewProduct.cuttedPrice && (
                   <span className="text-xs text-gray-400 line-through">
-                    ${selectedQuickViewProduct.cuttedPrice}
+                    Rs{selectedQuickViewProduct.cuttedPrice}
                   </span>
                 )}
               </div>
