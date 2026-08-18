@@ -71,25 +71,25 @@ const ProductCard = ({ item, onQuickView }) => {
       </div>
 
       {/* Product Image */}
-      <div className="w-[300px] h-[200px] flex items-center justify-center p-2 overflow-hidden my-1">
-        <img
-          src={
-            item.images?.[0]?.url ||
-            item.image ||
-            "https://via.placeholder.com/150"
-          }
-          alt={item.name}
-          className="max-h-[150px] max-w-[150px] object-contain transition-transform duration-300 group-hover:scale-105"
-        />
-      </div>
+    <div className="w-[200px] h-[200px] flex items-center justify-center mx-auto overflow-hidden my-1">
+  <img
+    src={
+      item.images?.[0]?.url ||
+      item.image ||
+      "https://via.placeholder.com/150"
+    }
+    alt={item.name}
+    className="w-[200px] h-[200px] object-contain transition-transform duration-300 group-hover:scale-105"
+  />
+</div>
 
       {/* Details */}
       <div className="flex flex-col gap-1 mt-1">
-        <h4 className="text-[20px] font-bold text-gray-700 line-clamp-2 h-7 leading-tight hover:text-green-400 transition-colors">
+        <h4 className="text-[13px] font-bold text-gray-700 line-clamp-2 h-7 leading-tight hover:text-green-400 transition-colors">
           {item.name}
         </h4>
 
-        <span className="text-[15px] font-extrabold text-green-500 uppercase tracking-wider">
+        <span className="text-[13px] text-green-500 uppercase tracking-wider">
           {item.stock > 0 || item.Stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
         </span>
 
@@ -110,7 +110,7 @@ const ProductCard = ({ item, onQuickView }) => {
         {/* Price */}
         <div className="flex items-center gap-2 mt-0.5">
           {item.cuttedPrice && (
-            <span className="text-[11px] text-gray-400 line-through font-medium">
+            <span className="text-[13px] text-gray-400 line-through font-medium">
               Rs:{item.cuttedPrice}
             </span>
           )}
@@ -196,12 +196,12 @@ const FeaturedCategoriesSection = () => {
                   <img
                     src={cat.image?.url || "https://via.placeholder.com/150"}
                     alt={cat.name}
-                    className="w-[80px] h-[80px] object-contain mb-2 group-hover:scale-105 transition-transform duration-300"
+                    className="w-[100px] h-[100px] object-contain mb-2 group-hover:scale-105 transition-transform duration-300"
                   />
-                  <h5 className="text-[20px] font-bold text-gray-800 leading-tight mb-0.5">
+                  <h5 className="text-[15px] font-bold text-gray-800 leading-tight mb-0.5">
                     {cat.name}
                   </h5>
-                  <span className="text-[10px] text-gray-400 font-medium">
+                  <span className="text-[12px] text-gray-400 font-medium">
                     {cat.numOfProducts
                       ? `${cat.numOfProducts} Items`
                       : "Explore"}
