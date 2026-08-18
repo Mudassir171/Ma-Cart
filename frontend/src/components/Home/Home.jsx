@@ -71,7 +71,7 @@ const ProductCard = ({ item, onQuickView }) => {
       </div>
 
       {/* Product Image */}
-      <div className="w-[300px] h-[400px] flex items-center justify-center p-2 overflow-hidden my-1">
+      <div className="w-[300px] h-[200px] flex items-center justify-center p-2 overflow-hidden my-1">
         <img
           src={
             item.images?.[0]?.url ||
