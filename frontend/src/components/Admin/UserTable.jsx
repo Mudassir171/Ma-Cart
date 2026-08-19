@@ -13,8 +13,9 @@ const UserTable = () => {
     const dispatch = useDispatch();
     const { enqueueSnackbar } = useSnackbar();
 
-    const { users, error } = useSelector((state) => state.users);
-    const { loading, isDeleted, error: deleteError } = useSelector((state) => state.profile);
+    // Redux selectors
+    const { users, loading: usersLoading, error } = useSelector((state) => state.users || {});
+    const { loading: profileLoading, isDeleted, error: deleteError } = useSelector((state) => state.profile || {});
 
     useEffect(() => {
         if (error) {
@@ -29,6 +30,7 @@ const UserTable = () => {
             enqueueSnackbar("User Deleted Successfully", { variant: "success" });
             dispatch({ type: DELETE_USER_RESET });
         }
+        
         dispatch(getAllUsers());
     }, [dispatch, error, deleteError, isDeleted, enqueueSnackbar]);
 
@@ -45,12 +47,23 @@ const UserTable = () => {
             renderCell: (params) => {
                 return (
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-full">
-                            <img draggable="false" src={params.row.avatar} alt={params.row.name} className="w-full h-full rounded-full object-cover" />
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0">
+                            {params.row.avatar ? (
+                                <img 
+                                    draggable="false" 
+                                    src={params.row.avatar} 
+                                    alt={params.row.name} 
+                                    className="w-full h-full rounded-full object-cover" 
+                                />
+                            ) : (
+                                <div className="w-full h-full rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold">
+                                    {params.row.name?.charAt(0) || "U"}
+                                </div>
+                            )}
                         </div>
-                        {params.row.name}
+                        <span className="truncate">{params.row.name}</span>
                     </div>
-                )
+                );
             },
         },
         {
@@ -73,15 +86,13 @@ const UserTable = () => {
             renderCell: (params) => {
                 return (
                     <>
-                        {
-                            params.row.role === "admin" ? (
-                                <span className="text-sm bg-green-100 p-1 px-2 font-medium rounded-full text-green-800 capitalize">{params.row.role}</span>
-                            ) : (
-                                <span className="text-sm bg-purple-100 p-1 px-2 font-medium rounded-full text-purple-800 capitalize">{params.row.role}</span>
-                            )
-                        }
+                        {params.row.role === "admin" ? (
+                            <span className="text-sm bg-green-100 p-1 px-2 font-medium rounded-full text-green-800 capitalize">{params.row.role}</span>
+                        ) : (
+                            <span className="text-sm bg-purple-100 p-1 px-2 font-medium rounded-full text-purple-800 capitalize">{params.row.role}</span>
+                        )}
                     </>
-                )
+                );
             },
         },
         {
@@ -108,27 +119,29 @@ const UserTable = () => {
 
     const rows = [];
 
+    // Optional Chaining (?.) aur Safe Fallbacks lagaye gaye hain
     users && users.forEach((item) => {
         rows.unshift({
-            id: item._id,
-            name: item.name,
-            avatar: item.avatar.url,
-            email: item.email,
-            gender: item.gender.toUpperCase(),
-            role: item.role,
-            registeredOn: new Date(item.createdAt).toISOString().substring(0, 10),
+            id: item?._id || Math.random(),
+            name: item?.name || "N/A",
+            avatar: item?.avatar?.url || "",
+            email: item?.email || "N/A",
+            gender: item?.gender ? item.gender.toUpperCase() : "N/A",
+            role: item?.role || "user",
+            registeredOn: item?.createdAt ? new Date(item.createdAt).toISOString().substring(0, 10) : "N/A",
         });
     });
 
+    const isLoading = usersLoading || profileLoading;
+
     return (
         <>
-            <MetaData title="Admin Users | Flipkart" />
+            <MetaData title="Admin Users | Ma-Cart" />
 
-            {loading && <BackdropLoader />}
+            {isLoading && <BackdropLoader />}
 
-            <h1 className="text-lg font-medium uppercase">users</h1>
+            <h1 className="text-lg font-medium uppercase mb-4">Users</h1>
             <div className="bg-white rounded-xl shadow-lg w-full" style={{ height: 470 }}>
-
                 <DataGrid
                     rows={rows}
                     columns={columns}
