@@ -51,7 +51,7 @@ const ProductCard = ({ item, onQuickView }) => {
       )}
 
       {/* Action Buttons: Nichay say uper slide hovering effect */}
-      <div className="absolute top-2 right-2 z-20 flex flex-col gap-1.5 translate-y-0 opacity-100 sm:translate-y-4 sm:opacity-0 group-hover/product:translate-y-0 group-hover/product:opacity-100 transition-all duration-300">
+      <div className="absolute top-2 right-2 z-20 flex flex-col gap-1.5 translate-y-4 opacity-0 group-hover/product:translate-y-0 group-hover/product:opacity-100 transition-all duration-300">
         <button
           type="button"
           onClick={handleQuickViewClick}
