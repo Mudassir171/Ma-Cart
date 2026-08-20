@@ -357,7 +357,7 @@ const Home = () => {
       <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4">
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
           {/* BANNER 1: HERO TOP BANNER */}
-          <div className="scroll-reveal mt-4 w-full relative h-[350px] rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-between">
+          <div className="scroll-reveal mt-[30px] w-full relative h-[350px] rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-between">
             <Banner />
           </div>
 
