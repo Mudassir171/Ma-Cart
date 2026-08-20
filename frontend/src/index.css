@@ -7,6 +7,36 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+.product-card-reveal {
+  animation: product-card-reveal 0.55s ease both;
+}
+
+.product-scroll-track {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.product-scroll-track::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes product-card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card-reveal {
+    animation: none;
+  }
+}
+
 /* hover navbar dropdown arrow */
 .arrow_down {
   border-left: 11px solid transparent;

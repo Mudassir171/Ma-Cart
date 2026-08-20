@@ -42,7 +42,7 @@ const ProductCard = ({ item, onQuickView }) => {
       : 0);
 
   return (
-    <div className="group/product relative bg-white border border-gray-200 rounded-md p-3 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:border-green-500 overflow-hidden">
+    <div className="product-card-reveal group/product relative bg-white border border-gray-200 rounded-md p-2 sm:p-3 flex flex-col justify-between h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-green-500 overflow-hidden">
       {/* Discount Badge */}
       {discountPercentage > 0 && (
         <span className="absolute top-2 left-2 z-10 bg-[#2bbef9] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm">
@@ -51,7 +51,7 @@ const ProductCard = ({ item, onQuickView }) => {
       )}
 
       {/* Action Buttons: Nichay say uper slide hovering effect */}
-      <div className="absolute top-2 right-2 z-20 flex flex-col gap-1.5 translate-y-4 opacity-0 group-hover/product:translate-y-0 group-hover/product:opacity-100 transition-all duration-300">
+      <div className="absolute top-2 right-2 z-20 flex flex-col gap-1.5 translate-y-0 opacity-100 sm:translate-y-4 sm:opacity-0 group-hover/product:translate-y-0 group-hover/product:opacity-100 transition-all duration-300">
         <button
           type="button"
           onClick={handleQuickViewClick}
@@ -71,7 +71,7 @@ const ProductCard = ({ item, onQuickView }) => {
       </div>
 
       {/* Product Image */}
-      <div className="w-[200px] h-[200px] flex items-center justify-center mx-auto overflow-hidden my-1">
+      <div className="w-full aspect-square max-w-[200px] flex items-center justify-center mx-auto overflow-hidden my-1">
         <img
           src={
             item.images?.[0]?.url ||
@@ -79,17 +79,17 @@ const ProductCard = ({ item, onQuickView }) => {
             "https://via.placeholder.com/150"
           }
           alt={item.name}
-          className="w-[200px] h-[200px] object-contain transition-transform duration-300 group-hover/product:scale-105"
+          className="w-full h-full object-contain transition-transform duration-500 group-hover/product:scale-105"
         />
       </div>
 
       {/* Details */}
       <div className="flex flex-col gap-1 mt-1">
-        <h4 className="text-[13px] font-bold text-gray-700 line-clamp-2 h-7 leading-tight hover:text-green-400 transition-colors">
+        <h4 className="text-[11px] sm:text-[13px] font-bold text-gray-700 line-clamp-2 h-8 sm:h-7 leading-tight hover:text-green-400 transition-colors">
           {item.name}
         </h4>
 
-        <span className="text-[13px] text-green-500 uppercase tracking-wider">
+        <span className="text-[10px] sm:text-[13px] text-green-500 uppercase tracking-wider">
           {item.stock > 0 || item.Stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
         </span>
 
@@ -99,7 +99,7 @@ const ProductCard = ({ item, onQuickView }) => {
             {[...Array(5)].map((_, i) => (
               <StarIcon
                 key={i}
-                className={`!text-[20px] ${
+                className={`!text-[16px] sm:!text-[20px] ${
                   i < Math.floor(item.ratings)
                     ? "text-amber-400"
                     : "text-gray-300"
@@ -110,13 +110,13 @@ const ProductCard = ({ item, onQuickView }) => {
         )}
 
         {/* Price */}
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-0.5">
           {item.cuttedPrice && (
-            <span className="text-[13px] text-gray-400 line-through font-medium">
+            <span className="text-[10px] sm:text-[13px] text-gray-400 line-through font-medium">
               Rs:{item.cuttedPrice}
             </span>
           )}
-          <span className="text-[15px] font-bold text-red-500">
+          <span className="text-[13px] sm:text-[15px] font-bold text-red-500">
             Rs:{item.price}
           </span>
         </div>
@@ -125,7 +125,7 @@ const ProductCard = ({ item, onQuickView }) => {
       {/* View Product Button (Hover Background Green 600) */}
       <Link
         to={`/product/${item._id}`}
-        className="mt-3 w-full text-center py-1.5 border border-[#2bbef9] text-[#2bbef9] hover:bg-green-600 hover:border-green-600 hover:text-white text-[11px] font-bold rounded-full transition-all duration-300 block"
+        className="mt-2 sm:mt-3 w-full text-center py-1.5 border border-[#2bbef9] text-[#2bbef9] hover:bg-green-600 hover:border-green-600 hover:text-white text-[10px] sm:text-[11px] font-bold rounded-full transition-all duration-300 block"
       >
         View Product
       </Link>
@@ -397,7 +397,7 @@ const Home = () => {
 
                   <div
                     ref={featuredScrollRef}
-                    className="flex gap-3 overflow-x-auto scroll-smooth py-2 scrollbar-none"
+                    className="product-scroll-track flex gap-2 sm:gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 px-1 scrollbar-none"
                     style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                   >
                     {!loading &&
@@ -409,7 +409,7 @@ const Home = () => {
                         .map((item) => (
                           <div
                             key={item._id}
-                            className="w-[250px] flex-shrink-0"
+                            className="w-[calc(50vw-1.5rem)] min-w-[150px] max-w-[250px] flex-shrink-0 snap-start"
                           >
                             <ProductCard
                               item={item}
@@ -477,7 +477,7 @@ const Home = () => {
               </section>
 
               {/* NEW PRODUCTS SECTION (2-ROW GRID) */}
-              <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative">
+              <section className="bg-white p-3 sm:p-5 rounded-xl border border-gray-200 shadow-sm relative">
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h3 className="text-xs font-extrabold uppercase text-gray-800 tracking-wider">
@@ -495,7 +495,7 @@ const Home = () => {
                   </Link>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
                   {!loading &&
                     newProducts?.slice(0, 8).map((item) => (
                       <div key={item._id} className="w-full">
