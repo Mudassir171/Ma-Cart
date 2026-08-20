@@ -232,6 +232,7 @@ const Home = () => {
 
   const featuredScrollRef = useRef(null);
   const newScrollRef = useRef(null);
+  const scrollAnimationRef = useRef(null);
 
   const scrollContainer = (ref, direction) => {
     if (ref.current) {
@@ -293,12 +294,24 @@ const Home = () => {
   }, []);
 
   const scrollPage = (direction) => {
+    if (scrollAnimationRef.current) {
+      cancelAnimationFrame(scrollAnimationRef.current);
+    }
+
     const start = window.scrollY;
     const target =
-      direction === "up" ? 0 : document.documentElement.scrollHeight;
+      direction === "up"
+        ? 0
+        : Math.max(
+            0,
+            document.documentElement.scrollHeight - window.innerHeight,
+          );
     const distance = target - start;
     const duration = 1800;
     const startTime = performance.now();
+    const root = document.documentElement;
+    const previousScrollBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
 
     const animateScroll = (currentTime) => {
       const progress = Math.min((currentTime - startTime) / duration, 1);
@@ -308,10 +321,15 @@ const Home = () => {
           : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 
       window.scrollTo(0, start + distance * easedProgress);
-      if (progress < 1) requestAnimationFrame(animateScroll);
+      if (progress < 1) {
+        scrollAnimationRef.current = requestAnimationFrame(animateScroll);
+      } else {
+        scrollAnimationRef.current = null;
+        root.style.scrollBehavior = previousScrollBehavior;
+      }
     };
 
-    requestAnimationFrame(animateScroll);
+    scrollAnimationRef.current = requestAnimationFrame(animateScroll);
   };
 
   const featuredProducts =
@@ -339,7 +357,7 @@ const Home = () => {
       <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4">
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
           {/* BANNER 1: HERO TOP BANNER */}
-          <div className="scroll-reveal w-full relative h-[300px] rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-between">
+          <div className="scroll-reveal w-full relative h-[350px] rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-between">
             <Banner />
           </div>
 
