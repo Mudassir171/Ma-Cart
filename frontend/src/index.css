@@ -7,8 +7,32 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
-.product-card-reveal {
-  animation: product-card-reveal 0.55s ease both;
+html {
+  scroll-behavior: smooth;
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(28px) scale(0.985);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.product-card-reveal:nth-child(2) {
+  transition-delay: 80ms;
+}
+
+.product-card-reveal:nth-child(3) {
+  transition-delay: 160ms;
+}
+
+.product-card-reveal:nth-child(4) {
+  transition-delay: 240ms;
 }
 
 .product-scroll-track {
@@ -20,20 +44,16 @@ body {
   display: none;
 }
 
-@keyframes product-card-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .product-card-reveal {
-    animation: none;
+  html {
+    scroll-behavior: auto;
+  }
+
+  .scroll-reveal,
+  .scroll-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 

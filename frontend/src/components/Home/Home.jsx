@@ -11,6 +11,8 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import StarIcon from "@mui/icons-material/Star";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import Banner from "./Banner/Banner";
 
 // --- 1. PRODUCT CARD (Bottom-to-Top Hover Effect & Matching UI) ---
@@ -42,7 +44,7 @@ const ProductCard = ({ item, onQuickView }) => {
       : 0);
 
   return (
-    <div className="product-card-reveal group/product relative bg-white border border-gray-200 rounded-md p-2 sm:p-3 flex flex-col justify-between h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-green-500 overflow-hidden">
+    <div className="scroll-reveal product-card-reveal group/product relative bg-white border border-gray-200 rounded-md p-2 sm:p-3 flex flex-col justify-between h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-green-500 overflow-hidden">
       {/* Discount Badge */}
       {discountPercentage > 0 && (
         <span className="absolute top-2 left-2 z-10 bg-[#2bbef9] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm">
@@ -152,7 +154,7 @@ const FeaturedCategoriesSection = () => {
   };
 
   return (
-    <div className="w-full relative bg-white border border-gray-200 rounded-md p-4">
+    <div className="scroll-reveal w-full relative bg-white border border-gray-200 rounded-md p-4">
       <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-3">
         FEATURED CATEGORIES
       </h3>
@@ -223,6 +225,10 @@ const Home = () => {
   const { error, loading, products } = useSelector((state) => state.products);
   const [selectedQuickViewProduct, setSelectedQuickViewProduct] =
     useState(null);
+  const [scrollPosition, setScrollPosition] = useState({
+    atTop: true,
+    atBottom: false,
+  });
 
   const featuredScrollRef = useRef(null);
   const newScrollRef = useRef(null);
@@ -249,6 +255,50 @@ const Home = () => {
     dispatch(getCategories());
   }, [dispatch, error, enqueueSnackbar]);
 
+  useEffect(() => {
+    const elements = document.querySelectorAll(".scroll-reveal");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px" },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, [loading, products]);
+
+  useEffect(() => {
+    const updateScrollPosition = () => {
+      const atTop = window.scrollY <= 10;
+      const atBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 10;
+      setScrollPosition({ atTop, atBottom });
+    };
+
+    updateScrollPosition();
+    window.addEventListener("scroll", updateScrollPosition, { passive: true });
+    window.addEventListener("resize", updateScrollPosition);
+
+    return () => {
+      window.removeEventListener("scroll", updateScrollPosition);
+      window.removeEventListener("resize", updateScrollPosition);
+    };
+  }, []);
+
+  const scrollPage = (direction) => {
+    window.scrollTo({
+      top: direction === "up" ? 0 : document.documentElement.scrollHeight,
+      behavior: "smooth",
+    });
+  };
+
   const featuredProducts =
     products?.filter((item) => {
       const disc =
@@ -274,7 +324,7 @@ const Home = () => {
       <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4">
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
           {/* BANNER 1: HERO TOP BANNER */}
-          <div className="w-full relative h-[300px] rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-between">
+          <div className="scroll-reveal w-full relative h-[300px] rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-between">
             <Banner />
           </div>
 
@@ -286,7 +336,7 @@ const Home = () => {
             {/* LEFT SIDEBAR BANNERS */}
             <div className="w-full lg:w-[260px] flex-shrink-0 flex flex-col gap-5">
               {/* BANNER 2: BAKERY */}
-              <div className="relative rounded-xl overflow-hidden h-[290px] shadow-sm group">
+              <div className="scroll-reveal relative rounded-xl overflow-hidden h-[290px] shadow-sm group">
                 <img
                   src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80"
                   alt="Fresh Products"
@@ -317,7 +367,7 @@ const Home = () => {
               </div>
 
               {/* BANNER 3: BURGER (YELLOW THEME) */}
-              <div className="relative rounded-xl overflow-hidden h-[210px] shadow-sm group bg-[#f5cb42]">
+              <div className="scroll-reveal relative rounded-xl overflow-hidden h-[210px] shadow-sm group bg-[#f5cb42]">
                 <img
                   src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80"
                   alt="Organic Burger"
@@ -340,7 +390,7 @@ const Home = () => {
               </div>
 
               {/* SIDE INFO FEATURES */}
-              <div className="bg-white rounded-xl p-4 border border-gray-200 flex flex-col gap-3 text-[11px] text-gray-600 shadow-sm">
+              <div className="scroll-reveal bg-white rounded-xl p-4 border border-gray-200 flex flex-col gap-3 text-[11px] text-gray-600 shadow-sm">
                 <div className="flex items-center gap-3">
                   <span className="text-base">📱</span>
                   <p>Download the App for your Phone.</p>
@@ -361,7 +411,7 @@ const Home = () => {
             {/* RIGHT CONTENT AREA */}
             <div className="flex-grow w-full flex flex-col gap-6 overflow-hidden">
               {/* FEATURED PRODUCTS SECTION */}
-              <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative">
+              <section className="scroll-reveal bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative">
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h3 className="text-xs font-extrabold uppercase text-gray-800 tracking-wider">
@@ -477,7 +527,7 @@ const Home = () => {
               </section>
 
               {/* NEW PRODUCTS SECTION (2-ROW GRID) */}
-              <section className="bg-white p-3 sm:p-5 rounded-xl border border-gray-200 shadow-sm relative">
+              <section className="scroll-reveal bg-white p-3 sm:p-5 rounded-xl border border-gray-200 shadow-sm relative">
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h3 className="text-xs font-extrabold uppercase text-gray-800 tracking-wider">
@@ -515,7 +565,7 @@ const Home = () => {
           {/* BOTTOM BANNERS ROW */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
             {/* BOTTOM BANNER 1 */}
-            <div className="relative rounded-xl overflow-hidden h-[160px] bg-[#00a862] p-5 flex items-center justify-between text-white shadow-sm group">
+            <div className="scroll-reveal relative rounded-xl overflow-hidden h-[160px] bg-[#00a862] p-5 flex items-center justify-between text-white shadow-sm group">
               <div>
                 <h4 className="text-lg font-black leading-tight">
                   Organic <br /> Breakfasts
@@ -538,7 +588,7 @@ const Home = () => {
             </div>
 
             {/* BOTTOM BANNER 2 */}
-            <div className="relative rounded-xl overflow-hidden h-[160px] bg-[#fce0c5] p-5 flex items-center justify-between text-gray-800 shadow-sm group">
+            <div className="scroll-reveal relative rounded-xl overflow-hidden h-[160px] bg-[#fce0c5] p-5 flex items-center justify-between text-gray-800 shadow-sm group">
               <div>
                 <h4 className="text-lg font-black leading-tight">
                   Organic <br /> Baby Food
@@ -561,7 +611,7 @@ const Home = () => {
             </div>
 
             {/* BOTTOM BANNER 3 */}
-            <div className="relative rounded-xl overflow-hidden h-[160px] bg-[#f0e7d8] p-5 flex items-center justify-between text-gray-800 shadow-sm group">
+            <div className="scroll-reveal relative rounded-xl overflow-hidden h-[160px] bg-[#f0e7d8] p-5 flex items-center justify-between text-gray-800 shadow-sm group">
               <div>
                 <h4 className="text-lg font-black leading-tight">
                   Organic <br /> Breakfast
@@ -635,6 +685,29 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      <div className="fixed bottom-5 right-4 z-40 flex flex-col gap-2 sm:right-6">
+        <button
+          type="button"
+          onClick={() => scrollPage("up")}
+          disabled={scrollPosition.atTop}
+          aria-label="Scroll to top"
+          title="Scroll to top"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0"
+        >
+          <KeyboardArrowUpIcon />
+        </button>
+        <button
+          type="button"
+          onClick={() => scrollPage("down")}
+          disabled={scrollPosition.atBottom}
+          aria-label="Scroll to bottom"
+          title="Scroll to bottom"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-lg transition-all duration-300 hover:translate-y-1 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0"
+        >
+          <KeyboardArrowDownIcon />
+        </button>
+      </div>
     </>
   );
 };
