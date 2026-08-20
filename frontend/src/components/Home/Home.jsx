@@ -293,10 +293,25 @@ const Home = () => {
   }, []);
 
   const scrollPage = (direction) => {
-    window.scrollTo({
-      top: direction === "up" ? 0 : document.documentElement.scrollHeight,
-      behavior: "smooth",
-    });
+    const start = window.scrollY;
+    const target =
+      direction === "up" ? 0 : document.documentElement.scrollHeight;
+    const distance = target - start;
+    const duration = 1800;
+    const startTime = performance.now();
+
+    const animateScroll = (currentTime) => {
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const easedProgress =
+        progress < 0.5
+          ? 2 * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+      window.scrollTo(0, start + distance * easedProgress);
+      if (progress < 1) requestAnimationFrame(animateScroll);
+    };
+
+    requestAnimationFrame(animateScroll);
   };
 
   const featuredProducts =
@@ -686,27 +701,28 @@ const Home = () => {
         </div>
       )}
 
-      <div className="fixed bottom-5 right-4 z-40 flex flex-col gap-2 sm:right-6">
-        <button
-          type="button"
-          onClick={() => scrollPage("up")}
-          disabled={scrollPosition.atTop}
-          aria-label="Scroll to top"
-          title="Scroll to top"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0"
-        >
-          <KeyboardArrowUpIcon />
-        </button>
-        <button
-          type="button"
-          onClick={() => scrollPage("down")}
-          disabled={scrollPosition.atBottom}
-          aria-label="Scroll to bottom"
-          title="Scroll to bottom"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-lg transition-all duration-300 hover:translate-y-1 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0"
-        >
-          <KeyboardArrowDownIcon />
-        </button>
+      <div className="fixed bottom-5 right-4 z-40 sm:right-6">
+        {scrollPosition.atTop ? (
+          <button
+            type="button"
+            onClick={() => scrollPage("down")}
+            aria-label="Scroll slowly to bottom"
+            title="Scroll down"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-green-600 bg-green-500 text-white shadow-lg transition-all duration-300 hover:translate-y-1 hover:bg-green-600"
+          >
+            <KeyboardArrowDownIcon />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => scrollPage("up")}
+            aria-label="Scroll slowly to top"
+            title="Scroll up"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-green-600 bg-green-500 text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-green-600"
+          >
+            <KeyboardArrowUpIcon />
+          </button>
+        )}
       </div>
     </>
   );
