@@ -139,12 +139,13 @@ export const newReview = (reviewData) => async (dispatch) => {
     dispatch({ type: NEW_REVIEW_REQUEST });
     const { data } = await axios.put("/api/v1/review", reviewData, config);
     dispatch({ type: NEW_REVIEW_SUCCESS, payload: data.success });
-{ isApproved: true }  // Approve
-{ isApproved: false }  // Reject  } catch (error) {
-    dispatch({ type: NEW_REVIEW_FAIL, payload: error.response?.data?.message });
+  } catch (error) {
+    dispatch({
+      type: NEW_REVIEW_FAIL,
+      payload: error.response?.data?.message,
+    });
   }
 };
-
 // 8. Get Slider Products
 export const getSliderProducts = () => async (dispatch) => {
   try {
