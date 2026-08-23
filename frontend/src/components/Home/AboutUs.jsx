@@ -1,104 +1,226 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import MetaData from "../Layouts/MetaData";
+
+const policySections = [
+  [
+    "Buyer Protection and Product Authenticity",
+    "Sellers must provide accurate descriptions, images, prices and stock information. Report a damaged, incorrect or counterfeit item through Contact Us so our support team can review the order and seller response.",
+  ],
+  [
+    "Shipping, Delivery and Order Tracking",
+    "Delivery time depends on the seller, product availability and destination. Customers can review order status from My Orders. Delays, failed delivery and address issues should be reported as soon as possible.",
+  ],
+  [
+    "Returns, Refunds and Cancellations",
+    "Return eligibility depends on product condition and the seller's return terms. Keep the original packaging and proof of purchase. Approved refunds are processed through the original payment method or the applicable platform process.",
+  ],
+  [
+    "Seller Standards and Commission",
+    "Sellers are responsible for lawful products, correct fulfillment, customer communication, invoices and after-sale support. Ma-Cart may review, pause or remove listings that breach marketplace rules or customer safety requirements.",
+  ],
+  [
+    "Privacy and Account Security",
+    "Use a strong password and never share login or payment credentials. Account, order and contact information should only be used to provide marketplace services, support, delivery and payment processing.",
+  ],
+  [
+    "Payments, Fraud and Disputes",
+    "Complete payments only through the checkout options shown on Ma-Cart. Never send money directly to a seller outside the platform. Contact support immediately for suspicious activity or an unresolved order dispute.",
+  ],
+];
 
 const AboutUs = () => {
+  const [openPolicy, setOpenPolicy] = useState(0);
+  const workflow = [
+    ["01", "Discover", "Browse products, categories and seller stores."],
+    ["02", "Compare", "Review price, stock, ratings and details."],
+    ["03", "Order", "Use secure checkout and track progress."],
+    ["04", "Resolve", "Reach support when something needs attention."],
+  ];
+  const audiences = [
+    [
+      "For Customers",
+      "Search, compare, order, track and review products in one place.",
+      "/products",
+      "Explore Products",
+    ],
+    [
+      "For Sellers",
+      "Create a store, publish products, manage orders and reach new buyers.",
+      "/become-seller",
+      "Join Ma-Cart",
+    ],
+    [
+      "Need Help?",
+      "Our support channel is available for account, order and marketplace questions.",
+      "/contact-us",
+      "Contact Support",
+    ],
+  ];
+
   return (
-    <div className="bg-white min-h-screen font-sans">
-      
-      {/* 1. Header Hero Section (Flipkart Blue Style) */}
-      <section className="bg-[#2874f0] py-16 md:py-24 text-center text-white px-4">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">About MA-CART</h1>
-        <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">
-          Your Trusted Destination for Quality and Convenience.
-        </p>
-      </section>
-
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        
-        {/* 2. Our Journey Section */}
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
-          <div className="order-2 md:order-1">
-            <h2 className="text-3xl font-semibold text-gray-800 mb-6">The MA-CART Story</h2>
-            <p className="text-gray-600 leading-relaxed mb-4 text-lg">
-              Launched in 2026, **Ma-Cart** has grown from a small startup to one of the most loved e-commerce platforms. Our journey began with a simple idea: <strong>"Customer First"</strong>.
-            </p>
-            <p className="text-gray-600 leading-relaxed mb-6 text-lg">
-              We bring millions of products across categories like Fashion, Electronics, and Home Essentials to your doorstep. Our mission is to provide an effortless shopping experience with the best prices.
-            </p>
-            <Link to="/">
-              <button className="bg-[#fb641b] text-white px-10 py-3 rounded-sm font-bold shadow-md hover:shadow-lg transition-all uppercase tracking-wide">
-                Start Shopping
-              </button>
+    <>
+      <MetaData title="About Ma-Cart | Marketplace Information and Policies" />
+      <main className="min-h-screen bg-slate-50 text-slate-800">
+        <section className="bg-[#173b67] px-4 py-16 text-center text-white sm:py-24">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-sky-200">
+            A marketplace built on trust
+          </p>
+          <h1 className="text-4xl font-black tracking-tight sm:text-6xl">
+            About Ma-Cart
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg">
+            A practical, secure place where customers discover products and
+            independent sellers grow their businesses.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link
+              to="/products"
+              className="rounded-full bg-[#2bbef9] px-6 py-3 text-sm font-bold text-white hover:bg-sky-500"
+            >
+              Start Shopping
             </Link>
-          </div>
-          
-          {/* Animated Image/Card */}
-          <div className="order-1 md:order-2 flex justify-center">
-            <div className="relative p-4 bg-gray-50 rounded-lg shadow-inner border border-gray-100 animate-float">
-                <img 
-                  src="/logo.png" 
-                  alt="Ma-Cart Mission" 
-                  className="w-full max-w-sm rounded shadow-xl"
-                  onError={(e) => e.target.src = "https://via.placeholder.com/400x300?text=Ma-Cart+Success"}
-                />
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Animated Video Section */}
-        <section className="mb-24">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-800">Watch Our Journey</h2>
-            <div className="w-20 h-1 bg-[#2874f0] mx-auto mt-2"></div>
-          </div>
-          <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl border-8 border-white">
-            <iframe 
-              className="w-full aspect-video"
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ" // Yahan apni video ka ID dalein
-              title="Ma-Cart Video"
-              frameBorder="0"
-              allowFullScreen
-            ></iframe>
+            <Link
+              to="/become-seller"
+              className="rounded-full border border-white/60 px-6 py-3 text-sm font-bold text-white hover:bg-white hover:text-[#173b67]"
+            >
+              Become a Seller
+            </Link>
           </div>
         </section>
 
-        {/* 4. Why Choose Us (Iconic Features) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-          <div className="p-8 text-center bg-white border border-gray-200 rounded hover:shadow-2xl transition-shadow duration-300 group">
-            <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">🚚</div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Fastest Delivery</h3>
-            <p className="text-gray-600">Across 1000+ cities with real-time tracking of your orders.</p>
-          </div>
-          <div className="p-8 text-center bg-white border border-gray-200 rounded hover:shadow-2xl transition-shadow duration-300 group">
-            <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">🛡️</div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Secure Payments</h3>
-            <p className="text-gray-600">Your transactions are safe with our multi-layer security systems.</p>
-          </div>
-          <div className="p-8 text-center bg-white border border-gray-200 rounded hover:shadow-2xl transition-shadow duration-300 group">
-            <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">⭐</div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Genuine Products</h3>
-            <p className="text-gray-600">We work directly with brands to ensure 100% original items.</p>
-          </div>
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:py-16">
+          <section className="grid items-center gap-10 md:grid-cols-2">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
+                Our mission
+              </p>
+              <h2 className="mt-3 text-3xl font-black text-slate-900 sm:text-4xl">
+                Better choices for buyers. Better reach for sellers.
+              </h2>
+              <p className="mt-5 leading-7 text-slate-600">
+                Ma-Cart connects customers with trusted vendors across everyday
+                categories. We aim to make product discovery, checkout, delivery
+                and after-sale support clear at every step.
+              </p>
+              <p className="mt-4 leading-7 text-slate-600">
+                Every seller brings their own catalog and responsibility. Our
+                role is to provide the tools, visibility and support that help
+                both sides trade with confidence.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {workflow.map(([number, title, text]) => (
+                <div
+                  key={number}
+                  className="border-t-4 border-sky-400 bg-white p-5 shadow-sm"
+                >
+                  <span className="text-2xl font-black text-sky-500">
+                    {number}
+                  </span>
+                  <h3 className="mt-3 font-bold text-slate-900">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    {text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-16 grid gap-4 sm:grid-cols-3">
+            {audiences.map(([title, text, path, action]) => (
+              <article
+                key={title}
+                className="bg-white p-6 shadow-sm ring-1 ring-slate-200"
+              >
+                <h2 className="text-xl font-black text-slate-900">{title}</h2>
+                <p className="mt-3 min-h-16 text-sm leading-6 text-slate-600">
+                  {text}
+                </p>
+                <Link
+                  to={path}
+                  className="mt-5 inline-block text-sm font-bold text-sky-600 hover:text-sky-800"
+                >
+                  {action} &rarr;
+                </Link>
+              </article>
+            ))}
+          </section>
+
+          <section
+            className="mt-16 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]"
+            id="policies"
+          >
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
+                Marketplace standards
+              </p>
+              <h2 className="mt-3 text-3xl font-black text-slate-900">
+                Terms, policies and protection
+              </h2>
+              <p className="mt-4 leading-7 text-slate-600">
+                These plain-language summaries explain how Ma-Cart works.
+                Product-specific terms, applicable law and seller policies may
+                also apply to your order.
+              </p>
+              <Link
+                to="/contact-us"
+                className="mt-6 inline-block rounded-full bg-slate-900 px-5 py-3 text-sm font-bold text-white hover:bg-slate-700"
+              >
+                Ask a policy question
+              </Link>
+            </div>
+            <div className="divide-y divide-slate-200 bg-white shadow-sm ring-1 ring-slate-200">
+              {policySections.map(([title, text], index) => (
+                <div key={title}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenPolicy(openPolicy === index ? -1 : index)
+                    }
+                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-bold text-slate-800 hover:bg-slate-50"
+                  >
+                    <span>{title}</span>
+                    <span className="text-xl text-sky-500">
+                      {openPolicy === index ? "−" : "+"}
+                    </span>
+                  </button>
+                  {openPolicy === index && (
+                    <p className="px-5 pb-5 text-sm leading-7 text-slate-600">
+                      {text}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-16 bg-[#e9f8ff] px-6 py-10 text-center sm:px-12">
+            <h2 className="text-2xl font-black text-slate-900">
+              Ready to shop or sell with confidence?
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600">
+              Keep your order details, communicate through the platform and
+              contact support whenever you need help.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link
+                to="/orders"
+                className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:border-sky-400"
+              >
+                Track My Orders
+              </Link>
+              <Link
+                to="/contact-us"
+                className="rounded-full bg-sky-500 px-5 py-3 text-sm font-bold text-white hover:bg-sky-600"
+              >
+                Contact Us
+              </Link>
+            </div>
+          </section>
         </div>
-
-      </div>
-
-      {/* 5. Bottom Footer Blue Bar */}
-      <div className="bg-gray-100 py-10 text-center border-t border-gray-200">
-        <p className="text-gray-500 font-medium italic">"Transforming the way India shops, one click at a time."</p>
-      </div>
-
-      {/* CSS Animations */}
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-15px); }
-        }
-        .animate-float {
-          animation: float 4s ease-in-out infinite;
-        }
-      `}</style>
-    </div>
+      </main>
+    </>
   );
 };
 
