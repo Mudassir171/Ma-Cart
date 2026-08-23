@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { getCategories } from "../../../actions/categoryAction";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -16,15 +15,10 @@ const Header = () => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { cartItems } = useSelector((state) => state.cart);
   const { wishlistItems } = useSelector((state) => state.wishlist);
-  const { categories } = useSelector((state) => state.allCategories);
-  const dispatch = useDispatch();
 
   const [togglePrimaryDropDown, setTogglePrimaryDropDown] = useState(false);
   const [mobileMenuToggle, setMobileMenuToggle] = useState(false);
-  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
-  const [shopMenuOpen, setShopMenuOpen] = useState(false);
-  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
-
+  
   // State for controlling the MyChatsModal
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
@@ -32,16 +26,10 @@ const Header = () => {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    dispatch(getCategories());
-  }, [dispatch]);
-
-  useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setTogglePrimaryDropDown(false);
         setMobileMenuToggle(false);
-        setCategoryMenuOpen(false);
-        setShopMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -182,287 +170,73 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Primary Store Navigation */}
-        <nav className="hidden sm:block bg-white text-[#24324a] border-b border-gray-100 shadow-sm">
-          <div className="w-full sm:w-9/12 m-auto flex items-center gap-7 px-4 py-3 text-[12px] font-semibold uppercase whitespace-nowrap">
-            <div className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setCategoryMenuOpen(!categoryMenuOpen);
-                  setShopMenuOpen(false);
-                }}
-                className="flex items-center gap-2 rounded-full bg-[#2bbef9] px-5 py-3 text-white hover:bg-[#18aeea] transition-colors"
-                aria-expanded={categoryMenuOpen}
-              >
-                <MenuIcon sx={{ fontSize: 18 }} />
-                All Categories
-                {categoryMenuOpen ? (
-                  <ExpandLessIcon sx={{ fontSize: 18 }} />
-                ) : (
-                  <ExpandMoreIcon sx={{ fontSize: 18 }} />
-                )}
-              </button>
-              {categoryMenuOpen && (
-                <div className="absolute left-0 top-full mt-2 z-[70] w-64 max-h-80 overflow-y-auto rounded-md border border-gray-100 bg-white p-2 normal-case shadow-xl">
-                  <Link
-                    to="/products"
-                    onClick={() => setCategoryMenuOpen(false)}
-                    className="block rounded px-3 py-2 text-sm hover:bg-sky-50 hover:text-sky-600"
-                  >
-                    All Products
-                  </Link>
-                  {(categories || []).map((category) => (
-                    <Link
-                      key={category._id}
-                      to={`/products?category=${encodeURIComponent(category.name)}`}
-                      onClick={() => setCategoryMenuOpen(false)}
-                      className="block rounded px-3 py-2 text-sm hover:bg-sky-50 hover:text-sky-600"
-                    >
-                      {category.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <Link to="/" className="hover:text-sky-500 transition-colors">
-              Home
-            </Link>
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setShopMenuOpen(!shopMenuOpen);
-                  setCategoryMenuOpen(false);
-                }}
-                className="flex items-center gap-1 hover:text-sky-500 transition-colors"
-                aria-expanded={shopMenuOpen}
-              >
-                Shop <ExpandMoreIcon sx={{ fontSize: 16 }} />
-              </button>
-              {shopMenuOpen && (
-                <div className="absolute left-0 top-full mt-3 z-[70] w-44 rounded-md border border-gray-100 bg-white p-2 normal-case shadow-xl">
-                  <Link
-                    to="/products"
-                    onClick={() => setShopMenuOpen(false)}
-                    className="block rounded px-3 py-2 text-sm hover:bg-sky-50 hover:text-sky-600"
-                  >
-                    All Products
-                  </Link>
-                  <Link
-                    to="/products?sort=latest"
-                    onClick={() => setShopMenuOpen(false)}
-                    className="block rounded px-3 py-2 text-sm hover:bg-sky-50 hover:text-sky-600"
-                  >
-                    New Products
-                  </Link>
-                  <Link
-                    to="/products?sort=discount"
-                    onClick={() => setShopMenuOpen(false)}
-                    className="block rounded px-3 py-2 text-sm hover:bg-sky-50 hover:text-sky-600"
-                  >
-                    Deals
-                  </Link>
-                </div>
-              )}
-            </div>
-            <Link
-              to={
-                isAuthenticated && user?.role === "seller"
-                  ? `/sellerstore/${user._id}`
-                  : "/products"
-              }
-              className="hover:text-sky-500 transition-colors"
-            >
-              Store Single
-            </Link>
-            <Link
-              to="/products?category=Bakery"
-              className="hover:text-sky-500 transition-colors"
-            >
-              Bakery
-            </Link>
-            <Link
-              to="/products?category=Beverages"
-              className="hover:text-sky-500 transition-colors"
-            >
-              Beverages
-            </Link>
-            <Link
-              to="/products?sort=latest"
-              className="hover:text-sky-500 transition-colors"
-            >
-              Blog
-            </Link>
-            <Link
-              to="/contact-us"
-              className="hover:text-sky-500 transition-colors"
-            >
-              Contact
-            </Link>
-          </div>
-        </nav>
-
         {/* Mobile Dropdown Menu (Drawer) */}
         {mobileMenuToggle && (
-          <>
-            <button
-              type="button"
-              aria-label="Close menu"
-              onClick={() => setMobileMenuToggle(false)}
-              className="sm:hidden fixed inset-0 bg-black/35 z-[55]"
-            />
-            <aside className="sm:hidden fixed top-0 left-0 bottom-0 w-[285px] max-w-[88vw] overflow-y-auto bg-white text-[#24324a] shadow-2xl z-[60]">
-              <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+          <div className="sm:hidden absolute top-full left-0 w-full bg-green-900 text-white px-4 py-4 space-y-3 border-t border-green-700 shadow-xl z-50">
+            {isAuthenticated === false ? (
+              <div className="flex gap-4 font-semibold text-sm pb-3 border-b border-green-700">
                 <Link
-                  to="/"
+                  to="/login"
                   onClick={() => setMobileMenuToggle(false)}
-                  className="h-8 flex items-center"
+                  className="hover:underline"
                 >
-                  <img
-                    src={logo}
-                    alt="MA-CART"
-                    className="h-8 w-auto object-contain"
-                  />
+                  LOGIN
                 </Link>
-                <button
-                  type="button"
-                  aria-label="Close menu"
+                <span>/</span>
+                <Link
+                  to="/register"
                   onClick={() => setMobileMenuToggle(false)}
-                  className="text-gray-400 hover:text-rose-500"
+                  className="hover:underline"
                 >
-                  <CloseIcon sx={{ fontSize: 18 }} />
-                </button>
+                  SIGN UP
+                </Link>
               </div>
-
-              <div className="px-4 py-3">
-                <label className="block text-[9px] text-gray-400 mb-1">
-                  Your Location
-                </label>
-                <select
-                  className="w-full border border-gray-200 rounded px-2 py-2 text-[10px] text-sky-600 outline-none bg-white"
-                  defaultValue=""
+            ) : (
+              <div className="pb-3 border-b border-green-700 relative overflow-visible">
+                <div
+                  className="font-medium flex justify-between items-center cursor-pointer"
+                  onClick={() =>
+                    setTogglePrimaryDropDown(!togglePrimaryDropDown)
+                  }
                 >
-                  <option value="" disabled>
-                    Select a Location
-                  </option>
-                  <option value="karachi">Karachi</option>
-                  <option value="lahore">Lahore</option>
-                  <option value="islamabad">Islamabad</option>
-                </select>
-              </div>
-
-              <div className="px-3">
-                <button
-                  type="button"
-                  onClick={() => setMobileCategoriesOpen(!mobileCategoriesOpen)}
-                  className="w-full flex items-center justify-between rounded bg-[#2bbef9] px-3 py-2.5 text-[10px] font-bold uppercase text-white"
-                >
-                  <span className="flex items-center gap-2">
-                    <MenuIcon sx={{ fontSize: 15 }} /> All Categories
+                  <div>
+                    <p className="text-xs text-green-300">Hello,</p>
+                    <p className="text-sm font-bold">{user.name}</p>
+                  </div>
+                  <span className="text-xs bg-green-800 px-2.5 py-1 rounded flex items-center gap-1">
+                    Account{" "}
+                    {togglePrimaryDropDown ? (
+                      <ExpandLessIcon sx={{ fontSize: "14px" }} />
+                    ) : (
+                      <ExpandMoreIcon sx={{ fontSize: "14px" }} />
+                    )}
                   </span>
-                  {mobileCategoriesOpen ? (
-                    <ExpandLessIcon sx={{ fontSize: 15 }} />
-                  ) : (
-                    <ExpandMoreIcon sx={{ fontSize: 15 }} />
-                  )}
-                </button>
-                {mobileCategoriesOpen && (
-                  <div className="border-x border-b border-gray-100 bg-white">
-                    {(categories || []).map((category) => (
-                      <Link
-                        key={category._id}
-                        to={`/products?category=${encodeURIComponent(category.name)}`}
-                        onClick={() => setMobileMenuToggle(false)}
-                        className="flex items-center justify-between border-b border-gray-100 px-3 py-2 text-[10px] hover:bg-sky-50 hover:text-sky-600"
-                      >
-                        <span>{category.name}</span>
-                        <ExpandMoreIcon sx={{ fontSize: 13 }} />
-                      </Link>
-                    ))}
+                </div>
+
+                {/* Mobile Primary DropDown Menu - Right Aligned */}
+                {togglePrimaryDropDown && (
+                  <div className="absolute right-0 sm:right-0 mt-2 w-48 bg-white text-black rounded-xl shadow-2xl z-[9999] border border-gray-100">
+                    <PrimaryDropDownMenu
+                      setTogglePrimaryDropDown={setTogglePrimaryDropDown}
+                      user={user}
+                      setIsChatModalOpen={setIsChatModalOpen}
+                    />
                   </div>
                 )}
               </div>
-
-              <div className="px-4 pt-5">
-                <p className="text-[9px] text-gray-400 mb-2">Site Navigation</p>
-                <div className="divide-y divide-gray-100 border-t border-gray-100">
-                  <Link
-                    to="/"
-                    onClick={() => setMobileMenuToggle(false)}
-                    className="flex justify-between py-3 text-[10px]"
-                  >
-                    Home{" "}
-                    <ExpandMoreIcon sx={{ fontSize: 13, color: "#aab2bd" }} />
-                  </Link>
-                  <Link
-                    to="/products"
-                    onClick={() => setMobileMenuToggle(false)}
-                    className="flex justify-between py-3 text-[10px]"
-                  >
-                    Shop{" "}
-                    <ExpandMoreIcon sx={{ fontSize: 13, color: "#aab2bd" }} />
-                  </Link>
-                  <Link
-                    to={
-                      isAuthenticated && user?.role === "seller"
-                        ? `/sellerstore/${user._id}`
-                        : "/products"
-                    }
-                    onClick={() => setMobileMenuToggle(false)}
-                    className="py-3 text-[10px]"
-                  >
-                    Store Single
-                  </Link>
-                  <Link
-                    to="/products?category=Bakery"
-                    onClick={() => setMobileMenuToggle(false)}
-                    className="py-3 text-[10px]"
-                  >
-                    Bakery
-                  </Link>
-                  <Link
-                    to="/products?category=Beverages"
-                    onClick={() => setMobileMenuToggle(false)}
-                    className="py-3 text-[10px]"
-                  >
-                    Beverages
-                  </Link>
-                  <Link
-                    to="/products?sort=latest"
-                    onClick={() => setMobileMenuToggle(false)}
-                    className="py-3 text-[10px]"
-                  >
-                    Blog
-                  </Link>
-                  <Link
-                    to="/contact-us"
-                    onClick={() => setMobileMenuToggle(false)}
-                    className="py-3 text-[10px]"
-                  >
-                    Contact
-                  </Link>
-                </div>
-              </div>
-
-              <div className="mt-6 border-t border-gray-100 px-4 py-4 text-[9px] text-gray-400">
-                <p>Copyright 2026 | MA-CART. All rights reserved.</p>
-                <button
-                  type="button"
-                  className="flex w-full justify-between border-b border-gray-100 py-4 text-left text-gray-700"
-                >
-                  English <ExpandMoreIcon sx={{ fontSize: 13 }} />
-                </button>
-                <button
-                  type="button"
-                  className="flex w-full justify-between py-4 text-left text-gray-700"
-                >
-                  USD <ExpandMoreIcon sx={{ fontSize: 13 }} />
-                </button>
-              </div>
-            </aside>
-          </>
+            )}
+            <div className="flex flex-col space-y-2.5 text-xs font-medium pt-1">
+              <span className="cursor-pointer hover:text-green-300">
+                SAVE MORE ON APP
+              </span>
+              <span className="cursor-pointer hover:text-green-300">
+                SELL ON MA-CART
+              </span>
+              <span className="cursor-pointer hover:text-green-300">
+                HELP & SUPPORT
+              </span>
+            </div>
+          </div>
         )}
 
         {/* Bottom Category Row (Desktop Only) */}
@@ -484,7 +258,7 @@ const Header = () => {
       </header>
 
       {/* Spacer */}
-      <div className="h-[150px] sm:h-[165px]"></div>
+      <div className="h-20 sm:h-20"></div>
 
       {/* My Chats Modal */}
       <MyChatsModal
