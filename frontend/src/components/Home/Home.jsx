@@ -223,6 +223,12 @@ const Home = () => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { error, loading, products } = useSelector((state) => state.products);
+  const [saleTime, setSaleTime] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
   const [selectedQuickViewProduct, setSelectedQuickViewProduct] =
     useState(null);
   const [scrollPosition, setScrollPosition] = useState({
@@ -247,6 +253,14 @@ const Home = () => {
     }
   };
 
+  const activeFlashProducts = (products || []).filter(
+    (item) =>
+      item.isFlashSale &&
+      item.dealExpiry &&
+      new Date(item.dealExpiry) > new Date(),
+  );
+  const saleProduct = activeFlashProducts[0];
+
   useEffect(() => {
     if (error) {
       enqueueSnackbar(error, { variant: "error" });
@@ -255,6 +269,25 @@ const Home = () => {
     dispatch(getSliderProducts());
     dispatch(getCategories());
   }, [dispatch, error, enqueueSnackbar]);
+
+  useEffect(() => {
+    const updateSaleTime = () => {
+      const remaining = saleProduct
+        ? Math.max(0, new Date(saleProduct.dealExpiry).getTime() - Date.now())
+        : 0;
+      const totalSeconds = Math.floor(remaining / 1000);
+      setSaleTime({
+        days: Math.floor(totalSeconds / 86400),
+        hours: Math.floor((totalSeconds % 86400) / 3600),
+        minutes: Math.floor((totalSeconds % 3600) / 60),
+        seconds: totalSeconds % 60,
+      });
+    };
+
+    updateSaleTime();
+    const timer = window.setInterval(updateSaleTime, 1000);
+    return () => window.clearInterval(timer);
+  }, [saleProduct]);
 
   useEffect(() => {
     const elements = document.querySelectorAll(".scroll-reveal");
@@ -360,6 +393,86 @@ const Home = () => {
           <div className="scroll-reveal mt-[30px] w-full relative h-[350px] rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-between">
             <Banner />
           </div>
+
+          {saleProduct && (
+            <section className="scroll-reveal w-full border border-rose-500 rounded-md bg-white p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-3 mb-5">
+                <div>
+                  <h2 className="text-sm sm:text-base font-bold uppercase text-gray-900">
+                    Hot Product{" "}
+                    <span className="text-rose-500">For This Week</span>
+                  </h2>
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    Do not miss this special discount before the offer ends.
+                  </p>
+                </div>
+                <Link
+                  to="/products"
+                  className="shrink-0 border border-gray-300 rounded-full px-3 py-1.5 text-[10px] text-gray-500 hover:bg-rose-500 hover:text-white transition-colors"
+                >
+                  View All &rarr;
+                </Link>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8">
+                <div className="relative shrink-0">
+                  <span className="absolute -top-3 -left-3 z-10 w-14 h-14 rounded-full bg-rose-600 text-white flex items-center justify-center text-sm font-bold">
+                    {saleProduct.discount || 0}%
+                  </span>
+                  <img
+                    src={
+                      saleProduct.images?.[0]?.url ||
+                      saleProduct.image ||
+                      "https://via.placeholder.com/180"
+                    }
+                    alt={saleProduct.name}
+                    className="w-36 h-36 object-contain"
+                  />
+                </div>
+                <div className="flex-1 w-full min-w-0">
+                  <div className="flex items-center gap-2 text-xs mb-2">
+                    {saleProduct.cuttedPrice > saleProduct.price && (
+                      <span className="text-gray-400 line-through">
+                        Rs:{saleProduct.cuttedPrice}
+                      </span>
+                    )}
+                    <span className="text-rose-600 font-bold">
+                      Rs:{saleProduct.price}
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+                    {saleProduct.name}
+                  </h3>
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    {saleProduct.category || "Featured product"} |{" "}
+                    <span className="text-emerald-600">
+                      {saleProduct.stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
+                    </span>
+                  </p>
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden mt-4">
+                    <div className="h-full w-3/4 bg-gradient-to-r from-rose-600 to-amber-400 rounded-full" />
+                  </div>
+                  <div className="flex items-center gap-1 mt-4 text-[10px] text-gray-500">
+                    {[
+                      saleTime.days,
+                      saleTime.hours,
+                      saleTime.minutes,
+                      saleTime.seconds,
+                    ].map((value, index) => (
+                      <React.Fragment key={index}>
+                        <span className="bg-gray-100 px-2 py-1 font-semibold text-gray-700">
+                          {String(value).padStart(2, "0")}
+                        </span>
+                        {index < 3 && <span>:</span>}
+                      </React.Fragment>
+                    ))}
+                    <span className="ml-2">
+                      Remains until the end of the offer
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* DYNAMIC CATEGORIES SECTION */}
           <FeaturedCategoriesSection />

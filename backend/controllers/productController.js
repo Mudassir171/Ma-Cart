@@ -14,14 +14,14 @@ exports.getAllProducts = asyncErrorHandler(async (req, res, next) => {
 
   // 1. Base Filter (Admin ya Approved Seller Products)
   const baseFilter = {
-    $or: [
-      { "user.role": "admin" }, 
-      { isApproved: true }
-    ]
+    $or: [{ "user.role": "admin" }, { isApproved: true }],
   };
 
   // 2. Search aur Filter ke liye baseFilter pass karein
-  const searchFeature = new SearchFeatures(Product.find(baseFilter).populate("user"), req.query)
+  const searchFeature = new SearchFeatures(
+    Product.find(baseFilter).populate("user"),
+    req.query,
+  )
     .search()
     .filter();
 
@@ -114,13 +114,13 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
   req.body.isApproved = req.user.role === "admin" ? true : false;
 
   // --- 🎨📏 COLORS & SIZES HANDLING ---
- // --- 🎨📏 COLORS & SIZES HANDLING ---
+  // --- 🎨📏 COLORS & SIZES HANDLING ---
   let colors = req.body.colors;
   if (colors) {
     let colorsArray = Array.isArray(colors) ? colors : [colors];
     req.body.colors = colorsArray.map((c) => {
       try {
-        return typeof c === 'string' ? JSON.parse(c) : c;
+        return typeof c === "string" ? JSON.parse(c) : c;
       } catch (err) {
         return c;
       }
@@ -129,10 +129,9 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
     req.body.colors = [];
   }
 
-
   let sizes = req.body.sizes;
   if (sizes) {
-    req.body.sizes = typeof sizes === 'string' ? [sizes] : sizes;
+    req.body.sizes = typeof sizes === "string" ? [sizes] : sizes;
   } else {
     req.body.sizes = [];
   }
@@ -144,17 +143,24 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
   if (req.body.offerTimer) {
     req.body.offerTimer = Number(req.body.offerTimer);
   }
+  if (req.body.isFlashSale !== undefined) {
+    req.body.isFlashSale =
+      req.body.isFlashSale === true || req.body.isFlashSale === "true";
+  }
+  if (req.body.dealExpiry) {
+    req.body.dealExpiry = new Date(req.body.dealExpiry);
+  }
 
   // Specifications Parsing
   if (req.body.specifications) {
     let specs = [];
-    let specsArray = Array.isArray(req.body.specifications) 
-      ? req.body.specifications 
+    let specsArray = Array.isArray(req.body.specifications)
+      ? req.body.specifications
       : [req.body.specifications];
 
     specsArray.forEach((s) => {
       try {
-        specs.push(typeof s === 'string' ? JSON.parse(s) : s);
+        specs.push(typeof s === "string" ? JSON.parse(s) : s);
       } catch (err) {
         // Ignore invalid format if empty/optional
       }
@@ -208,10 +214,12 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
   // --- 🎨📏 COLORS & SIZES UPDATE HANDLING ---
   // --- 🎨📏 COLORS & SIZES UPDATE HANDLING ---
   if (req.body.colors) {
-    let colorsArray = Array.isArray(req.body.colors) ? req.body.colors : [req.body.colors];
+    let colorsArray = Array.isArray(req.body.colors)
+      ? req.body.colors
+      : [req.body.colors];
     product.colors = colorsArray.map((c) => {
       try {
-        return typeof c === 'string' ? JSON.parse(c) : c;
+        return typeof c === "string" ? JSON.parse(c) : c;
       } catch (err) {
         return c;
       }
@@ -219,7 +227,8 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
   }
 
   if (req.body.sizes) {
-    product.sizes = typeof req.body.sizes === 'string' ? [req.body.sizes] : req.body.sizes;
+    product.sizes =
+      typeof req.body.sizes === "string" ? [req.body.sizes] : req.body.sizes;
   }
 
   // --- 🏷️ DISCOUNT & ⏱️ TIMER UPDATE HANDLING ---
@@ -229,9 +238,27 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
   if (req.body.offerTimer !== undefined) {
     product.offerTimer = Number(req.body.offerTimer);
   }
+  if (req.body.isFlashSale !== undefined) {
+    product.isFlashSale =
+      req.body.isFlashSale === true || req.body.isFlashSale === "true";
+  }
+  if (req.body.dealExpiry !== undefined) {
+    product.dealExpiry = req.body.dealExpiry
+      ? new Date(req.body.dealExpiry)
+      : undefined;
+  }
 
   // 2. Baaki Fields Update Karein
-  const { specifications, colors, sizes, discount, offerTimer, ...otherData } = req.body;
+  const {
+    specifications,
+    colors,
+    sizes,
+    discount,
+    offerTimer,
+    isFlashSale,
+    dealExpiry,
+    ...otherData
+  } = req.body;
 
   Object.keys(otherData).forEach((key) => {
     product[key] = otherData[key];

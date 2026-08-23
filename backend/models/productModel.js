@@ -39,6 +39,13 @@ const productSchema = new mongoose.Schema({
     type: Number, // Hours mein timer store hoga (e.g. 24, 48)
     default: 0,
   },
+  isFlashSale: {
+    type: Boolean,
+    default: false,
+  },
+  dealExpiry: {
+    type: Date,
+  },
   // -----------------------------------
   colors: [
     {
@@ -125,7 +132,7 @@ const productSchema = new mongoose.Schema({
   isApproved: {
     type: Boolean,
     default: function () {
-      return false; 
+      return false;
     },
   },
   // --- UPDATES END ---
