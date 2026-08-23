@@ -23,6 +23,7 @@ const Header = () => {
   const [mobileMenuToggle, setMobileMenuToggle] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const [shopMenuOpen, setShopMenuOpen] = useState(false);
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
 
   // State for controlling the MyChatsModal
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -305,130 +306,163 @@ const Header = () => {
 
         {/* Mobile Dropdown Menu (Drawer) */}
         {mobileMenuToggle && (
-          <div className="sm:hidden absolute top-full left-0 w-full bg-green-900 text-white px-4 py-4 space-y-3 border-t border-green-700 shadow-xl z-50">
-            {isAuthenticated === false ? (
-              <div className="flex gap-4 font-semibold text-sm pb-3 border-b border-green-700">
+          <>
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setMobileMenuToggle(false)}
+              className="sm:hidden fixed inset-0 bg-black/35 z-[55]"
+            />
+            <aside className="sm:hidden fixed top-0 left-0 bottom-0 w-[285px] max-w-[88vw] overflow-y-auto bg-white text-[#24324a] shadow-2xl z-[60]">
+              <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
                 <Link
-                  to="/login"
+                  to="/"
                   onClick={() => setMobileMenuToggle(false)}
-                  className="hover:underline"
+                  className="h-8 flex items-center"
                 >
-                  LOGIN
+                  <img
+                    src={logo}
+                    alt="MA-CART"
+                    className="h-8 w-auto object-contain"
+                  />
                 </Link>
-                <span>/</span>
-                <Link
-                  to="/register"
+                <button
+                  type="button"
+                  aria-label="Close menu"
                   onClick={() => setMobileMenuToggle(false)}
-                  className="hover:underline"
+                  className="text-gray-400 hover:text-rose-500"
                 >
-                  SIGN UP
-                </Link>
+                  <CloseIcon sx={{ fontSize: 18 }} />
+                </button>
               </div>
-            ) : (
-              <div className="pb-3 border-b border-green-700 relative overflow-visible">
-                <div
-                  className="font-medium flex justify-between items-center cursor-pointer"
-                  onClick={() =>
-                    setTogglePrimaryDropDown(!togglePrimaryDropDown)
-                  }
-                >
-                  <div>
-                    <p className="text-xs text-green-300">Hello,</p>
-                    <p className="text-sm font-bold">{user.name}</p>
-                  </div>
-                  <span className="text-xs bg-green-800 px-2.5 py-1 rounded flex items-center gap-1">
-                    Account{" "}
-                    {togglePrimaryDropDown ? (
-                      <ExpandLessIcon sx={{ fontSize: "14px" }} />
-                    ) : (
-                      <ExpandMoreIcon sx={{ fontSize: "14px" }} />
-                    )}
-                  </span>
-                </div>
 
-                {/* Mobile Primary DropDown Menu - Right Aligned */}
-                {togglePrimaryDropDown && (
-                  <div className="absolute right-0 sm:right-0 mt-2 w-48 bg-white text-black rounded-xl shadow-2xl z-[9999] border border-gray-100">
-                    <PrimaryDropDownMenu
-                      setTogglePrimaryDropDown={setTogglePrimaryDropDown}
-                      user={user}
-                      setIsChatModalOpen={setIsChatModalOpen}
-                    />
+              <div className="px-4 py-3">
+                <label className="block text-[9px] text-gray-400 mb-1">
+                  Your Location
+                </label>
+                <select
+                  className="w-full border border-gray-200 rounded px-2 py-2 text-[10px] text-sky-600 outline-none bg-white"
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Select a Location
+                  </option>
+                  <option value="karachi">Karachi</option>
+                  <option value="lahore">Lahore</option>
+                  <option value="islamabad">Islamabad</option>
+                </select>
+              </div>
+
+              <div className="px-3">
+                <button
+                  type="button"
+                  onClick={() => setMobileCategoriesOpen(!mobileCategoriesOpen)}
+                  className="w-full flex items-center justify-between rounded bg-[#2bbef9] px-3 py-2.5 text-[10px] font-bold uppercase text-white"
+                >
+                  <span className="flex items-center gap-2">
+                    <MenuIcon sx={{ fontSize: 15 }} /> All Categories
+                  </span>
+                  {mobileCategoriesOpen ? (
+                    <ExpandLessIcon sx={{ fontSize: 15 }} />
+                  ) : (
+                    <ExpandMoreIcon sx={{ fontSize: 15 }} />
+                  )}
+                </button>
+                {mobileCategoriesOpen && (
+                  <div className="border-x border-b border-gray-100 bg-white">
+                    {(categories || []).map((category) => (
+                      <Link
+                        key={category._id}
+                        to={`/products?category=${encodeURIComponent(category.name)}`}
+                        onClick={() => setMobileMenuToggle(false)}
+                        className="flex items-center justify-between border-b border-gray-100 px-3 py-2 text-[10px] hover:bg-sky-50 hover:text-sky-600"
+                      >
+                        <span>{category.name}</span>
+                        <ExpandMoreIcon sx={{ fontSize: 13 }} />
+                      </Link>
+                    ))}
                   </div>
                 )}
               </div>
-            )}
-            <div className="flex flex-col space-y-2.5 text-xs font-medium pt-1">
-              <Link
-                to="/"
-                onClick={() => setMobileMenuToggle(false)}
-                className="hover:text-green-300"
-              >
-                HOME
-              </Link>
-              <Link
-                to="/products"
-                onClick={() => setMobileMenuToggle(false)}
-                className="hover:text-green-300"
-              >
-                SHOP
-              </Link>
-              <Link
-                to={
-                  isAuthenticated && user?.role === "seller"
-                    ? `/sellerstore/${user._id}`
-                    : "/products"
-                }
-                onClick={() => setMobileMenuToggle(false)}
-                className="hover:text-green-300"
-              >
-                STORE SINGLE
-              </Link>
-              <Link
-                to="/products?category=Bakery"
-                onClick={() => setMobileMenuToggle(false)}
-                className="hover:text-green-300"
-              >
-                BAKERY
-              </Link>
-              <Link
-                to="/products?category=Beverages"
-                onClick={() => setMobileMenuToggle(false)}
-                className="hover:text-green-300"
-              >
-                BEVERAGES
-              </Link>
-              <Link
-                to="/contact-us"
-                onClick={() => setMobileMenuToggle(false)}
-                className="hover:text-green-300"
-              >
-                CONTACT
-              </Link>
-              <div className="border-t border-green-700 pt-2">
-                <p className="mb-1 text-green-300">CATEGORIES</p>
-                {(categories || []).slice(0, 8).map((category) => (
+
+              <div className="px-4 pt-5">
+                <p className="text-[9px] text-gray-400 mb-2">Site Navigation</p>
+                <div className="divide-y divide-gray-100 border-t border-gray-100">
                   <Link
-                    key={category._id}
-                    to={`/products?category=${encodeURIComponent(category.name)}`}
+                    to="/"
                     onClick={() => setMobileMenuToggle(false)}
-                    className="block py-1 hover:text-green-300"
+                    className="flex justify-between py-3 text-[10px]"
                   >
-                    {category.name}
+                    Home{" "}
+                    <ExpandMoreIcon sx={{ fontSize: 13, color: "#aab2bd" }} />
                   </Link>
-                ))}
+                  <Link
+                    to="/products"
+                    onClick={() => setMobileMenuToggle(false)}
+                    className="flex justify-between py-3 text-[10px]"
+                  >
+                    Shop{" "}
+                    <ExpandMoreIcon sx={{ fontSize: 13, color: "#aab2bd" }} />
+                  </Link>
+                  <Link
+                    to={
+                      isAuthenticated && user?.role === "seller"
+                        ? `/sellerstore/${user._id}`
+                        : "/products"
+                    }
+                    onClick={() => setMobileMenuToggle(false)}
+                    className="py-3 text-[10px]"
+                  >
+                    Store Single
+                  </Link>
+                  <Link
+                    to="/products?category=Bakery"
+                    onClick={() => setMobileMenuToggle(false)}
+                    className="py-3 text-[10px]"
+                  >
+                    Bakery
+                  </Link>
+                  <Link
+                    to="/products?category=Beverages"
+                    onClick={() => setMobileMenuToggle(false)}
+                    className="py-3 text-[10px]"
+                  >
+                    Beverages
+                  </Link>
+                  <Link
+                    to="/products?sort=latest"
+                    onClick={() => setMobileMenuToggle(false)}
+                    className="py-3 text-[10px]"
+                  >
+                    Blog
+                  </Link>
+                  <Link
+                    to="/contact-us"
+                    onClick={() => setMobileMenuToggle(false)}
+                    className="py-3 text-[10px]"
+                  >
+                    Contact
+                  </Link>
+                </div>
               </div>
-              <span className="cursor-pointer hover:text-green-300">
-                SAVE MORE ON APP
-              </span>
-              <span className="cursor-pointer hover:text-green-300">
-                SELL ON MA-CART
-              </span>
-              <span className="cursor-pointer hover:text-green-300">
-                HELP & SUPPORT
-              </span>
-            </div>
-          </div>
+
+              <div className="mt-6 border-t border-gray-100 px-4 py-4 text-[9px] text-gray-400">
+                <p>Copyright 2026 | MA-CART. All rights reserved.</p>
+                <button
+                  type="button"
+                  className="flex w-full justify-between border-b border-gray-100 py-4 text-left text-gray-700"
+                >
+                  English <ExpandMoreIcon sx={{ fontSize: 13 }} />
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full justify-between py-4 text-left text-gray-700"
+                >
+                  USD <ExpandMoreIcon sx={{ fontSize: 13 }} />
+                </button>
+              </div>
+            </aside>
+          </>
         )}
 
         {/* Bottom Category Row (Desktop Only) */}
