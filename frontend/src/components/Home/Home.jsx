@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearErrors, getSliderProducts } from "../../actions/productAction";
 import { getCategories } from "../../actions/categoryAction";
 import { addToWishlist } from "../../actions/wishlistAction";
+import { addItemsToCart } from "../../actions/cartAction";
 import { useSnackbar } from "notistack";
 import MetaData from "../Layouts/MetaData";
 import { Link } from "react-router-dom";
@@ -13,10 +14,14 @@ import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import StarIcon from "@mui/icons-material/Star";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import SearchIcon from "@mui/icons-material/Search";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Banner from "./Banner/Banner";
 
 // --- 1. PRODUCT CARD (Bottom-to-Top Hover Effect & Matching UI) ---
-const ProductCard = ({ item, onQuickView }) => {
+const ProductCard = ({ item, onQuickView, onViewed }) => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -35,6 +40,17 @@ const ProductCard = ({ item, onQuickView }) => {
     } else {
       enqueueSnackbar(`Quick View: ${item.name}`, { variant: "info" });
     }
+  };
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!item.stock || item.stock < 1) {
+      enqueueSnackbar("Product is Out of Stock", { variant: "error" });
+      return;
+    }
+    dispatch(addItemsToCart(item._id, 1));
+    enqueueSnackbar("Added To Cart Successfully", { variant: "success" });
   };
 
   const discountPercentage =
@@ -127,10 +143,18 @@ const ProductCard = ({ item, onQuickView }) => {
       {/* View Product Button (Hover Background Green 600) */}
       <Link
         to={`/product/${item._id}`}
+        onClick={() => onViewed?.(item)}
         className="mt-2 sm:mt-3 w-full text-center py-1.5 border border-[#2bbef9] text-[#2bbef9] hover:bg-green-600 hover:border-green-600 hover:text-white text-[10px] sm:text-[11px] font-bold rounded-full transition-all duration-300 block"
       >
         View Product
       </Link>
+      <button
+        type="button"
+        onClick={handleAddToCart}
+        className="mt-1.5 w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] sm:text-[11px] font-bold rounded-full transition-colors flex items-center justify-center gap-1"
+      >
+        <ShoppingCartOutlinedIcon className="!text-[14px]" /> Add to Cart
+      </button>
     </div>
   );
 };
@@ -229,10 +253,62 @@ const Home = () => {
     atTop: true,
     atBottom: false,
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [deliveryPin, setDeliveryPin] = useState(
+    () => localStorage.getItem("deliveryPin") || "",
+  );
+  const [deliveryMessage, setDeliveryMessage] = useState("");
+  const [copiedCoupon, setCopiedCoupon] = useState(false);
+  const [recentProducts, setRecentProducts] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("recentProducts") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  const [saleTime, setSaleTime] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
 
   const featuredScrollRef = useRef(null);
   const newScrollRef = useRef(null);
   const scrollAnimationRef = useRef(null);
+
+  const addRecentlyViewed = (item) => {
+    setRecentProducts((current) => {
+      const next = [
+        item,
+        ...current.filter((product) => product._id !== item._id),
+      ].slice(0, 6);
+      localStorage.setItem("recentProducts", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const checkDelivery = () => {
+    if (!/^\d{5}$/.test(deliveryPin)) {
+      setDeliveryMessage("Enter a valid 5-digit postal code.");
+      return;
+    }
+    localStorage.setItem("deliveryPin", deliveryPin);
+    setDeliveryMessage(
+      `Delivery available to ${deliveryPin}. Expected in 2-4 days.`,
+    );
+  };
+
+  const copyCoupon = async () => {
+    try {
+      await navigator.clipboard.writeText("FREE25BAC");
+      setCopiedCoupon(true);
+      enqueueSnackbar("Coupon copied to clipboard", { variant: "success" });
+      window.setTimeout(() => setCopiedCoupon(false), 2200);
+    } catch {
+      enqueueSnackbar("Copy the coupon: FREE25BAC", { variant: "info" });
+    }
+  };
 
   const scrollContainer = (ref, direction) => {
     if (ref.current) {
@@ -255,6 +331,24 @@ const Home = () => {
     dispatch(getSliderProducts());
     dispatch(getCategories());
   }, [dispatch, error, enqueueSnackbar]);
+
+  useEffect(() => {
+    const saleEndsAt =
+      Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000;
+    const updateSaleTime = () => {
+      const remaining = Math.max(0, saleEndsAt - Date.now());
+      const totalSeconds = Math.floor(remaining / 1000);
+      setSaleTime({
+        days: Math.floor(totalSeconds / 86400),
+        hours: Math.floor((totalSeconds % 86400) / 3600),
+        minutes: Math.floor((totalSeconds % 3600) / 60),
+        seconds: totalSeconds % 60,
+      });
+    };
+    updateSaleTime();
+    const timer = window.setInterval(updateSaleTime, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const elements = document.querySelectorAll(".scroll-reveal");
@@ -350,19 +444,208 @@ const Home = () => {
       )
     : [];
 
+  const searchSuggestions = searchTerm.trim()
+    ? products
+        .filter((item) =>
+          item.name?.toLowerCase().includes(searchTerm.toLowerCase()),
+        )
+        .slice(0, 5)
+    : [];
+  const categorySections = (categories || [])
+    .map((category) => ({
+      ...category,
+      products: (products || [])
+        .filter((item) => {
+          const itemCategory = item.category?.name || item.category;
+          return itemCategory?.toLowerCase() === category.name?.toLowerCase();
+        })
+        .slice(0, 5),
+    }))
+    .filter((category) => category.products.length > 0)
+    .slice(0, 3);
+  const ratedProducts = (products || [])
+    .filter((item) => item.ratings > 0)
+    .slice(0, 3);
+  const saleProduct = featuredProducts[0] || newProducts[0];
+  const saleUnits = [
+    saleTime.days,
+    saleTime.hours,
+    saleTime.minutes,
+    saleTime.seconds,
+  ];
+
   return (
     <>
       <MetaData title="Ma-Cart | Online Shopping Site" />
 
       <main className="w-full bg-[#f8f9fa] min-h-screen pb-12 pt-4">
         <div className="max-w-[1360px] mx-auto px-2 sm:px-4 flex flex-col gap-6">
+          {/* SEARCH WITH LIVE SUGGESTIONS */}
+          <div className="scroll-reveal relative z-30">
+            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 shadow-sm focus-within:border-emerald-500">
+              <SearchIcon className="text-gray-400" fontSize="small" />
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search products..."
+                aria-label="Search products"
+                className="w-full bg-transparent outline-none text-sm text-gray-700"
+              />
+              <Link
+                to={`/products${searchTerm.trim() ? `?keyword=${encodeURIComponent(searchTerm.trim())}` : ""}`}
+                onClick={() => setSearchTerm("")}
+                className="text-xs font-bold text-emerald-600 whitespace-nowrap"
+              >
+                Search
+              </Link>
+            </div>
+            {searchSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
+                {searchSuggestions.map((item) => (
+                  <Link
+                    key={item._id}
+                    to={`/product/${item._id}`}
+                    onClick={() => {
+                      addRecentlyViewed(item);
+                      setSearchTerm("");
+                    }}
+                    className="flex items-center gap-3 px-4 py-2 hover:bg-emerald-50 border-b last:border-b-0"
+                  >
+                    <img
+                      src={item.images?.[0]?.url}
+                      alt=""
+                      className="w-9 h-9 object-contain"
+                    />
+                    <span className="text-xs text-gray-700 line-clamp-1">
+                      {item.name}
+                    </span>
+                    <span className="ml-auto text-xs font-bold text-emerald-600">
+                      Rs:{item.price}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
           {/* BANNER 1: HERO TOP BANNER */}
-          <div className="scroll-reveal mt-[30px] w-full relative h-[350px] rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-between">
+          <div className="scroll-reveal mt-[3l0px] w-full relative h-[350px] rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-between">
             <Banner />
           </div>
 
           {/* DYNAMIC CATEGORIES SECTION */}
           <FeaturedCategoriesSection />
+
+          {/* FLASH SALE AND DELIVERY CHECKER */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4">
+            <section className="scroll-reveal bg-white border border-rose-200 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-rose-500">
+                    Limited time offer
+                  </p>
+                  <h2 className="text-lg font-black text-gray-800">
+                    Flash Sale
+                  </h2>
+                </div>
+                <div className="flex gap-1 text-center">
+                  {saleUnits.map((unit, index) => (
+                    <span
+                      key={index}
+                      className="bg-gray-100 rounded px-2 py-1 text-xs font-bold text-gray-800"
+                    >
+                      {String(unit).padStart(2, "0")}
+                      <small className="block text-[8px] font-normal text-gray-400">
+                        {["D", "H", "M", "S"][index]}
+                      </small>
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {saleProduct ? (
+                <div className="flex items-center gap-4 border border-rose-300 rounded-lg p-3">
+                  <span className="shrink-0 rounded-full bg-rose-500 text-white text-sm font-black px-3 py-3">
+                    {saleProduct.discount || 0}%
+                  </span>
+                  <img
+                    src={saleProduct.images?.[0]?.url}
+                    alt={saleProduct.name}
+                    className="w-24 h-24 object-contain"
+                  />
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-sm text-gray-800 line-clamp-2">
+                      {saleProduct.name}
+                    </h3>
+                    <p className="text-xs text-gray-400 line-through mt-1">
+                      Rs:{saleProduct.cuttedPrice}
+                    </p>
+                    <p className="text-base font-black text-rose-500">
+                      Rs:{saleProduct.price}
+                    </p>
+                    <Link
+                      to={`/product/${saleProduct._id}`}
+                      onClick={() => addRecentlyViewed(saleProduct)}
+                      className="text-[11px] font-bold text-emerald-600"
+                    >
+                      Grab the deal
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400">
+                  Loading today&apos;s deal...
+                </p>
+              )}
+            </section>
+
+            <section className="scroll-reveal bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <LocationOnOutlinedIcon className="text-emerald-600" />
+                <h2 className="text-sm font-black text-gray-800">
+                  Check delivery availability
+                </h2>
+              </div>
+              <p className="text-xs text-gray-500 mb-3">
+                Enter your postal code to see delivery availability.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  value={deliveryPin}
+                  onChange={(event) =>
+                    setDeliveryPin(
+                      event.target.value.replace(/\D/g, "").slice(0, 5),
+                    )
+                  }
+                  placeholder="Postal code"
+                  inputMode="numeric"
+                  className="min-w-0 flex-1 rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                />
+                <button
+                  type="button"
+                  onClick={checkDelivery}
+                  className="rounded bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700"
+                >
+                  Check
+                </button>
+              </div>
+              {deliveryMessage && (
+                <p
+                  className={`mt-3 text-xs ${deliveryMessage.startsWith("Delivery") ? "text-emerald-600" : "text-rose-500"}`}
+                >
+                  {deliveryMessage}
+                </p>
+              )}
+            </section>
+          </div>
+
+          <button
+            type="button"
+            onClick={copyCoupon}
+            className="scroll-reveal w-full rounded-xl bg-rose-50 px-4 py-4 text-xs text-rose-600 flex items-center justify-center gap-2 hover:bg-rose-100"
+          >
+            Super discount for your first purchase: <strong>FREE25BAC</strong>{" "}
+            <ContentCopyIcon className="!text-sm" />{" "}
+            {copiedCoupon ? "Copied" : "Copy coupon"}
+          </button>
 
           {/* MAIN GRID LAYOUT */}
           <div className="flex flex-col lg:flex-row gap-6 items-start">
@@ -496,6 +779,7 @@ const Home = () => {
                           >
                             <ProductCard
                               item={item}
+                              onViewed={addRecentlyViewed}
                               onQuickView={(prod) =>
                                 setSelectedQuickViewProduct(prod)
                               }
@@ -584,6 +868,7 @@ const Home = () => {
                       <div key={item._id} className="w-full">
                         <ProductCard
                           item={item}
+                          onViewed={addRecentlyViewed}
                           onQuickView={(prod) =>
                             setSelectedQuickViewProduct(prod)
                           }
@@ -592,6 +877,107 @@ const Home = () => {
                     ))}
                 </div>
               </section>
+
+              {categorySections.map((category) => (
+                <section
+                  key={category._id}
+                  className="scroll-reveal bg-white p-3 sm:p-5 rounded-xl border border-gray-200 shadow-sm"
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <h3 className="text-xs font-extrabold uppercase text-gray-800 tracking-wider">
+                        Shop {category.name}
+                      </h3>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        Popular picks from this category.
+                      </p>
+                    </div>
+                    <Link
+                      to={`/products?category=${encodeURIComponent(category.name)}`}
+                      className="text-[11px] font-semibold text-emerald-600"
+                    >
+                      View all &rarr;
+                    </Link>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1">
+                    {category.products.map((item) => (
+                      <div key={item._id} className="w-[170px] min-w-[170px]">
+                        <ProductCard
+                          item={item}
+                          onViewed={addRecentlyViewed}
+                          onQuickView={setSelectedQuickViewProduct}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
+
+              {recentProducts.length > 0 && (
+                <section className="scroll-reveal bg-white p-3 sm:p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <h3 className="text-xs font-extrabold uppercase text-gray-800 tracking-wider">
+                        Recently Viewed
+                      </h3>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        Pick up where you left off.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        localStorage.removeItem("recentProducts");
+                        setRecentProducts([]);
+                      }}
+                      className="text-[11px] text-gray-400 hover:text-rose-500"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3">
+                    {recentProducts.map((item) => (
+                      <ProductCard
+                        key={item._id}
+                        item={item}
+                        onViewed={addRecentlyViewed}
+                        onQuickView={setSelectedQuickViewProduct}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {ratedProducts.length > 0 && (
+                <section className="scroll-reveal bg-[#f5fbf8] p-4 sm:p-5 rounded-xl border border-emerald-100">
+                  <h3 className="text-xs font-extrabold uppercase text-gray-800 tracking-wider mb-4">
+                    What shoppers are saying
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {ratedProducts.map((item) => (
+                      <Link
+                        key={item._id}
+                        to={`/product/${item._id}`}
+                        className="bg-white border border-gray-100 rounded-lg p-3 hover:border-emerald-300 transition-colors"
+                        onClick={() => addRecentlyViewed(item)}
+                      >
+                        <div className="flex items-center gap-1 text-amber-400 text-sm">
+                          ★★★★★{" "}
+                          <span className="text-gray-500 text-[11px]">
+                            {Number(item.ratings).toFixed(1)}/5
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-2">
+                          “Great quality and value. I would order this again.”
+                        </p>
+                        <p className="text-[10px] font-bold text-gray-800 mt-2 line-clamp-1">
+                          Verified shopper · {item.name}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
           </div>
 
