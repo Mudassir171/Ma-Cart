@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { getCategories } from "../../../actions/categoryAction";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -15,10 +16,14 @@ const Header = () => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { cartItems } = useSelector((state) => state.cart);
   const { wishlistItems } = useSelector((state) => state.wishlist);
+  const { categories } = useSelector((state) => state.allCategories);
+  const dispatch = useDispatch();
 
   const [togglePrimaryDropDown, setTogglePrimaryDropDown] = useState(false);
   const [mobileMenuToggle, setMobileMenuToggle] = useState(false);
-  
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
+  const [shopMenuOpen, setShopMenuOpen] = useState(false);
+
   // State for controlling the MyChatsModal
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
@@ -26,10 +31,16 @@ const Header = () => {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
+    dispatch(getCategories());
+  }, [dispatch]);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setTogglePrimaryDropDown(false);
         setMobileMenuToggle(false);
+        setCategoryMenuOpen(false);
+        setShopMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -170,6 +181,128 @@ const Header = () => {
           </div>
         </div>
 
+        {/* Primary Store Navigation */}
+        <nav className="hidden sm:block bg-white text-[#24324a] border-b border-gray-100 shadow-sm">
+          <div className="w-full sm:w-9/12 m-auto flex items-center gap-7 px-4 py-3 text-[12px] font-semibold uppercase whitespace-nowrap">
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setCategoryMenuOpen(!categoryMenuOpen);
+                  setShopMenuOpen(false);
+                }}
+                className="flex items-center gap-2 rounded-full bg-[#2bbef9] px-5 py-3 text-white hover:bg-[#18aeea] transition-colors"
+                aria-expanded={categoryMenuOpen}
+              >
+                <MenuIcon sx={{ fontSize: 18 }} />
+                All Categories
+                {categoryMenuOpen ? (
+                  <ExpandLessIcon sx={{ fontSize: 18 }} />
+                ) : (
+                  <ExpandMoreIcon sx={{ fontSize: 18 }} />
+                )}
+              </button>
+              {categoryMenuOpen && (
+                <div className="absolute left-0 top-full mt-2 z-[70] w-64 max-h-80 overflow-y-auto rounded-md border border-gray-100 bg-white p-2 normal-case shadow-xl">
+                  <Link
+                    to="/products"
+                    onClick={() => setCategoryMenuOpen(false)}
+                    className="block rounded px-3 py-2 text-sm hover:bg-sky-50 hover:text-sky-600"
+                  >
+                    All Products
+                  </Link>
+                  {(categories || []).map((category) => (
+                    <Link
+                      key={category._id}
+                      to={`/products?category=${encodeURIComponent(category.name)}`}
+                      onClick={() => setCategoryMenuOpen(false)}
+                      className="block rounded px-3 py-2 text-sm hover:bg-sky-50 hover:text-sky-600"
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Link to="/" className="hover:text-sky-500 transition-colors">
+              Home
+            </Link>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setShopMenuOpen(!shopMenuOpen);
+                  setCategoryMenuOpen(false);
+                }}
+                className="flex items-center gap-1 hover:text-sky-500 transition-colors"
+                aria-expanded={shopMenuOpen}
+              >
+                Shop <ExpandMoreIcon sx={{ fontSize: 16 }} />
+              </button>
+              {shopMenuOpen && (
+                <div className="absolute left-0 top-full mt-3 z-[70] w-44 rounded-md border border-gray-100 bg-white p-2 normal-case shadow-xl">
+                  <Link
+                    to="/products"
+                    onClick={() => setShopMenuOpen(false)}
+                    className="block rounded px-3 py-2 text-sm hover:bg-sky-50 hover:text-sky-600"
+                  >
+                    All Products
+                  </Link>
+                  <Link
+                    to="/products?sort=latest"
+                    onClick={() => setShopMenuOpen(false)}
+                    className="block rounded px-3 py-2 text-sm hover:bg-sky-50 hover:text-sky-600"
+                  >
+                    New Products
+                  </Link>
+                  <Link
+                    to="/products?sort=discount"
+                    onClick={() => setShopMenuOpen(false)}
+                    className="block rounded px-3 py-2 text-sm hover:bg-sky-50 hover:text-sky-600"
+                  >
+                    Deals
+                  </Link>
+                </div>
+              )}
+            </div>
+            <Link
+              to={
+                isAuthenticated && user?.role === "seller"
+                  ? `/sellerstore/${user._id}`
+                  : "/products"
+              }
+              className="hover:text-sky-500 transition-colors"
+            >
+              Store Single
+            </Link>
+            <Link
+              to="/products?category=Bakery"
+              className="hover:text-sky-500 transition-colors"
+            >
+              Bakery
+            </Link>
+            <Link
+              to="/products?category=Beverages"
+              className="hover:text-sky-500 transition-colors"
+            >
+              Beverages
+            </Link>
+            <Link
+              to="/products?sort=latest"
+              className="hover:text-sky-500 transition-colors"
+            >
+              Blog
+            </Link>
+            <Link
+              to="/contact-us"
+              className="hover:text-sky-500 transition-colors"
+            >
+              Contact
+            </Link>
+          </div>
+        </nav>
+
         {/* Mobile Dropdown Menu (Drawer) */}
         {mobileMenuToggle && (
           <div className="sm:hidden absolute top-full left-0 w-full bg-green-900 text-white px-4 py-4 space-y-3 border-t border-green-700 shadow-xl z-50">
@@ -226,6 +359,65 @@ const Header = () => {
               </div>
             )}
             <div className="flex flex-col space-y-2.5 text-xs font-medium pt-1">
+              <Link
+                to="/"
+                onClick={() => setMobileMenuToggle(false)}
+                className="hover:text-green-300"
+              >
+                HOME
+              </Link>
+              <Link
+                to="/products"
+                onClick={() => setMobileMenuToggle(false)}
+                className="hover:text-green-300"
+              >
+                SHOP
+              </Link>
+              <Link
+                to={
+                  isAuthenticated && user?.role === "seller"
+                    ? `/sellerstore/${user._id}`
+                    : "/products"
+                }
+                onClick={() => setMobileMenuToggle(false)}
+                className="hover:text-green-300"
+              >
+                STORE SINGLE
+              </Link>
+              <Link
+                to="/products?category=Bakery"
+                onClick={() => setMobileMenuToggle(false)}
+                className="hover:text-green-300"
+              >
+                BAKERY
+              </Link>
+              <Link
+                to="/products?category=Beverages"
+                onClick={() => setMobileMenuToggle(false)}
+                className="hover:text-green-300"
+              >
+                BEVERAGES
+              </Link>
+              <Link
+                to="/contact-us"
+                onClick={() => setMobileMenuToggle(false)}
+                className="hover:text-green-300"
+              >
+                CONTACT
+              </Link>
+              <div className="border-t border-green-700 pt-2">
+                <p className="mb-1 text-green-300">CATEGORIES</p>
+                {(categories || []).slice(0, 8).map((category) => (
+                  <Link
+                    key={category._id}
+                    to={`/products?category=${encodeURIComponent(category.name)}`}
+                    onClick={() => setMobileMenuToggle(false)}
+                    className="block py-1 hover:text-green-300"
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
               <span className="cursor-pointer hover:text-green-300">
                 SAVE MORE ON APP
               </span>
@@ -258,7 +450,7 @@ const Header = () => {
       </header>
 
       {/* Spacer */}
-      <div className="h-20 sm:h-20"></div>
+      <div className="h-[150px] sm:h-[165px]"></div>
 
       {/* My Chats Modal */}
       <MyChatsModal
