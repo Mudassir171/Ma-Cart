@@ -247,6 +247,7 @@ const Home = () => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const { error, loading, products } = useSelector((state) => state.products);
+  const { categories } = useSelector((state) => state.allCategories);
   const [selectedQuickViewProduct, setSelectedQuickViewProduct] =
     useState(null);
   const [scrollPosition, setScrollPosition] = useState({
